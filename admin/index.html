@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理面板</title>
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>管理面板</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="#dashboard" class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span> 概览
+                </a></li>
+                <li><a href="#files" class="nav-item" data-page="files">
+                    <span class="nav-icon">📁</span> 文件管理
+                </a></li>
+                <li><a href="#posts" class="nav-item" data-page="posts">
+                    <span class="nav-icon">📝</span> 文章管理
+                </a></li>
+                <li><a href="#stats" class="nav-item" data-page="stats">
+                    <span class="nav-icon">📈</span> 访问统计
+                </a></li>
+                <li><a href="#settings" class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙️</span> 系统设置
+                </a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="logoutBtn" class="btn-logout">退出登录</button>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <header class="top-bar">
+            <h1 id="pageTitle">概览</h1>
+            <div class="user-info">
+                <span id="currentUser">admin</span>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- 概览页面 -->
+            <section id="page-dashboard" class="page-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👁️</div>
+                        <div class="stat-info">
+                            <h3>总访问量</h3>
+                            <p class="stat-number" id="totalVisits">--</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📄</div>
+                        <div class="stat-info">
+                            <h3>文章数量</h3>
+                            <p class="stat-number" id="totalPosts">--</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📁</div>
+                        <div class="stat-info">
+                            <h3>文件数量</h3>
+                            <p class="stat-number" id="totalFiles">--</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💾</div>
+                        <div class="stat-info">
+                            <h3>存储空间</h3>
+                            <p class="stat-number" id="storageUsed">--</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>快速操作</h2>
+                    <div class="quick-actions">
+                        <button class="btn-primary" onclick="location.href='#posts'">新建文章</button>
+                        <button class="btn-secondary" onclick="location.href='#files'">上传文件</button>
+                        <button class="btn-secondary" onclick="location.href='#settings'">系统设置</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>服务器状态</h2>
+                    <div class="status-list">
+                        <div class="status-item">
+                            <span class="status-dot online"></span>
+                            <span>网站状态</span>
+                            <span class="status-text">正常运行</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-dot online"></span>
+                            <span>CDN 状态</span>
+                            <span class="status-text">Cloudflare 已连接</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-dot info"></span>
+                            <span>SSL 证书</span>
+                            <span class="status-text">有效（自动续期）</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 文件管理页面 -->
+            <section id="page-files" class="page-section">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>文件管理</h2>
+                        <button class="btn-primary">上传文件</button>
+                    </div>
+                    <div class="file-browser">
+                        <div class="file-path">
+                            <span>/</span>
+                        </div>
+                        <table class="file-table">
+                            <thead>
+                                <tr>
+                                    <th>名称</th>
+                                    <th>大小</th>
+                                    <th>修改时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>📁 assets</td>
+                                    <td>--</td>
+                                    <td>2026-08-09</td>
+                                    <td><button class="btn-link">查看</button></td>
+                                </tr>
+                                <tr>
+                                    <td>📄 index.html</td>
+                                    <td>2 KB</td>
+                                    <td>2026-08-09</td>
+                                    <td>
+                                        <button class="btn-link">编辑</button>
+                                        <button class="btn-link danger">删除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="notice">⚠️ 纯静态模式下文件管理仅为演示，实际操作需要后端支持</p>
+                </div>
+            </section>
+
+            <!-- 文章管理页面 -->
+            <section id="page-posts" class="page-section">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>文章管理</h2>
+                        <button class="btn-primary">新建文章</button>
+                    </div>
+                    <div class="post-list-admin">
+                        <div class="post-item-admin">
+                            <div class="post-info">
+                                <h3>示例文章标题</h3>
+                                <p class="post-meta">发布于 2026-08-09 · 标签：示例</p>
+                            </div>
+                            <div class="post-actions">
+                                <button class="btn-link">编辑</button>
+                                <button class="btn-link danger">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="notice">⚠️ 纯静态模式下文章管理仅为演示，实际操作需要后端支持</p>
+                </div>
+            </section>
+
+            <!-- 访问统计页面 -->
+            <section id="page-stats" class="page-section">
+                <div class="panel">
+                    <h2>访问统计</h2>
+                    <div class="stats-placeholder">
+                        <p>📊 接入 Cloudflare Analytics 后显示详细数据</p>
+                        <ul class="stats-features">
+                            <li>✓ 实时访问量</li>
+                            <li>✓ 访客地区分布</li>
+                            <li>✓ 热门页面排行</li>
+                            <li>✓ 流量来源分析</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 系统设置页面 -->
+            <section id="page-settings" class="page-section">
+                <div class="panel">
+                    <h2>重置密钥管理</h2>
+                    <div class="reset-secret-box">
+                        <p class="secret-desc">用于忘记密码时重置账号，<strong>用完一次自动变更</strong>，请妥善保存。</p>
+                        <div class="secret-display">
+                            <span class="secret-label">当前重置密钥：</span>
+                            <code id="resetSecretValue">加载中...</code>
+                            <button id="copySecretBtn" class="btn-secondary btn-small">复制</button>
+                        </div>
+                        <div class="secret-actions">
+                            <button id="refreshSecretBtn" class="btn-primary">刷新重置密钥</button>
+                        </div>
+                        <p id="secretMsg" class="secret-msg"></p>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2>系统设置</h2>
+                    <form class="settings-form">
+                        <div class="form-group">
+                            <label>网站名称</label>
+                            <input type="text" value="My Site" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>管理员账号</label>
+                            <input type="text" id="settingsUsername" value="admin" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>修改密码</label>
+                            <input type="password" placeholder="新密码" disabled>
+                        </div>
+                        <button type="button" class="btn-primary" disabled>保存设置</button>
+                    </form>
+                    <p class="notice">⚠️ 部分功能开发中</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>
