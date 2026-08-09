@@ -1,0 +1,8 @@
+# 重定向规则
+# 格式：源路径  目标路径  状态码
+
+# 示例：将旧路径重定向到新路径
+# /old-page  /new-page  301
+
+# 博客文章友好 URL（如果需要）
+# /blog/hello-world  /blog/posts/hello-world.html  301

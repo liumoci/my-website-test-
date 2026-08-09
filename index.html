@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导航</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/">My Site</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">首页</a></li>
+                <li><a href="/about/">关于我</a></li>
+                <li><a href="/blog/">博客</a></li>
+                <li><a href="/drive/">云盘</a></li>
+                <li><a href="/admin/">管理</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>欢迎来到我的小站</h1>
+            <p>记录生活，分享技术</p>
+        </section>
+
+        <section class="nav-cards">
+            <div class="card">
+                <a href="/about/">
+                    <h2>个人主页</h2>
+                    <p>了解更多关于我</p>
+                </a>
+            </div>
+            <div class="card">
+                <a href="/blog/">
+                    <h2>博客</h2>
+                    <p>阅读我的文章</p>
+                </a>
+            </div>
+            <div class="card">
+                <a href="/drive/">
+                    <h2>云盘</h2>
+                    <p>文件分享与存储</p>
+                </a>
+            </div>
+            <div class="card">
+                <a href="/admin/">
+                    <h2>管理面板</h2>
+                    <p>网站后台管理</p>
+                </a>
+            </div>
+        </section>
+
+        <div id="navSections">
+            <!-- 导航分类从 API 动态加载 -->
+            <section class="links">
+                <h2>常用链接</h2>
+                <div class="link-grid">
+                    <span style="color: var(--text-secondary);">加载中...</span>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 My Site. Powered by Cloudflare Pages.</p>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
