@@ -2,10 +2,13 @@
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
+  const pathname = url.pathname;
   
-  // 登录页和静态资源不需要验证
-  if (url.pathname === '/admin/login.html' || 
-      url.pathname.startsWith('/admin/assets/')) {
+  // 登录页和静态资源直接放行（用 endsWith 更保险）
+  if (pathname.endsWith('/login.html') || 
+      pathname.includes('/assets/') ||
+      pathname === '/admin/' ||
+      pathname === '/admin') {
     return context.next();
   }
   
@@ -13,27 +16,32 @@ export async function onRequest(context) {
   const cookieHeader = request.headers.get('Cookie') || '';
   const sessionToken = getCookieValue(cookieHeader, 'admin_session');
   
+  // 没有 cookie，跳转到登录页
   if (!sessionToken) {
     return Response.redirect(url.origin + '/admin/login.html', 302);
   }
   
   // 验证 session
   try {
+    if (!env.ADMIN_KV) {
+      // KV 未配置，直接放行，页面上会显示错误
+      return context.next();
+    }
+    
     const sessionData = await env.ADMIN_KV.get('session:' + sessionToken, { type: 'json' });
     
     if (!sessionData || sessionData.expires < Date.now()) {
-      // session 不存在或已过期
+      // session 不存在或已过期，清除 cookie 并重定向到登录页
       const response = Response.redirect(url.origin + '/admin/login.html', 302);
       response.headers.append('Set-Cookie', 'admin_session=; Path=/admin; Max-Age=0; HttpOnly; SameSite=Lax');
       return response;
     }
     
     // session 有效，继续
-    const response = await context.next();
-    return response;
+    return context.next();
   } catch (e) {
-    // KV 未配置或出错，重定向到登录页
-    return Response.redirect(url.origin + '/admin/login.html', 302);
+    // 出错直接放行，避免重定向循环
+    return context.next();
   }
 }
 
