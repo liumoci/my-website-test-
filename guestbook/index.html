@@ -5,72 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>留言板</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/guestbook.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <style>
-        /* 内联样式，确保不被全局样式覆盖 */
+        * { box-sizing: border-box; }
         body.guestbook-body {
             margin: 0 !important;
             padding: 0 !important;
             min-height: 100vh !important;
             background: transparent !important;
         }
-        
         .guestbook-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-size: cover; background-position: center; background-repeat: no-repeat;
             z-index: -2;
         }
-        
         .guestbook-bg-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.25);
-            z-index: -1;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.25); z-index: -1;
         }
-        
         .guestbook-main {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
             padding: 2rem;
-            box-sizing: border-box;
         }
-        
         .guestbook-container {
-            display: flex;
-            gap: 2rem;
-            max-width: 1100px;
-            width: 100%;
-            align-items: stretch;
+            display: flex; gap: 2rem; max-width: 1100px; width: 100%; align-items: stretch;
         }
-        
-        .guestbook-left,
-        .guestbook-right {
-            display: flex;
-            align-items: stretch;
-        }
-        
-        .guestbook-left {
-            flex: 0 0 380px;
-        }
-        
-        .guestbook-right {
-            flex: 1;
-        }
-        
+        .guestbook-left, .guestbook-right { display: flex; align-items: stretch; }
+        .guestbook-left { flex: 0 0 380px; }
+        .guestbook-right { flex: 1; }
         .glass-card {
             background: rgba(255, 255, 255, 0.15) !important;
             backdrop-filter: blur(20px) !important;
@@ -78,142 +42,35 @@
             border: 1px solid rgba(255, 255, 255, 0.3) !important;
             border-radius: 1.5rem !important;
             padding: 2rem !important;
-            width: 100%;
-            box-sizing: border-box;
+            width: 100%; box-sizing: border-box;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
             color: white !important;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
-        
         .glass-title {
-            color: white !important;
-            font-size: 1.5rem !important;
+            color: white !important; font-size: 1.5rem !important;
             margin: 0 0 1.5rem 0 !important;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
         }
-        
         .glass-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;
         }
-        
-        .glass-header .glass-title {
-            margin-bottom: 0 !important;
-        }
-        
+        .glass-header .glass-title { margin-bottom: 0 !important; }
         .message-count-badge {
-            background: rgba(255, 255, 255, 0.25);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.85rem;
-            font-weight: 600;
+            background: rgba(255, 255, 255, 0.25); color: white;
+            padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;
         }
-        
         .guestbook-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            flex: 1;
+            display: flex; flex-direction: column; gap: 1rem; flex: 1;
         }
-        
-        .guestbook-form .form-group {
-            margin-bottom: 0 !important;
-        }
-        
-        .guestbook-form input,
-        .guestbook-form textarea {
-            width: 100% !important;
-            padding: 0.875rem 1rem !important;
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
-            border-radius: 0.75rem !important;
-            background: rgba(255, 255, 255, 0.2) !important;
-            color: white !important;
-            font-size: 0.95rem !important;
-            font-family: inherit !important;
-            box-sizing: border-box !important;
-            outline: none !important;
-            resize: none !important;
-        }
-        
-        .guestbook-form input::placeholder,
-        .guestbook-form textarea::placeholder {
-            color: rgba(255, 255, 255, 0.6) !important;
-        }
-        
-        .guestbook-form input:focus,
-        .guestbook-form textarea:focus {
-            border-color: rgba(255, 255, 255, 0.6) !important;
-            background: rgba(255, 255, 255, 0.25) !important;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
-        }
-        
-        .guestbook-form textarea {
-            min-height: 150px !important;
-            flex: 1;
-        }
-        
-        .form-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: auto;
-        }
-        
-        .btn-glass {
-            flex: 1;
-            padding: 0.75rem 1.5rem !important;
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
-            border-radius: 0.75rem !important;
-            background: rgba(255, 255, 255, 0.15) !important;
-            color: white !important;
-            font-size: 0.95rem !important;
-            font-weight: 600 !important;
-            cursor: pointer;
-            font-family: inherit !important;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-glass:hover {
-            background: rgba(255, 255, 255, 0.25) !important;
-            transform: translateY(-2px);
-        }
-        
-        .btn-primary-glass {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85)) !important;
-            border-color: rgba(255, 255, 255, 0.2) !important;
-        }
-        
-        .btn-primary-glass:hover {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)) !important;
-        }
-        
+        .form-buttons { display: flex; gap: 1rem; margin-top: auto; }
         .messages-scroll {
-            max-height: 450px;
-            overflow-y: auto;
-            padding-right: 0.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            flex: 1;
+            max-height: 450px; overflow-y: auto; padding-right: 0.5rem;
+            display: flex; flex-direction: column; gap: 1rem; flex: 1;
         }
-        
-        .messages-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .messages-scroll::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-        
-        .messages-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-        
+        .messages-scroll::-webkit-scrollbar { width: 6px; }
+        .messages-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .messages-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
         .message-item {
             background: rgba(255, 255, 255, 0.15) !important;
             backdrop-filter: blur(10px) !important;
@@ -223,97 +80,33 @@
             padding: 1rem 1.25rem !important;
             color: white !important;
         }
-        
         .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.75rem;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;
         }
-        
-        .message-name {
-            font-weight: 600;
-            color: white !important;
-            font-size: 1rem;
-        }
-        
-        .message-time {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.6) !important;
-        }
-        
-        .message-content {
-            color: rgba(255, 255, 255, 0.9) !important;
-            line-height: 1.6;
-            word-wrap: break-word;
-            font-size: 0.95rem;
-        }
-        
+        .message-name { font-weight: 600; color: white !important; font-size: 1rem; }
+        .message-time { font-size: 0.8rem; color: rgba(255,255,255,0.6) !important; }
+        .message-content { color: rgba(255,255,255,0.9) !important; line-height: 1.6; word-wrap: break-word; font-size: 0.95rem; }
         .message-reply {
-            margin-top: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
-            border-left: 3px solid rgba(255, 255, 255, 0.6);
+            margin-top: 0.75rem; padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3));
+            border-left: 3px solid rgba(255,255,255,0.6);
             border-radius: 0 0.75rem 0.75rem 0;
         }
-        
-        .reply-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: white;
-            margin-bottom: 0.5rem;
-        }
-        
-        .reply-content {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.5;
-        }
-        
-        .reply-time {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 0.5rem;
-            text-align: right;
-        }
-        
-        .form-msg {
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-            text-align: center;
-        }
-        
-        .form-msg.success {
-            color: #4ade80;
-        }
-        
-        .form-msg.error {
-            color: #f87171;
-        }
-        
+        .reply-label { font-size: 0.8rem; font-weight: 600; color: white; margin-bottom: 0.5rem; }
+        .reply-content { font-size: 0.9rem; color: rgba(255,255,255,0.9); line-height: 1.5; }
+        .reply-time { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; text-align: right; }
+        .form-msg { font-size: 0.85rem; margin-top: 0.5rem; text-align: center; }
+        .form-msg.success { color: #4ade80; }
+        .form-msg.error { color: #f87171; }
         @media (max-width: 900px) {
-            .guestbook-container {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-            .guestbook-left,
-            .guestbook-right {
-                flex: none;
-                width: 100%;
-            }
-            .messages-scroll {
-                max-height: 350px;
-            }
+            .guestbook-container { flex-direction: column; gap: 1.5rem; }
+            .guestbook-left, .guestbook-right { flex: none; width: 100%; }
+            .messages-scroll { max-height: 350px; }
         }
     </style>
 </head>
 <body class="guestbook-body">
-    <!-- 页面加载动画 -->
-    <div class="page-loader" id="pageLoader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <!-- 背景 -->
+    <div class="page-loader" id="pageLoader"><div class="loader-spinner"></div></div>
     <div class="guestbook-bg"></div>
     <div class="guestbook-bg-overlay"></div>
 
@@ -325,14 +118,18 @@
                     <h2 class="glass-title">💬 留言建议</h2>
                     <form id="messageForm" class="guestbook-form">
                         <div class="form-group">
-                            <input type="text" id="messageName" placeholder="请输入你的昵称" required maxlength="50">
+                            <input type="text" id="messageName" placeholder="请输入你的昵称" required maxlength="50"
+                                style="width:100%;padding:0.875rem 1rem;border:1px solid rgba(255,255,255,0.3);border-radius:0.75rem;background:rgba(255,255,255,0.2);color:white;font-size:0.95rem;font-family:inherit;box-sizing:border-box;outline:none;resize:none;">
                         </div>
                         <div class="form-group">
-                            <textarea id="messageContent" placeholder="请输入留言内容..." required maxlength="500"></textarea>
+                            <textarea id="messageContent" placeholder="请输入留言内容..." required maxlength="500"
+                                style="width:100%;padding:0.875rem 1rem;border:1px solid rgba(255,255,255,0.3);border-radius:0.75rem;background:rgba(255,255,255,0.2);color:white;font-size:0.95rem;font-family:inherit;box-sizing:border-box;outline:none;resize:none;min-height:150px;flex:1;"></textarea>
                         </div>
                         <div class="form-buttons">
-                            <button type="button" class="btn-glass" onclick="clearForm()">清空</button>
-                            <button type="submit" class="btn-glass btn-primary-glass">提交</button>
+                            <button type="button" onclick="clearForm()"
+                                style="flex:1;padding:0.75rem 1.5rem;border:1px solid rgba(255,255,255,0.3);border-radius:0.75rem;background:rgba(255,255,255,0.15);color:white;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.3s ease;">清空</button>
+                            <button type="submit"
+                                style="flex:1;padding:0.75rem 1.5rem;border:1px solid rgba(255,255,255,0.2);border-radius:0.75rem;background:linear-gradient(135deg,rgba(102,126,234,0.85),rgba(118,75,162,0.85));color:white;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.3s ease;">提交</button>
                         </div>
                         <span id="messageFormMsg" class="form-msg"></span>
                     </form>
@@ -347,7 +144,7 @@
                         <span id="messageCount" class="message-count-badge">0</span>
                     </div>
                     <div id="messagesList" class="messages-scroll">
-                        <p style="text-align: center; color: rgba(255,255,255,0.7); padding: 2rem;">加载中...</p>
+                        <p style="text-align:center;color:rgba(255,255,255,0.7);padding:2rem;">加载中...</p>
                     </div>
                 </div>
             </div>
