@@ -169,6 +169,7 @@ function initNavigation() {
         'files': '文件管理',
         'posts': '文章管理',
         'profile': '个人主页',
+        'nav': '导航管理',
         'stats': '访问统计',
         'settings': '系统设置'
     };

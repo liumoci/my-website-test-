@@ -5,19 +5,40 @@ export async function onRequest(context) {
   // POST/PUT 需要验证登录
   if (request.method === 'POST' || request.method === 'PUT') {
     const cookieHeader = request.headers.get('Cookie') || '';
-    const sessionToken = getCookieValue(cookieHeader, 'nav_admin_session');
     
-    if (!sessionToken) {
-      return jsonResponse({ success: false, message: '未登录' }, 401);
+    // 支持两种登录方式：管理面板登录(admin_session)和导航管理登录(nav_admin_session)
+    let loggedIn = false;
+    
+    // 检查管理面板登录
+    const adminToken = getCookieValue(cookieHeader, 'admin_session');
+    if (adminToken) {
+      try {
+        const adminSession = await env.ADMIN_KV.get('session:' + adminToken, { type: 'json' });
+        if (adminSession && adminSession.expires > Date.now()) {
+          loggedIn = true;
+        }
+      } catch (e) {
+        // 忽略错误，继续检查其他方式
+      }
     }
     
-    try {
-      const sessionData = await env.ADMIN_KV.get('nav_session:' + sessionToken, { type: 'json' });
-      if (!sessionData || sessionData.expires < Date.now()) {
-        return jsonResponse({ success: false, message: '登录已过期' }, 401);
+    // 检查导航管理登录
+    if (!loggedIn) {
+      const navToken = getCookieValue(cookieHeader, 'nav_admin_session');
+      if (navToken) {
+        try {
+          const navSession = await env.ADMIN_KV.get('nav_session:' + navToken, { type: 'json' });
+          if (navSession && navSession.expires > Date.now()) {
+            loggedIn = true;
+          }
+        } catch (e) {
+          // 忽略错误
+        }
       }
-    } catch (e) {
-      return jsonResponse({ success: false, message: '验证失败' }, 401);
+    }
+    
+    if (!loggedIn) {
+      return jsonResponse({ success: false, message: '未登录' }, 401);
     }
   }
   
@@ -43,8 +64,7 @@ export async function onRequest(context) {
   // POST：保存导航数据
   if (request.method === 'POST') {
     try {
-      const body = await request.json();
-      const navData = body.data;
+      const navData = await request.json();
       
       if (!navData || !navData.categories || !Array.isArray(navData.categories)) {
         return jsonResponse({ success: false, message: '数据格式错误' }, 400);
