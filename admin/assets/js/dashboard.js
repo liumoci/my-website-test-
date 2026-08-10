@@ -59,6 +59,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // 个人主页管理
     initProfileManager();
+    
+    // 隐藏页面加载动画
+    setTimeout(() => {
+        const loader = document.getElementById('pageLoader');
+        if (loader) {
+            loader.classList.add('hidden');
+        }
+    }, 300);
 });
 
 // 初始化重置密钥功能
@@ -209,13 +217,10 @@ function initNavigation() {
     }
 }
 
-// 模拟统计数据
+// 旧的模拟统计数据（已废弃，保留兼容）
 function initStats() {
-    // 模拟数据（实际项目中应从 API 获取）
-    document.getElementById('totalVisits').textContent = '1,234';
-    document.getElementById('totalPosts').textContent = '1';
-    document.getElementById('totalFiles').textContent = '12';
-    document.getElementById('storageUsed').textContent = '2.5 MB';
+    // 已改为真实的 Cloudflare Analytics
+    // 见 initStatsPage()
 }
 
 // ===== 个人主页管理 =====
