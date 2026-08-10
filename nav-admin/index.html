@@ -42,9 +42,12 @@
         <!-- 卡片管理标签页 -->
         <div id="tab-cards" class="tab-content">
             <div class="cards-manager">
-                <p class="tab-desc">管理首页的四个入口卡片，可以修改标题、描述、图标和链接</p>
+                <p class="tab-desc">管理首页的入口卡片，可以添加、编辑、删除和排序</p>
                 <div class="cards-list" id="cardsList">
                     <!-- 卡片列表动态生成 -->
+                </div>
+                <div class="add-card-section">
+                    <button id="addCardBtn" class="btn-secondary btn-block">+ 添加卡片</button>
                 </div>
             </div>
         </div>
@@ -78,9 +81,20 @@
                 </div>
                 
                 <div id="bgImageSection" class="form-group" style="display: none;">
-                    <label>背景图片 URL</label>
-                    <input type="url" id="bgImageUrl" placeholder="https://example.com/bg.jpg">
-                    <p class="hint">输入图片的完整 URL 地址</p>
+                    <label>背景图片</label>
+                    <div id="bgDropZone" class="drop-zone">
+                        <div class="drop-zone-content">
+                            <div class="drop-zone-icon">📁</div>
+                            <p>拖拽图片到此处，或</p>
+                            <p class="drop-zone-hint">点击选择文件</p>
+                        </div>
+                        <input type="file" id="bgFileInput" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label>或输入图片 URL</label>
+                        <input type="url" id="bgImageUrl" placeholder="https://example.com/bg.jpg">
+                    </div>
+                    <p class="hint">支持 JPG/PNG/GIF，建议小于 500KB（会转成 base64 存储）</p>
                 </div>
                 
                 <div class="form-group">

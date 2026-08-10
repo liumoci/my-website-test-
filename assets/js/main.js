@@ -4,9 +4,26 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('网站加载完成');
     
+    // 隐藏加载动画
+    hideLoader();
+    
     // 加载导航数据（背景、卡片、链接）
     loadNavData();
 });
+
+// 隐藏加载动画
+function hideLoader() {
+    const loader = document.getElementById('pageLoader');
+    if (loader) {
+        setTimeout(() => {
+            loader.classList.add('hidden');
+            // 动画结束后移除
+            setTimeout(() => {
+                loader.remove();
+            }, 500);
+        }, 300);
+    }
+}
 
 // 加载导航数据
 async function loadNavData() {

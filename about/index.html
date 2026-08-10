@@ -8,6 +8,11 @@
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
+    <!-- 页面加载动画 -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-spinner"></div>
+    </div>
+
     <header>
         <nav class="navbar">
             <div class="logo">
@@ -24,37 +29,58 @@
 
     <main>
         <section class="profile">
-            <div class="avatar">
+            <div class="avatar" id="profileAvatar">
                 <img src="../assets/images/avatar.png" alt="头像" width="150" height="150">
             </div>
-            <h1>你好，我是 XXX</h1>
-            <p class="bio">这里写一段自我介绍...</p>
+            <h1 id="profileName">加载中...</h1>
+            <p class="bio" id="profileBio">加载中...</p>
         </section>
 
-        <section class="skills">
+        <section class="skills" id="skillsSection">
             <h2>技能</h2>
-            <ul>
-                <li>技能 1</li>
-                <li>技能 2</li>
-                <li>技能 3</li>
+            <ul id="skillsList">
+                <li>加载中...</li>
             </ul>
         </section>
 
-        <section class="projects">
+        <section class="projects" id="projectsSection">
             <h2>项目</h2>
-            <div class="project-list">
+            <div class="project-list" id="projectsList">
                 <div class="project-item">
-                    <h3>项目名称</h3>
-                    <p>项目描述</p>
-                    <a href="#" target="_blank">查看详情</a>
+                    <h3>加载中...</h3>
                 </div>
             </div>
         </section>
 
-        <section class="contact">
+        <section class="contact" id="contactSection">
             <h2>联系方式</h2>
-            <p>Email: your@email.com</p>
-            <p>GitHub: <a href="https://github.com/yourname" target="_blank">@yourname</a></p>
+            <div id="contactList">
+                <p>加载中...</p>
+            </div>
+        </section>
+
+        <!-- 留言箱 -->
+        <section class="guestbook">
+            <h2>💬 留言板</h2>
+            <div class="guestbook-form">
+                <form id="messageForm">
+                    <div class="form-group">
+                        <input type="text" id="messageName" placeholder="你的昵称" required maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <textarea id="messageContent" placeholder="说点什么吧..." required maxlength="500" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">提交留言</button>
+                    <span id="messageFormMsg" class="form-msg"></span>
+                </form>
+            </div>
+            
+            <div class="guestbook-messages">
+                <h3>全部留言 <span id="messageCount" class="message-count">(0)</span></h3>
+                <div id="messagesList" class="messages-list">
+                    <p style="color: var(--text-secondary);">加载中...</p>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -63,5 +89,6 @@
     </footer>
 
     <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/about.js"></script>
 </body>
 </html>

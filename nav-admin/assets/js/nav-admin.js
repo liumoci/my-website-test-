@@ -278,6 +278,9 @@ function initCardManager() {
     document.getElementById('cardModal').addEventListener('click', function(e) {
         if (e.target === this) hideCardModal();
     });
+    
+    // 添加卡片按钮
+    document.getElementById('addCardBtn').addEventListener('click', addCard);
 }
 
 function renderCards() {
@@ -303,6 +306,7 @@ function renderCards() {
             </div>
             <div class="card-edit-actions">
                 <button class="btn-secondary btn-small" onclick="editCard(${index})">编辑</button>
+                <button class="btn-danger btn-small" onclick="deleteCard(${index})">删除</button>
             </div>
         `;
         container.appendChild(cardEl);
@@ -322,6 +326,26 @@ function editCard(index) {
     showCardModal();
 }
 
+function addCard() {
+    currentEditCardIndex = -1;
+    
+    document.getElementById('cardModalTitle').textContent = '添加卡片';
+    document.getElementById('cardTitle').value = '';
+    document.getElementById('cardDesc').value = '';
+    document.getElementById('cardIcon').value = '📄';
+    document.getElementById('cardUrl').value = '';
+    
+    showCardModal();
+}
+
+function deleteCard(index) {
+    if (confirm('确定要删除这个卡片吗？')) {
+        navData.cards.splice(index, 1);
+        renderCards();
+        showStatus('已删除，点击保存生效', 'success');
+    }
+}
+
 function handleCardSubmit(e) {
     e.preventDefault();
     
@@ -332,8 +356,12 @@ function handleCardSubmit(e) {
     
     if (!title || !url) return;
     
+    const cardData = { title, description, icon, url };
+    
     if (currentEditCardIndex >= 0 && currentEditCardIndex < navData.cards.length) {
-        navData.cards[currentEditCardIndex] = { title, description, icon, url };
+        navData.cards[currentEditCardIndex] = cardData;
+    } else {
+        navData.cards.push(cardData);
     }
     
     hideCardModal();
@@ -378,6 +406,71 @@ function initBackgroundManager() {
     
     // 图片URL输入
     document.getElementById('bgImageUrl').addEventListener('input', updateBgPreview);
+    
+    // 拖拽上传
+    initDragAndDrop();
+}
+
+// 初始化拖拽上传
+function initDragAndDrop() {
+    const dropZone = document.getElementById('bgDropZone');
+    const fileInput = document.getElementById('bgFileInput');
+    
+    if (!dropZone || !fileInput) return;
+    
+    // 点击选择文件
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    // 文件选择
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleImageFile(file);
+    });
+    
+    // 拖拽事件
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleImageFile(file);
+        } else {
+            showStatus('请拖入图片文件', 'error');
+        }
+    });
+}
+
+// 处理图片文件
+function handleImageFile(file) {
+    // 检查文件大小
+    if (file.size > 500 * 1024) {
+        if (!confirm('图片超过 500KB，可能会影响加载速度，确定继续吗？')) {
+            return;
+        }
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64 = e.target.result;
+        document.getElementById('bgImageUrl').value = base64;
+        updateBgPreview();
+        showStatus('图片已加载，点击保存生效', 'success');
+    };
+    reader.onerror = function() {
+        showStatus('图片读取失败', 'error');
+    };
+    reader.readAsDataURL(file);
 }
 
 function renderBackground() {

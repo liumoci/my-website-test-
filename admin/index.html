@@ -24,8 +24,14 @@
                 <li><a href="#posts" class="nav-item" data-page="posts">
                     <span class="nav-icon">📝</span> 文章管理
                 </a></li>
+                <li><a href="#profile" class="nav-item" data-page="profile">
+                    <span class="nav-icon">👤</span> 个人主页
+                </a></li>
                 <li><a href="#stats" class="nav-item" data-page="stats">
                     <span class="nav-icon">📈</span> 访问统计
+                </a></li>
+                <li><a href="/nav-admin/" class="nav-item nav-link-external">
+                    <span class="nav-icon">🔗</span> 导航管理
                 </a></li>
                 <li><a href="#settings" class="nav-item" data-page="settings">
                     <span class="nav-icon">⚙️</span> 系统设置
@@ -174,6 +180,95 @@
                         </div>
                     </div>
                     <p class="notice">⚠️ 纯静态模式下文章管理仅为演示，实际操作需要后端支持</p>
+                </div>
+            </section>
+
+            <!-- 个人主页管理页面 -->
+            <section id="page-profile" class="page-section">
+                <div class="panel">
+                    <h2>基本信息</h2>
+                    <div class="profile-edit-form">
+                        <div class="form-group">
+                            <label>头像</label>
+                            <div class="avatar-upload-area">
+                                <div class="avatar-preview" id="avatarPreview">
+                                    <span style="color: var(--text-secondary);">暂无头像</span>
+                                </div>
+                                <div class="avatar-actions">
+                                    <button type="button" id="uploadAvatarBtn" class="btn-secondary btn-small">上传头像</button>
+                                    <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
+                                    <button type="button" id="removeAvatarBtn" class="btn-danger btn-small">移除</button>
+                                </div>
+                                <p class="hint">建议正方形图片，大小不超过 200KB</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>昵称</label>
+                            <input type="text" id="profileName" placeholder="你的名字">
+                        </div>
+                        <div class="form-group">
+                            <label>个人简介</label>
+                            <textarea id="profileBio" rows="4" placeholder="介绍一下你自己"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2>技能标签</h2>
+                    <div class="skills-editor">
+                        <div class="skills-list" id="skillsList">
+                            <!-- 技能标签动态生成 -->
+                        </div>
+                        <div class="skill-add">
+                            <input type="text" id="newSkillInput" placeholder="添加技能">
+                            <button type="button" id="addSkillBtn" class="btn-secondary btn-small">添加</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2>项目展示</h2>
+                    <div class="projects-editor">
+                        <div class="projects-list" id="projectsList">
+                            <!-- 项目列表动态生成 -->
+                        </div>
+                        <button type="button" id="addProjectBtn" class="btn-secondary btn-block">+ 添加项目</button>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2>联系方式</h2>
+                    <div class="contact-edit-form">
+                        <div class="form-group">
+                            <label>邮箱</label>
+                            <input type="email" id="contactEmail" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>GitHub</label>
+                            <input type="text" id="contactGithub" placeholder="GitHub 用户名">
+                        </div>
+                        <div class="form-group">
+                            <label>Twitter</label>
+                            <input type="text" id="contactTwitter" placeholder="Twitter 用户名">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2>留言管理</h2>
+                    <div class="messages-manager">
+                        <div class="messages-stats">
+                            <span>共 <strong id="messageCount">0</strong> 条留言</span>
+                        </div>
+                        <div class="messages-list" id="messagesList">
+                            <!-- 留言列表动态生成 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="save-bar">
+                    <button type="button" id="saveProfileBtn" class="btn-primary">保存个人主页设置</button>
+                    <span id="profileSaveMsg" class="save-msg"></span>
                 </div>
             </section>
 
