@@ -1,35 +1,26 @@
-// 留言箱 API（修复版）
+// 留言箱 API（简化可靠版）
 export async function onRequest(context) {
   const { request, env } = context;
   
   const url = new URL(request.url);
   const pathname = url.pathname;
+  const method = request.method;
   
   // 获取客户端 IP
-  const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const clientIP = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'unknown';
   
-  // 解析路径
-  // /api/messages
-  // /api/messages/:id
-  // /api/messages/:id/reply
-  // /api/messages/settings
-  // /api/messages/blacklist
-  // /api/messages/blacklist/:ip
+  // 工具函数：检查是否是管理员路径
+  function isAdminRoute() {
+    // 设置、黑名单、回复、删除 都需要管理员权限
+    if (pathname.endsWith('/settings')) return true;
+    if (pathname.includes('/blacklist')) return true;
+    if (pathname.endsWith('/reply')) return true;
+    if (method === 'DELETE' && !pathname.endsWith('/settings') && !pathname.includes('/blacklist')) return true;
+    return false;
+  }
   
-  const pathParts = pathname.split('/').filter(p => p);
-  // pathParts = ['api', 'messages', ...]
-  
-  const resource = pathParts[1]; // 'messages'
-  const subPath = pathParts[2]; // 可能是 id、'settings'、'blacklist'
-  const subSubPath = pathParts[3]; // 可能是 'reply'、ip地址
-  
-  // ===== 权限验证 =====
-  const adminPaths = ['settings', 'blacklist'];
-  const isAdminPath = adminPaths.includes(subPath) || 
-                      (subPath && subSubPath === 'reply') ||
-                      (subPath && request.method === 'DELETE' && subSubPath !== 'reply');
-  
-  if (isAdminPath) {
+  // 管理员权限验证
+  if (isAdminRoute()) {
     const cookieHeader = request.headers.get('Cookie') || '';
     const sessionToken = getCookieValue(cookieHeader, 'admin_session');
     
@@ -43,58 +34,61 @@ export async function onRequest(context) {
         return jsonResponse({ success: false, message: '登录已过期' }, 401);
       }
     } catch (e) {
-      return jsonResponse({ success: false, message: '验证失败' }, 401);
+      return jsonResponse({ success: false, message: '验证失败: ' + e.message }, 401);
     }
   }
   
-  // ===== 路由处理 =====
+  // ===== 路由分发 =====
   
   // GET /api/messages - 获取留言列表
-  if (request.method === 'GET' && !subPath) {
+  if (method === 'GET' && pathname === '/api/messages') {
     return getMessages(env);
   }
   
   // POST /api/messages - 提交留言
-  if (request.method === 'POST' && !subPath) {
+  if (method === 'POST' && pathname === '/api/messages') {
     return submitMessage(env, request, clientIP);
   }
   
   // GET /api/messages/settings - 获取设置
-  if (request.method === 'GET' && subPath === 'settings') {
+  if (method === 'GET' && pathname === '/api/messages/settings') {
     return getSettings(env);
   }
   
   // POST /api/messages/settings - 保存设置
-  if (request.method === 'POST' && subPath === 'settings') {
+  if (method === 'POST' && pathname === '/api/messages/settings') {
     return saveSettings(env, request);
   }
   
   // GET /api/messages/blacklist - 获取黑名单
-  if (request.method === 'GET' && subPath === 'blacklist') {
+  if (method === 'GET' && pathname === '/api/messages/blacklist') {
     return getBlacklist(env);
   }
   
   // POST /api/messages/blacklist - 添加黑名单
-  if (request.method === 'POST' && subPath === 'blacklist') {
+  if (method === 'POST' && pathname === '/api/messages/blacklist') {
     return addToBlacklist(env, request);
   }
   
   // DELETE /api/messages/blacklist/:ip - 移除黑名单
-  if (request.method === 'DELETE' && subPath === 'blacklist' && subSubPath) {
-    return removeFromBlacklist(env, subSubPath);
+  if (method === 'DELETE' && pathname.startsWith('/api/messages/blacklist/')) {
+    const ip = pathname.replace('/api/messages/blacklist/', '');
+    return removeFromBlacklist(env, ip);
   }
   
   // POST /api/messages/:id/reply - 回复留言
-  if (request.method === 'POST' && subPath && subSubPath === 'reply') {
-    return replyMessage(env, subPath, request);
+  if (method === 'POST' && pathname.endsWith('/reply')) {
+    const id = pathname.replace('/api/messages/', '').replace('/reply', '');
+    return replyMessage(env, id, request);
   }
   
   // DELETE /api/messages/:id - 删除留言
-  if (request.method === 'DELETE' && subPath && subSubPath !== 'reply' && subPath !== 'settings' && subPath !== 'blacklist') {
-    return deleteMessage(env, subPath);
+  if (method === 'DELETE' && pathname.startsWith('/api/messages/') && !pathname.includes('/blacklist')) {
+    const id = pathname.replace('/api/messages/', '');
+    return deleteMessage(env, id);
   }
   
-  return jsonResponse({ success: false, message: '不支持的请求: ' + request.method + ' ' + pathname }, 405);
+  return jsonResponse({ success: false, message: '不支持的请求: ' + method + ' ' + pathname }, 405);
 }
 
 // 获取留言列表
@@ -106,9 +100,7 @@ async function getMessages(env) {
       return jsonResponse({ success: true, messages: [] }, 200);
     }
     
-    // 按时间倒序
     const sorted = messagesData.messages.sort((a, b) => b.time - a.time);
-    
     return jsonResponse({ success: true, messages: sorted }, 200);
   } catch (e) {
     return jsonResponse({ success: false, message: '获取失败: ' + e.message }, 500);
@@ -119,7 +111,8 @@ async function getMessages(env) {
 async function submitMessage(env, request, clientIP) {
   try {
     const body = await request.json();
-    const { name, content } = body;
+    const name = (body.name || '').trim();
+    const content = (body.content || '').trim();
     
     if (!name || !content) {
       return jsonResponse({ success: false, message: '昵称和内容不能为空' }, 400);
@@ -133,32 +126,29 @@ async function submitMessage(env, request, clientIP) {
       return jsonResponse({ success: false, message: '昵称不能超过50字' }, 400);
     }
     
-    // 检查是否在黑名单
+    // 检查黑名单
     const blacklist = await getBlacklistData(env);
     if (blacklist.includes(clientIP)) {
       return jsonResponse({ success: false, message: '你已被禁止留言' }, 403);
     }
     
-    // 检查留言频率
+    // 检查频率限制
     const settings = await getSettingsData(env);
     const rateLimitMinutes = settings.rateLimitMinutes || 1;
     
     if (rateLimitMinutes > 0) {
       const messagesData = await env.ADMIN_KV.get('guestbook_messages', { type: 'json' });
       if (messagesData && messagesData.messages) {
-        const recentMessage = messagesData.messages.find(
+        const recent = messagesData.messages.find(
           m => m.ip === clientIP && (Date.now() - m.time) < rateLimitMinutes * 60 * 1000
         );
-        if (recentMessage) {
-          return jsonResponse({ 
-            success: false, 
-            message: `留言太频繁了，请 ${rateLimitMinutes} 分钟后再试` 
-          }, 429);
+        if (recent) {
+          return jsonResponse({ success: false, message: `留言太频繁了，请 ${rateLimitMinutes} 分钟后再试` }, 429);
         }
       }
     }
     
-    // 获取现有留言
+    // 获取现有数据
     let messagesData = await env.ADMIN_KV.get('guestbook_messages', { type: 'json' });
     if (!messagesData || !messagesData.messages) {
       messagesData = { messages: [] };
@@ -166,17 +156,15 @@ async function submitMessage(env, request, clientIP) {
     
     // 添加新留言
     const newMessage = {
-      id: Date.now().toString(),
-      name: name.trim(),
-      content: content.trim(),
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+      name: name,
+      content: content,
       time: Date.now(),
       ip: clientIP,
       reply: null
     };
     
     messagesData.messages.push(newMessage);
-    
-    // 保存
     await env.ADMIN_KV.put('guestbook_messages', JSON.stringify(messagesData));
     
     return jsonResponse({ success: true, message: '留言成功', data: newMessage }, 200);
@@ -189,7 +177,7 @@ async function submitMessage(env, request, clientIP) {
 async function replyMessage(env, messageId, request) {
   try {
     const body = await request.json();
-    const { content } = body;
+    const content = (body.content || '').trim();
     
     if (!content) {
       return jsonResponse({ success: false, message: '回复内容不能为空' }, 400);
@@ -201,18 +189,17 @@ async function replyMessage(env, messageId, request) {
       return jsonResponse({ success: false, message: '留言不存在' }, 404);
     }
     
-    const messageIndex = messagesData.messages.findIndex(m => m.id === messageId);
-    if (messageIndex === -1) {
+    const index = messagesData.messages.findIndex(m => m.id === messageId);
+    if (index === -1) {
       return jsonResponse({ success: false, message: '留言不存在' }, 404);
     }
     
-    messagesData.messages[messageIndex].reply = {
-      content: content.trim(),
+    messagesData.messages[index].reply = {
+      content: content,
       time: Date.now()
     };
     
     await env.ADMIN_KV.put('guestbook_messages', JSON.stringify(messagesData));
-    
     return jsonResponse({ success: true, message: '回复成功' }, 200);
   } catch (e) {
     return jsonResponse({ success: false, message: '回复失败: ' + e.message }, 500);
@@ -225,12 +212,10 @@ async function deleteMessage(env, messageId) {
     let messagesData = await env.ADMIN_KV.get('guestbook_messages', { type: 'json' });
     
     if (!messagesData || !messagesData.messages) {
-      return jsonResponse({ success: false, message: '留言不存在' }, 404);
+      return jsonResponse({ success: true, message: '删除成功' }, 200);
     }
     
-    // 过滤掉要删除的留言
     messagesData.messages = messagesData.messages.filter(m => m.id !== messageId);
-    
     await env.ADMIN_KV.put('guestbook_messages', JSON.stringify(messagesData));
     
     return jsonResponse({ success: true, message: '删除成功' }, 200);
@@ -239,7 +224,7 @@ async function deleteMessage(env, messageId) {
   }
 }
 
-// 获取留言设置
+// 获取设置
 async function getSettings(env) {
   try {
     const settings = await getSettingsData(env);
@@ -249,16 +234,14 @@ async function getSettings(env) {
   }
 }
 
-// 保存留言设置
+// 保存设置
 async function saveSettings(env, request) {
   try {
     const body = await request.json();
-    
     const currentSettings = await getSettingsData(env);
     const newSettings = { ...currentSettings, ...body };
     
     await env.ADMIN_KV.put('guestbook_settings', JSON.stringify(newSettings));
-    
     return jsonResponse({ success: true, message: '保存成功' }, 200);
   } catch (e) {
     return jsonResponse({ success: false, message: '保存失败: ' + e.message }, 500);
@@ -268,63 +251,60 @@ async function saveSettings(env, request) {
 // 获取黑名单
 async function getBlacklist(env) {
   try {
-    const blacklistData = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
-    const blacklist = blacklistData && blacklistData.ips ? blacklistData.ips : [];
-    return jsonResponse({ success: true, data: blacklist }, 200);
+    const data = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
+    const list = data && data.ips ? data.ips : [];
+    return jsonResponse({ success: true, data: list }, 200);
   } catch (e) {
     return jsonResponse({ success: false, message: '获取失败: ' + e.message }, 500);
   }
 }
 
-// 添加到黑名单
+// 添加黑名单
 async function addToBlacklist(env, request) {
   try {
     const body = await request.json();
-    const { ip, reason } = body;
+    const ip = (body.ip || '').trim();
+    const reason = (body.reason || '').trim();
     
     if (!ip) {
       return jsonResponse({ success: false, message: 'IP不能为空' }, 400);
     }
     
-    let blacklistData = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
-    if (!blacklistData || !blacklistData.ips) {
-      blacklistData = { ips: [] };
+    let data = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
+    if (!data || !data.ips) {
+      data = { ips: [] };
     }
     
-    // 检查是否已存在
-    if (blacklistData.ips.find(item => item.ip === ip)) {
+    if (data.ips.find(item => item.ip === ip)) {
       return jsonResponse({ success: false, message: '该IP已在黑名单中' }, 400);
     }
     
-    blacklistData.ips.push({
-      ip,
-      reason: reason || '',
+    data.ips.push({
+      ip: ip,
+      reason: reason,
       time: Date.now()
     });
     
-    await env.ADMIN_KV.put('guestbook_blacklist', JSON.stringify(blacklistData));
-    
+    await env.ADMIN_KV.put('guestbook_blacklist', JSON.stringify(data));
     return jsonResponse({ success: true, message: '已加入黑名单' }, 200);
   } catch (e) {
     return jsonResponse({ success: false, message: '操作失败: ' + e.message }, 500);
   }
 }
 
-// 从黑名单移除
+// 移除黑名单
 async function removeFromBlacklist(env, ip) {
   try {
-    // URL 解码
     const decodedIp = decodeURIComponent(ip);
     
-    let blacklistData = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
+    let data = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
     
-    if (!blacklistData || !blacklistData.ips) {
-      return jsonResponse({ success: false, message: '黑名单为空' }, 404);
+    if (!data || !data.ips) {
+      return jsonResponse({ success: true, message: '已移除' }, 200);
     }
     
-    blacklistData.ips = blacklistData.ips.filter(item => item.ip !== decodedIp);
-    
-    await env.ADMIN_KV.put('guestbook_blacklist', JSON.stringify(blacklistData));
+    data.ips = data.ips.filter(item => item.ip !== decodedIp);
+    await env.ADMIN_KV.put('guestbook_blacklist', JSON.stringify(data));
     
     return jsonResponse({ success: true, message: '已从黑名单移除' }, 200);
   } catch (e) {
@@ -334,16 +314,12 @@ async function removeFromBlacklist(env, ip) {
 
 // ===== 工具函数 =====
 
-// 获取设置数据
 async function getSettingsData(env) {
   try {
     const settings = await env.ADMIN_KV.get('guestbook_settings', { type: 'json' });
     if (settings) return settings;
-  } catch (e) {
-    // 忽略错误
-  }
+  } catch (e) {}
   
-  // 默认设置
   return {
     backgroundColor: '',
     cardColor: '',
@@ -354,34 +330,29 @@ async function getSettingsData(env) {
   };
 }
 
-// 获取黑名单数据（纯IP数组）
 async function getBlacklistData(env) {
   try {
-    const blacklistData = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
-    if (blacklistData && blacklistData.ips) {
-      return blacklistData.ips.map(item => item.ip);
+    const data = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
+    if (data && data.ips) {
+      return data.ips.map(item => item.ip);
     }
-  } catch (e) {
-    // 忽略错误
-  }
+  } catch (e) {}
   return [];
 }
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status: status,
-    headers: {
-      'Content-Type': 'application/json'
-    }
+    headers: { 'Content-Type': 'application/json' }
   });
 }
 
 function getCookieValue(cookieHeader, name) {
   const cookies = cookieHeader.split(';');
   for (const cookie of cookies) {
-    const [key, value] = cookie.trim().split('=');
-    if (key === name) {
-      return value;
+    const parts = cookie.trim().split('=');
+    if (parts[0] === name) {
+      return parts[1];
     }
   }
   return null;

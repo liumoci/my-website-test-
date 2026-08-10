@@ -249,7 +249,8 @@ function escapeHtml(text) {
 // ===== 悬浮留言按钮 =====
 function isAdminPage() {
     const path = window.location.pathname;
-    return path.startsWith('/admin/') || path.startsWith('/nav-admin/');
+    // 管理页面、导航管理、留言箱页面都不显示悬浮按钮
+    return path.startsWith('/admin/') || path.startsWith('/nav-admin/') || path.startsWith('/guestbook/');
 }
 
 function addFloatingGuestbookBtn() {
