@@ -106,7 +106,7 @@ async function getCountries(env) {
             limit: 10
             filter: { date_geq: "${getDateDaysAgo(7)}" }
             groupBy: [clientCountryName]
-            orderBy: [requests_DESC]
+            orderBy: [sum_requests_DESC]
           ) {
             sum {
               requests
@@ -140,7 +140,7 @@ async function getTopPages(env) {
             limit: 10
             filter: { date_geq: "${getDateDaysAgo(7)}" }
             groupBy: [clientRequestPath]
-            orderBy: [pageViews_DESC]
+            orderBy: [sum_pageViews_DESC]
           ) {
             sum {
               pageViews
@@ -176,7 +176,7 @@ async function getTopSources(env) {
             limit: 10
             filter: { date_geq: "${getDateDaysAgo(7)}" }
             groupBy: [clientRefererHost]
-            orderBy: [requests_DESC]
+            orderBy: [sum_requests_DESC]
           ) {
             sum {
               requests
@@ -212,7 +212,7 @@ async function getTrend(env) {
             limit: 7
             filter: { date_geq: "${getDateDaysAgo(7)}" }
             groupBy: [date]
-            orderBy: [date_ASC]
+            orderBy: [dim_date_ASC]
           ) {
             sum {
               requests
