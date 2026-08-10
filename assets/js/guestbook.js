@@ -8,6 +8,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('messageForm').addEventListener('submit', handleMessageSubmit);
 });
 
+// 清空表单
+function clearForm() {
+    document.getElementById('messageName').value = '';
+    document.getElementById('messageContent').value = '';
+    document.getElementById('messageFormMsg').textContent = '';
+    document.getElementById('messageFormMsg').className = 'form-msg';
+}
+
 // 加载留言
 async function loadMessages() {
     try {
@@ -20,7 +28,7 @@ async function loadMessages() {
     } catch (err) {
         console.error('加载留言失败:', err);
         document.getElementById('messagesList').innerHTML = 
-            '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载失败</p>';
+            '<p style="text-align: center; color: rgba(255,255,255,0.7); padding: 2rem;">加载失败</p>';
     }
 }
 
@@ -29,11 +37,11 @@ function renderMessages(messages) {
     const list = document.getElementById('messagesList');
     const countEl = document.getElementById('messageCount');
     
-    countEl.textContent = `(${messages.length})`;
+    countEl.textContent = messages.length;
     
     if (messages.length === 0) {
         list.innerHTML = 
-            '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">还没有留言，来抢沙发吧！</p>';
+            '<p style="text-align: center; color: rgba(255,255,255,0.7); padding: 2rem;">还没有留言，来抢沙发吧！</p>';
         return;
     }
     
@@ -105,7 +113,7 @@ async function handleMessageSubmit(e) {
             msgEl.textContent = '留言成功！';
             msgEl.className = 'form-msg success';
             
-            // 清空表单
+            // 清空内容
             document.getElementById('messageContent').value = '';
             
             // 重新加载留言
@@ -126,7 +134,7 @@ async function handleMessageSubmit(e) {
         console.error(err);
     } finally {
         btn.disabled = false;
-        btn.textContent = '提交留言';
+        btn.textContent = '提交';
     }
 }
 

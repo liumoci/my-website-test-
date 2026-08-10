@@ -1,22 +1,35 @@
-// 留言箱 API（重构版）
+// 留言箱 API（修复版）
 export async function onRequest(context) {
   const { request, env } = context;
   
   const url = new URL(request.url);
-  const pathParts = url.pathname.split('/').filter(p => p);
-  const messageId = pathParts.length > 2 ? pathParts[2] : null;
-  const action = pathParts.length > 3 ? pathParts[3] : null;
+  const pathname = url.pathname;
   
   // 获取客户端 IP
   const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
   
-  // 需要管理员登录的操作
-  const adminActions = ['reply', 'delete', 'settings', 'blacklist'];
-  const isAdminAction = adminActions.includes(pathParts[2]) || 
-                        (messageId && action === 'reply') ||
-                        (messageId && request.method === 'DELETE');
+  // 解析路径
+  // /api/messages
+  // /api/messages/:id
+  // /api/messages/:id/reply
+  // /api/messages/settings
+  // /api/messages/blacklist
+  // /api/messages/blacklist/:ip
   
-  if (isAdminAction) {
+  const pathParts = pathname.split('/').filter(p => p);
+  // pathParts = ['api', 'messages', ...]
+  
+  const resource = pathParts[1]; // 'messages'
+  const subPath = pathParts[2]; // 可能是 id、'settings'、'blacklist'
+  const subSubPath = pathParts[3]; // 可能是 'reply'、ip地址
+  
+  // ===== 权限验证 =====
+  const adminPaths = ['settings', 'blacklist'];
+  const isAdminPath = adminPaths.includes(subPath) || 
+                      (subPath && subSubPath === 'reply') ||
+                      (subPath && request.method === 'DELETE' && subSubPath !== 'reply');
+  
+  if (isAdminPath) {
     const cookieHeader = request.headers.get('Cookie') || '';
     const sessionToken = getCookieValue(cookieHeader, 'admin_session');
     
@@ -34,51 +47,54 @@ export async function onRequest(context) {
     }
   }
   
-  // GET 请求路由
-  if (request.method === 'GET') {
-    // 获取留言设置
-    if (pathParts[2] === 'settings') {
-      return getSettings(env);
-    }
-    // 获取黑名单
-    if (pathParts[2] === 'blacklist') {
-      return getBlacklist(env);
-    }
-    // 获取留言列表
+  // ===== 路由处理 =====
+  
+  // GET /api/messages - 获取留言列表
+  if (request.method === 'GET' && !subPath) {
     return getMessages(env);
   }
   
-  // POST 请求路由
-  if (request.method === 'POST') {
-    // 保存留言设置
-    if (pathParts[2] === 'settings') {
-      return saveSettings(env, request);
-    }
-    // 添加到黑名单
-    if (pathParts[2] === 'blacklist') {
-      return addToBlacklist(env, request);
-    }
-    // 回复留言
-    if (messageId && action === 'reply') {
-      return replyMessage(env, messageId, request);
-    }
-    // 提交留言
+  // POST /api/messages - 提交留言
+  if (request.method === 'POST' && !subPath) {
     return submitMessage(env, request, clientIP);
   }
   
-  // DELETE 请求路由
-  if (request.method === 'DELETE') {
-    // 从黑名单移除
-    if (pathParts[2] === 'blacklist' && pathParts[3]) {
-      return removeFromBlacklist(env, pathParts[3]);
-    }
-    // 删除留言
-    if (messageId) {
-      return deleteMessage(env, messageId);
-    }
+  // GET /api/messages/settings - 获取设置
+  if (request.method === 'GET' && subPath === 'settings') {
+    return getSettings(env);
   }
   
-  return jsonResponse({ success: false, message: '不支持的方法' }, 405);
+  // POST /api/messages/settings - 保存设置
+  if (request.method === 'POST' && subPath === 'settings') {
+    return saveSettings(env, request);
+  }
+  
+  // GET /api/messages/blacklist - 获取黑名单
+  if (request.method === 'GET' && subPath === 'blacklist') {
+    return getBlacklist(env);
+  }
+  
+  // POST /api/messages/blacklist - 添加黑名单
+  if (request.method === 'POST' && subPath === 'blacklist') {
+    return addToBlacklist(env, request);
+  }
+  
+  // DELETE /api/messages/blacklist/:ip - 移除黑名单
+  if (request.method === 'DELETE' && subPath === 'blacklist' && subSubPath) {
+    return removeFromBlacklist(env, subSubPath);
+  }
+  
+  // POST /api/messages/:id/reply - 回复留言
+  if (request.method === 'POST' && subPath && subSubPath === 'reply') {
+    return replyMessage(env, subPath, request);
+  }
+  
+  // DELETE /api/messages/:id - 删除留言
+  if (request.method === 'DELETE' && subPath && subSubPath !== 'reply' && subPath !== 'settings' && subPath !== 'blacklist') {
+    return deleteMessage(env, subPath);
+  }
+  
+  return jsonResponse({ success: false, message: '不支持的请求: ' + request.method + ' ' + pathname }, 405);
 }
 
 // 获取留言列表
@@ -125,7 +141,7 @@ async function submitMessage(env, request, clientIP) {
     
     // 检查留言频率
     const settings = await getSettingsData(env);
-    const rateLimitMinutes = settings.rateLimitMinutes || 1; // 默认1分钟
+    const rateLimitMinutes = settings.rateLimitMinutes || 1;
     
     if (rateLimitMinutes > 0) {
       const messagesData = await env.ADMIN_KV.get('guestbook_messages', { type: 'json' });
@@ -252,7 +268,8 @@ async function saveSettings(env, request) {
 // 获取黑名单
 async function getBlacklist(env) {
   try {
-    const blacklist = await getBlacklistData(env);
+    const blacklistData = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
+    const blacklist = blacklistData && blacklistData.ips ? blacklistData.ips : [];
     return jsonResponse({ success: true, data: blacklist }, 200);
   } catch (e) {
     return jsonResponse({ success: false, message: '获取失败: ' + e.message }, 500);
@@ -296,13 +313,16 @@ async function addToBlacklist(env, request) {
 // 从黑名单移除
 async function removeFromBlacklist(env, ip) {
   try {
+    // URL 解码
+    const decodedIp = decodeURIComponent(ip);
+    
     let blacklistData = await env.ADMIN_KV.get('guestbook_blacklist', { type: 'json' });
     
     if (!blacklistData || !blacklistData.ips) {
       return jsonResponse({ success: false, message: '黑名单为空' }, 404);
     }
     
-    blacklistData.ips = blacklistData.ips.filter(item => item.ip !== ip);
+    blacklistData.ips = blacklistData.ips.filter(item => item.ip !== decodedIp);
     
     await env.ADMIN_KV.put('guestbook_blacklist', JSON.stringify(blacklistData));
     
@@ -329,7 +349,8 @@ async function getSettingsData(env) {
     cardColor: '',
     primaryColor: '',
     rateLimitMinutes: 1,
-    enabled: true
+    enabled: true,
+    backgroundImage: ''
   };
 }
 

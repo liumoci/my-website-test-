@@ -8,65 +8,52 @@
     <link rel="stylesheet" href="../assets/css/guestbook.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
-<body>
+<body class="guestbook-body">
     <!-- 页面加载动画 -->
     <div class="page-loader" id="pageLoader">
         <div class="loader-spinner"></div>
     </div>
 
-    <header>
-        <nav class="navbar">
-            <div class="logo">
-                <a href="/">My Site</a>
-            </div>
-            <ul class="nav-links">
-                <li><a href="/">首页</a></li>
-                <li><a href="/about/">关于我</a></li>
-                <li><a href="/blog/">博客</a></li>
-                <li><a href="/drive/">云盘</a></li>
-            </ul>
-        </nav>
-    </header>
+    <!-- 背景图 -->
+    <div class="guestbook-bg"></div>
+    <div class="guestbook-bg-overlay"></div>
 
-    <main>
-        <section class="guestbook-container">
-            <h1 class="guestbook-title">💬 留言板</h1>
-            <p class="guestbook-subtitle">有什么想说的，都可以在这里留言</p>
-
-            <!-- 留言表单 -->
-            <div class="guestbook-form-card">
-                <form id="messageForm">
-                    <div class="form-row">
+    <main class="guestbook-main">
+        <div class="guestbook-container">
+            <!-- 左侧：留言表单 -->
+            <div class="guestbook-left">
+                <div class="glass-card">
+                    <h2 class="glass-title">💬 留言建议</h2>
+                    <form id="messageForm" class="guestbook-form">
                         <div class="form-group">
-                            <input type="text" id="messageName" placeholder="你的昵称" required maxlength="50">
+                            <input type="text" id="messageName" placeholder="请输入你的昵称" required maxlength="50">
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="messageContent" placeholder="说点什么吧..." required maxlength="500" rows="4"></textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">提交留言</button>
+                        <div class="form-group">
+                            <textarea id="messageContent" placeholder="请输入留言内容..." required maxlength="500" rows="6"></textarea>
+                        </div>
+                        <div class="form-buttons">
+                            <button type="button" class="btn-glass" onclick="clearForm()">清空</button>
+                            <button type="submit" class="btn-glass btn-primary-glass">提交</button>
+                        </div>
                         <span id="messageFormMsg" class="form-msg"></span>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 右侧：留言列表 -->
+            <div class="guestbook-right">
+                <div class="glass-card">
+                    <div class="glass-header">
+                        <h2 class="glass-title">📝 留言板</h2>
+                        <span id="messageCount" class="message-count-badge">0</span>
                     </div>
-                </form>
-            </div>
-
-            <!-- 留言列表 -->
-            <div class="guestbook-list">
-                <div class="guestbook-list-header">
-                    <h2>全部留言</h2>
-                    <span id="messageCount" class="message-count">(0)</span>
-                </div>
-                <div id="messagesList" class="messages-list">
-                    <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载中...</p>
+                    <div id="messagesList" class="messages-scroll">
+                        <p style="text-align: center; color: rgba(255,255,255,0.7); padding: 2rem;">加载中...</p>
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
     </main>
-
-    <footer>
-        <p>&copy; 2026 My Site. Powered by Cloudflare Pages.</p>
-    </footer>
 
     <script src="../assets/js/main.js"></script>
     <script src="../assets/js/guestbook.js"></script>

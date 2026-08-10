@@ -200,11 +200,6 @@ function initNavigation() {
             // 更新 URL hash
             window.location.hash = page;
             
-            // 切换到个人主页时刷新留言
-            if (page === 'profile') {
-                loadMessages();
-            }
-            
             // 切换到留言管理页面时加载数据
             if (page === 'messages') {
                 loadAdminMessages();
@@ -237,7 +232,6 @@ function initStats() {
 
 // ===== 个人主页管理 =====
 let profileData = null;
-let messagesData = [];
 
 function initProfileManager() {
     // 检查是否有个人主页页面
@@ -493,87 +487,6 @@ function showProfileMsg(msg, type) {
         msgEl.textContent = '';
         msgEl.className = 'save-msg';
     }, 3000);
-}
-
-// ===== 留言管理 =====
-async function loadMessages() {
-    try {
-        const response = await fetch('/api/messages');
-        const data = await response.json();
-        
-        if (data.success && data.messages) {
-            messagesData = data.messages;
-            renderMessages();
-        }
-    } catch (e) {
-        console.error('加载留言失败:', e);
-    }
-}
-
-function renderMessages() {
-    const container = document.getElementById('messagesList');
-    const countEl = document.getElementById('messageCount');
-    
-    if (!container) return;
-    
-    countEl.textContent = messagesData.length;
-    
-    if (messagesData.length === 0) {
-        container.innerHTML = '<div class="empty-state">暂无留言</div>';
-        return;
-    }
-    
-    container.innerHTML = '';
-    
-    messagesData.forEach(msg => {
-        const item = document.createElement('div');
-        item.className = 'message-item';
-        
-        const date = new Date(msg.time);
-        const timeStr = date.toLocaleString('zh-CN');
-        
-        item.innerHTML = `
-            <div class="message-header">
-                <span class="message-name">${escapeHtml(msg.name)}</span>
-                <span class="message-time">${timeStr}</span>
-            </div>
-            <div class="message-content">${escapeHtml(msg.content)}</div>
-            <div class="message-actions">
-                <button class="btn-danger btn-small" onclick="deleteMessage('${msg.id}')">删除</button>
-            </div>
-        `;
-        container.appendChild(item);
-    });
-}
-
-async function deleteMessage(id) {
-    if (!confirm('确定要删除这条留言吗？')) return;
-    
-    try {
-        const response = await fetch('/api/messages/' + id, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            messagesData = messagesData.filter(m => m.id !== id);
-            renderMessages();
-        } else {
-            alert('删除失败: ' + (data.message || '未知错误'));
-        }
-    } catch (e) {
-        alert('删除失败');
-        console.error(e);
-    }
-}
-
-// HTML 转义
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 // ===== 系统设置 =====

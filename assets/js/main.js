@@ -260,10 +260,135 @@ function addFloatingGuestbookBtn() {
     btn.id = 'floatingGuestbookBtn';
     btn.className = 'floating-guestbook-btn';
     btn.innerHTML = '💬';
-    btn.title = '留言板';
-    btn.onclick = function() {
-        window.location.href = '/guestbook/';
-    };
+    btn.title = '留言板（可拖动）';
     
+    // 点击跳转
+    btn.addEventListener('click', function(e) {
+        // 如果是拖动后的点击，不跳转
+        if (btn.dataset.dragged === 'true') {
+            btn.dataset.dragged = 'false';
+            return;
+        }
+        window.location.href = '/guestbook/';
+    });
+    
+    // 拖拽功能
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+    
+    btn.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        btn.dataset.dragged = 'false';
+        
+        // 计算初始位置
+        const rect = btn.getBoundingClientRect();
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = rect.left;
+        startTop = rect.top;
+        
+        // 切换到 fixed 定位
+        btn.style.position = 'fixed';
+        btn.style.left = startLeft + 'px';
+        btn.style.top = startTop + 'px';
+        btn.style.right = 'auto';
+        btn.style.bottom = 'auto';
+        btn.style.zIndex = '10000';
+        btn.style.cursor = 'grabbing';
+        
+        e.preventDefault();
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        // 移动距离超过 5px 才算拖动
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            btn.dataset.dragged = 'true';
+        }
+        
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
+        
+        // 限制在视口范围内
+        const btnWidth = btn.offsetWidth;
+        const btnHeight = btn.offsetHeight;
+        const maxLeft = window.innerWidth - btnWidth;
+        const maxTop = window.innerHeight - btnHeight;
+        
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+        
+        btn.style.left = newLeft + 'px';
+        btn.style.top = newTop + 'px';
+    });
+    
+    document.addEventListener('mouseup', function() {
+        if (isDragging) {
+            isDragging = false;
+            btn.style.cursor = 'grab';
+        }
+    });
+    
+    // 移动端触摸支持
+    btn.addEventListener('touchstart', function(e) {
+        isDragging = true;
+        btn.dataset.dragged = 'false';
+        
+        const touch = e.touches[0];
+        const rect = btn.getBoundingClientRect();
+        startX = touch.clientX;
+        startY = touch.clientY;
+        startLeft = rect.left;
+        startTop = rect.top;
+        
+        btn.style.position = 'fixed';
+        btn.style.left = startLeft + 'px';
+        btn.style.top = startTop + 'px';
+        btn.style.right = 'auto';
+        btn.style.bottom = 'auto';
+        btn.style.zIndex = '10000';
+        
+        e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
+        
+        const touch = e.touches[0];
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            btn.dataset.dragged = 'true';
+        }
+        
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
+        
+        const btnWidth = btn.offsetWidth;
+        const btnHeight = btn.offsetHeight;
+        const maxLeft = window.innerWidth - btnWidth;
+        const maxTop = window.innerHeight - btnHeight;
+        
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+        
+        btn.style.left = newLeft + 'px';
+        btn.style.top = newTop + 'px';
+        
+        e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener('touchend', function() {
+        if (isDragging) {
+            isDragging = false;
+        }
+    });
+    
+    btn.style.cursor = 'grab';
     document.body.appendChild(btn);
 }
