@@ -116,7 +116,9 @@ async function getTrend(env) {
             limit: 7
             filter: { date_geq: "${getDateDaysAgo(7)}" }
           ) {
-            date
+            dimensions {
+              date
+            }
             sum {
               requests
               pageViews
@@ -134,7 +136,7 @@ async function getTrend(env) {
   const groups = result.data.viewer.zones[0].httpRequests1dGroups || [];
   
   return groups.map(g => ({
-    date: g.date || '',
+    date: g.dimensions ? g.dimensions.date || '' : '',
     requests: g.sum.requests || 0,
     pageViews: g.sum.pageViews || 0,
     uniques: g.uniq.uniques || 0
