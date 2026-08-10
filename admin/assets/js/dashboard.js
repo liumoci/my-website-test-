@@ -257,12 +257,8 @@ function initProfileManager() {
     // 保存按钮
     document.getElementById('saveProfileBtn').addEventListener('click', saveProfile);
     
-    // 刷新留言按钮
-    document.getElementById('refreshMessagesBtn').addEventListener('click', loadMessages);
-    
     // 加载数据
     loadProfileData();
-    loadMessages();
 }
 
 // 加载个人主页数据
