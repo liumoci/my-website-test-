@@ -51,6 +51,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 系统设置
     initSettings();
     
+    // 留言管理
+    initMessagesManager();
+    
     // 导航管理
     initNavManager();
     
@@ -171,6 +174,7 @@ function initNavigation() {
         'profile': '个人主页',
         'nav': '导航管理',
         'stats': '访问统计',
+        'messages': '留言管理',
         'settings': '系统设置'
     };
     
@@ -201,6 +205,13 @@ function initNavigation() {
                 loadMessages();
             }
             
+            // 切换到留言管理页面时加载数据
+            if (page === 'messages') {
+                loadAdminMessages();
+                loadMsgSettings();
+                loadBlacklist();
+            }
+
             // 切换到统计页面时加载数据
             if (page === 'stats') {
                 loadAllStats();
@@ -1401,4 +1412,459 @@ function formatBytes(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// ===== 留言管理 =====
+
+// 初始化留言管理
+function initMessagesManager() {
+    // 标签页切换
+    initMessagesTabs();
+    
+    // 刷新按钮
+    const refreshBtn = document.getElementById('refreshMessagesBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', loadAdminMessages);
+    }
+    
+    // 保存设置按钮
+    const saveSettingsBtn = document.getElementById('saveMsgSettingsBtn');
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', saveMsgSettings);
+    }
+    
+    // 添加黑名单按钮
+    const addBlacklistBtn = document.getElementById('addBlacklistBtn');
+    if (addBlacklistBtn) {
+        addBlacklistBtn.addEventListener('click', addToBlacklist);
+    }
+    
+    // 颜色选择器同步
+    const colorInputs = ['msgBgColor', 'msgCardColor', 'msgPrimaryColor'];
+    colorInputs.forEach(id => {
+        const colorInput = document.getElementById(id);
+        const textInput = document.getElementById(id + 'Text');
+        if (colorInput && textInput) {
+            colorInput.addEventListener('input', function() {
+                textInput.value = this.value;
+            });
+            textInput.addEventListener('input', function() {
+                if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+                    colorInput.value = this.value;
+                }
+            });
+        }
+    });
+}
+
+// 留言管理标签页切换
+function initMessagesTabs() {
+    const tabBtns = document.querySelectorAll('#page-messages .tab-btn');
+    const tabContents = document.querySelectorAll('#page-messages .tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.getAttribute('data-tab');
+            
+            tabBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            tabContents.forEach(content => content.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+        });
+    });
+}
+
+// 加载留言列表（管理端）
+async function loadAdminMessages() {
+    const container = document.getElementById('messagesAdminList');
+    if (!container) return;
+    
+    try {
+        const response = await fetch('/api/messages', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success && data.messages) {
+            renderAdminMessages(data.messages);
+        } else {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载失败</p>';
+        }
+    } catch (err) {
+        console.error('加载留言失败:', err);
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载失败</p>';
+    }
+}
+
+// 渲染管理端留言列表
+function renderAdminMessages(messages) {
+    const container = document.getElementById('messagesAdminList');
+    
+    if (messages.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">还没有留言</p>';
+        return;
+    }
+    
+    let html = '';
+    
+    messages.forEach(msg => {
+        const date = new Date(msg.time);
+        const timeStr = date.toLocaleString('zh-CN');
+        
+        let replyHtml = '';
+        if (msg.reply && msg.reply.content) {
+            const replyDate = new Date(msg.reply.time);
+            const replyTimeStr = replyDate.toLocaleString('zh-CN');
+            replyHtml = `
+                <div class="admin-reply-box">
+                    <div class="reply-label">📢 你的回复</div>
+                    <div class="reply-content">${escapeHtml(msg.reply.content)}</div>
+                    <div class="reply-time">${replyTimeStr}</div>
+                </div>
+            `;
+        }
+        
+        html += `
+            <div class="admin-message-item" data-id="${msg.id}">
+                <div class="admin-message-header">
+                    <div class="admin-message-info">
+                        <span class="admin-message-name">${escapeHtml(msg.name)}</span>
+                        <span class="admin-message-ip">IP: ${msg.ip || 'unknown'}</span>
+                    </div>
+                    <span class="admin-message-time">${timeStr}</span>
+                </div>
+                <div class="admin-message-content">${escapeHtml(msg.content)}</div>
+                ${replyHtml}
+                <div class="admin-message-actions">
+                    <button class="btn-primary btn-small" onclick="showReplyForm('${msg.id}')">
+                        ${msg.reply ? '修改回复' : '回复'}
+                    </button>
+                    <button class="btn-danger btn-small" onclick="deleteAdminMessage('${msg.id}')">删除</button>
+                    <button class="btn-secondary btn-small" onclick="blacklistIP('${msg.ip}')">拉黑IP</button>
+                </div>
+                <div id="replyForm-${msg.id}" class="reply-form" style="display: none;">
+                    <textarea placeholder="输入回复内容..." rows="3" id="replyInput-${msg.id}"></textarea>
+                    <div class="reply-form-actions">
+                        <button class="btn-primary btn-small" onclick="submitReply('${msg.id}')">提交回复</button>
+                        <button class="btn-secondary btn-small" onclick="hideReplyForm('${msg.id}')">取消</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// 显示回复表单
+function showReplyForm(msgId) {
+    const form = document.getElementById('replyForm-' + msgId);
+    if (form) {
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// 隐藏回复表单
+function hideReplyForm(msgId) {
+    const form = document.getElementById('replyForm-' + msgId);
+    if (form) {
+        form.style.display = 'none';
+    }
+}
+
+// 提交回复
+async function submitReply(msgId) {
+    const input = document.getElementById('replyInput-' + msgId);
+    const content = input.value.trim();
+    
+    if (!content) {
+        alert('回复内容不能为空');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/messages/${msgId}/reply`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            loadAdminMessages();
+        } else {
+            alert(data.message || '回复失败');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('网络错误');
+    }
+}
+
+// 删除留言
+async function deleteAdminMessage(msgId) {
+    if (!confirm('确定要删除这条留言吗？')) return;
+    
+    try {
+        const response = await fetch(`/api/messages/${msgId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            loadAdminMessages();
+        } else {
+            alert(data.message || '删除失败');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('网络错误');
+    }
+}
+
+// 拉黑IP
+async function blacklistIP(ip) {
+    if (!ip || ip === 'unknown') {
+        alert('无法获取IP地址');
+        return;
+    }
+    
+    if (!confirm(`确定要拉黑 IP: ${ip} 吗？`)) return;
+    
+    try {
+        const response = await fetch('/api/messages/blacklist', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ip, reason: '违规留言' })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('已加入黑名单');
+            loadBlacklist();
+        } else {
+            alert(data.message || '操作失败');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('网络错误');
+    }
+}
+
+// ===== 留言设置 =====
+
+// 加载留言设置
+async function loadMsgSettings() {
+    try {
+        const response = await fetch('/api/messages/settings', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+            const settings = data.data;
+            
+            // 背景颜色
+            if (settings.backgroundColor) {
+                document.getElementById('msgBgColor').value = settings.backgroundColor;
+                document.getElementById('msgBgColorText').value = settings.backgroundColor;
+            }
+            
+            // 卡片颜色
+            if (settings.cardColor) {
+                document.getElementById('msgCardColor').value = settings.cardColor;
+                document.getElementById('msgCardColorText').value = settings.cardColor;
+            }
+            
+            // 主题颜色
+            if (settings.primaryColor) {
+                document.getElementById('msgPrimaryColor').value = settings.primaryColor;
+                document.getElementById('msgPrimaryColorText').value = settings.primaryColor;
+            }
+            
+            // 频率限制
+            document.getElementById('msgRateLimit').value = settings.rateLimitMinutes || 1;
+            
+            // 启用状态
+            document.getElementById('msgEnabled').checked = settings.enabled !== false;
+        }
+    } catch (err) {
+        console.error('加载设置失败:', err);
+    }
+}
+
+// 保存留言设置
+async function saveMsgSettings() {
+    const btn = document.getElementById('saveMsgSettingsBtn');
+    const msgEl = document.getElementById('msgSettingsMsg');
+    
+    btn.disabled = true;
+    btn.textContent = '保存中...';
+    
+    try {
+        const settings = {
+            backgroundColor: document.getElementById('msgBgColorText').value || '',
+            cardColor: document.getElementById('msgCardColorText').value || '',
+            primaryColor: document.getElementById('msgPrimaryColorText').value || '',
+            rateLimitMinutes: parseInt(document.getElementById('msgRateLimit').value) || 0,
+            enabled: document.getElementById('msgEnabled').checked
+        };
+        
+        const response = await fetch('/api/messages/settings', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(settings)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            msgEl.textContent = '保存成功！';
+            msgEl.className = 'form-msg success';
+        } else {
+            msgEl.textContent = data.message || '保存失败';
+            msgEl.className = 'form-msg error';
+        }
+    } catch (err) {
+        msgEl.textContent = '网络错误';
+        msgEl.className = 'form-msg error';
+        console.error(err);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '保存设置';
+        
+        setTimeout(() => {
+            msgEl.textContent = '';
+            msgEl.className = 'form-msg';
+        }, 3000);
+    }
+}
+
+// ===== 黑名单管理 =====
+
+// 加载黑名单
+async function loadBlacklist() {
+    const container = document.getElementById('blacklistContainer');
+    if (!container) return;
+    
+    try {
+        const response = await fetch('/api/messages/blacklist', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+            renderBlacklist(data.data);
+        }
+    } catch (err) {
+        console.error('加载黑名单失败:', err);
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载失败</p>';
+    }
+}
+
+// 渲染黑名单
+function renderBlacklist(blacklist) {
+    const container = document.getElementById('blacklistContainer');
+    
+    if (!blacklist || blacklist.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">黑名单为空</p>';
+        return;
+    }
+    
+    let html = '<div class="blacklist-items">';
+    
+    blacklist.forEach(item => {
+        const date = new Date(item.time);
+        const timeStr = date.toLocaleString('zh-CN');
+        
+        html += `
+            <div class="blacklist-item">
+                <div class="blacklist-info">
+                    <span class="blacklist-ip">${escapeHtml(item.ip)}</span>
+                    <span class="blacklist-reason">${escapeHtml(item.reason || '无')}</span>
+                </div>
+                <div class="blacklist-actions">
+                    <span class="blacklist-time">${timeStr}</span>
+                    <button class="btn-danger btn-small" onclick="removeBlacklist('${escapeHtml(item.ip)}')">移除</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// 添加到黑名单
+async function addToBlacklist() {
+    const ip = prompt('请输入要拉黑的IP地址：');
+    if (!ip) return;
+    
+    const reason = prompt('请输入拉黑原因（可选）：') || '';
+    
+    try {
+        const response = await fetch('/api/messages/blacklist', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ip, reason })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            loadBlacklist();
+        } else {
+            alert(data.message || '添加失败');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('网络错误');
+    }
+}
+
+// 从黑名单移除
+async function removeBlacklist(ip) {
+    if (!confirm(`确定要从黑名单移除 IP: ${ip} 吗？`)) return;
+    
+    try {
+        const response = await fetch(`/api/messages/blacklist/${encodeURIComponent(ip)}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            loadBlacklist();
+        } else {
+            alert(data.message || '移除失败');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('网络错误');
+    }
+}
+
+// HTML 转义
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }

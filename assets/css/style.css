@@ -637,3 +637,45 @@ footer {
     white-space: pre-wrap;
     word-break: break-word;
 }
+
+
+/* ===== 悬浮留言按钮 ===== */
+.floating-guestbook-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-guestbook-btn:hover {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.floating-guestbook-btn:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+    .floating-guestbook-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+    }
+}
+

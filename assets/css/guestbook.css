@@ -1,0 +1,198 @@
+/* ===== 留言箱页面 ===== */
+.guestbook-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.guestbook-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.guestbook-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* 留言表单卡片 */
+.guestbook-form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* 留言列表 */
+.guestbook-list {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.guestbook-list-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.guestbook-list-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.message-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.messages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* 留言项 */
+.message-item {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.message-item:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.message-name {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.message-time {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.message-content {
+    line-height: 1.6;
+    word-wrap: break-word;
+}
+
+/* 站长回复 */
+.message-reply {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(99, 102, 241, 0.1);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.reply-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.reply-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.reply-time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    text-align: right;
+}
+
+/* 悬浮留言按钮 */
+.floating-guestbook-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-guestbook-btn:hover {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.floating-guestbook-btn:active {
+    transform: scale(0.95);
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .guestbook-container {
+        padding: 1rem;
+    }
+    
+    .guestbook-title {
+        font-size: 1.5rem;
+    }
+    
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .floating-guestbook-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+    }
+}

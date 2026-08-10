@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 加载导航数据（背景、卡片、链接）
     loadNavData();
+    
+    // 添加悬浮留言按钮（管理页不加）
+    if (!isAdminPage()) {
+        addFloatingGuestbookBtn();
+    }
 });
 
 // 隐藏加载动画
@@ -239,4 +244,26 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// ===== 悬浮留言按钮 =====
+function isAdminPage() {
+    const path = window.location.pathname;
+    return path.startsWith('/admin/') || path.startsWith('/nav-admin/');
+}
+
+function addFloatingGuestbookBtn() {
+    // 检查是否已存在
+    if (document.getElementById('floatingGuestbookBtn')) return;
+    
+    const btn = document.createElement('button');
+    btn.id = 'floatingGuestbookBtn';
+    btn.className = 'floating-guestbook-btn';
+    btn.innerHTML = '💬';
+    btn.title = '留言板';
+    btn.onclick = function() {
+        window.location.href = '/guestbook/';
+    };
+    
+    document.body.appendChild(btn);
 }

@@ -38,6 +38,9 @@
                 <li><a href="#nav" class="nav-item" data-page="nav">
                     <span class="nav-icon">🔗</span> 导航管理
                 </a></li>
+                <li><a href="#messages" class="nav-item" data-page="messages">
+                    <span class="nav-icon">💬</span> 留言管理
+                </a></li>
                 <li><a href="#settings" class="nav-item" data-page="settings">
                     <span class="nav-icon">⚙️</span> 系统设置
                 </a></li>
@@ -512,6 +515,94 @@
                             <button id="refreshSecretBtn" class="btn-primary">刷新重置密钥</button>
                         </div>
                         <p id="secretMsg" class="secret-msg"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 留言管理页面 -->
+            <section id="page-messages" class="page-section">
+                <div class="messages-manager">
+                    <!-- 标签页 -->
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="msg-list">📨 留言列表</button>
+                        <button class="tab-btn" data-tab="msg-settings">⚙️ 留言设置</button>
+                        <button class="tab-btn" data-tab="msg-blacklist">🚫 黑名单</button>
+                    </div>
+
+                    <!-- 留言列表标签页 -->
+                    <div id="tab-msg-list" class="tab-content active">
+                        <div class="msg-list-header">
+                            <h2>全部留言</h2>
+                            <button id="refreshMessagesBtn" class="btn-secondary btn-small">刷新</button>
+                        </div>
+                        <div id="messagesAdminList" class="messages-admin-list">
+                            <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载中...</p>
+                        </div>
+                    </div>
+
+                    <!-- 留言设置标签页 -->
+                    <div id="tab-msg-settings" class="tab-content">
+                        <div class="panel">
+                            <h2>留言箱设置</h2>
+                            
+                            <div class="form-group">
+                                <label>背景颜色</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="msgBgColor" value="#ffffff">
+                                    <input type="text" id="msgBgColorText" placeholder="留空使用默认" class="color-text-input">
+                                </div>
+                                <p class="hint">留言箱页面背景颜色</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>卡片颜色</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="msgCardColor" value="#f9fafb">
+                                    <input type="text" id="msgCardColorText" placeholder="留空使用默认" class="color-text-input">
+                                </div>
+                                <p class="hint">留言卡片背景颜色</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>主题颜色</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="msgPrimaryColor" value="#3b82f6">
+                                    <input type="text" id="msgPrimaryColorText" placeholder="留空使用默认" class="color-text-input">
+                                </div>
+                                <p class="hint">主题色（按钮、链接等）</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>留言频率限制（分钟）</label>
+                                <input type="number" id="msgRateLimit" value="1" min="0" max="60">
+                                <p class="hint">同一IP两次留言的最小间隔，0表示不限制</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="msgEnabled" checked>
+                                    <span>启用留言功能</span>
+                                </label>
+                            </div>
+
+                            <div class="form-actions">
+                                <button id="saveMsgSettingsBtn" class="btn-primary">保存设置</button>
+                                <span id="msgSettingsMsg" class="form-msg"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 黑名单标签页 -->
+                    <div id="tab-msg-blacklist" class="tab-content">
+                        <div class="panel">
+                            <div class="blacklist-header">
+                                <h2>IP 黑名单</h2>
+                                <button id="addBlacklistBtn" class="btn-primary btn-small">添加IP</button>
+                            </div>
+                            <div id="blacklistContainer" class="blacklist-list">
+                                <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载中...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
