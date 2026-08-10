@@ -66,7 +66,7 @@ async function getOverview(env) {
       viewer {
         zones(filter: { zoneTag: "${env.CF_ZONE_ID}" }) {
           httpRequests1dGroups(
-            limit: 1
+            limit: 7
             filter: { date_geq: "${getDateDaysAgo(7)}" }
           ) {
             sum {
@@ -86,13 +86,25 @@ async function getOverview(env) {
   const result = await callGraphQL(env, query);
   
   const zone = result.data.viewer.zones[0];
-  const group = zone.httpRequests1dGroups[0] || { sum: {}, uniq: {} };
+  const groups = zone.httpRequests1dGroups || [];
+  
+  let totalRequests = 0;
+  let totalPageViews = 0;
+  let totalUniques = 0;
+  let totalBytes = 0;
+  
+  groups.forEach(g => {
+    totalRequests += g.sum.requests || 0;
+    totalPageViews += g.sum.pageViews || 0;
+    totalBytes += g.sum.bytes || 0;
+    totalUniques += g.uniq.uniques || 0;
+  });
   
   return {
-    requests: group.sum.requests || 0,
-    pageViews: group.sum.pageViews || 0,
-    uniques: group.uniq.uniques || 0,
-    bytes: group.sum.bytes || 0
+    requests: totalRequests,
+    pageViews: totalPageViews,
+    uniques: totalUniques,
+    bytes: totalBytes
   };
 }
 
@@ -105,8 +117,7 @@ async function getCountries(env) {
           httpRequests1dGroups(
             limit: 10
             filter: { date_geq: "${getDateDaysAgo(7)}" }
-            groupBy: [clientCountryName]
-            orderBy: [sum_requests_DESC]
+            dimensions: ["clientCountryName"]
           ) {
             sum {
               requests
@@ -139,8 +150,7 @@ async function getTopPages(env) {
           httpRequests1dGroups(
             limit: 10
             filter: { date_geq: "${getDateDaysAgo(7)}" }
-            groupBy: [clientRequestPath]
-            orderBy: [sum_pageViews_DESC]
+            dimensions: ["clientRequestPath"]
           ) {
             sum {
               pageViews
@@ -175,8 +185,7 @@ async function getTopSources(env) {
           httpRequests1dGroups(
             limit: 10
             filter: { date_geq: "${getDateDaysAgo(7)}" }
-            groupBy: [clientRefererHost]
-            orderBy: [sum_requests_DESC]
+            dimensions: ["clientRefererHost"]
           ) {
             sum {
               requests
@@ -211,8 +220,7 @@ async function getTrend(env) {
           httpRequests1dGroups(
             limit: 7
             filter: { date_geq: "${getDateDaysAgo(7)}" }
-            groupBy: [date]
-            orderBy: [dim_date_ASC]
+            dimensions: ["date"]
           ) {
             sum {
               requests
