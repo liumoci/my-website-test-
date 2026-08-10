@@ -4,9 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 加载个人主页数据
     loadProfileData();
     
-    // 加载留言
-    loadMessages();
-    
     // 留言表单
     document.getElementById('messageForm').addEventListener('submit', handleMessageSubmit);
 });
