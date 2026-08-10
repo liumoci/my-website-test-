@@ -1,4 +1,4 @@
-// Cloudflare Analytics API (使用 REST API，确保稳定)
+// Cloudflare Analytics API (简化版 GraphQL，确保稳定)
 export async function onRequest(context) {
   const { request, env } = context;
   
@@ -38,13 +38,13 @@ export async function onRequest(context) {
         data = await getOverview(env);
         break;
       case 'countries':
-        data = await getCountries(env);
+        data = []; // 暂不支持
         break;
       case 'pages':
-        data = await getTopPages(env);
+        data = []; // 暂不支持
         break;
       case 'sources':
-        data = await getTopSources(env);
+        data = []; // 暂不支持
         break;
       case 'trend':
         data = await getTrend(env);
@@ -59,80 +59,113 @@ export async function onRequest(context) {
   }
 }
 
-// 调用 Cloudflare REST API
-async function callCFAPI(env, endpoint, params = {}) {
-  const url = new URL(`https://api.cloudflare.com/client/v4/zones/${env.CF_ZONE_ID}/analytics/${endpoint}`);
-  
-  Object.keys(params).forEach(key => {
-    if (params[key] !== undefined && params[key] !== null) {
-      url.searchParams.append(key, params[key]);
-    }
-  });
-  
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${env.CF_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  
-  const data = await response.json();
-  
-  if (!data.success) {
-    throw new Error(data.errors && data.errors[0] ? data.errors[0].message : 'API 请求失败');
-  }
-  
-  return data.result;
-}
-
-// 查询概览数据
+// 查询概览数据（7天总和）
 async function getOverview(env) {
-  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const until = new Date().toISOString();
+  const query = `
+    query {
+      viewer {
+        zones(filter: { zoneTag: "${env.CF_ZONE_ID}" }) {
+          httpRequests1dGroups(
+            limit: 7
+            filter: { date_geq: "${getDateDaysAgo(7)}" }
+          ) {
+            sum {
+              requests
+              pageViews
+              bytes
+            }
+            uniq {
+              uniques
+            }
+          }
+        }
+      }
+    }
+  `;
   
-  const result = await callCFAPI(env, 'dashboard', { since, until });
+  const result = await callGraphQL(env, query);
+  const groups = result.data.viewer.zones[0].httpRequests1dGroups || [];
   
-  const totals = result.totals || {};
+  let totalRequests = 0;
+  let totalPageViews = 0;
+  let totalUniques = 0;
+  let totalBytes = 0;
+  
+  groups.forEach(g => {
+    totalRequests += g.sum.requests || 0;
+    totalPageViews += g.sum.pageViews || 0;
+    totalUniques += g.uniq.uniques || 0;
+    totalBytes += g.sum.bytes || 0;
+  });
   
   return {
-    requests: totals.requests ? totals.requests.all || 0 : 0,
-    pageViews: totals.page_views ? totals.page_views.all || 0 : 0,
-    uniques: totals.uniques ? totals.uniques.all || 0 : 0,
-    bytes: totals.bytes ? totals.bytes.all || 0 : 0
+    requests: totalRequests,
+    pageViews: totalPageViews,
+    uniques: totalUniques,
+    bytes: totalBytes
   };
-}
-
-// 查询国家分布（暂用空数据，后续完善）
-async function getCountries(env) {
-  return [];
-}
-
-// 查询热门页面（暂用空数据，后续完善）
-async function getTopPages(env) {
-  return [];
-}
-
-// 查询流量来源（暂用空数据，后续完善）
-async function getTopSources(env) {
-  return [];
 }
 
 // 查询最近 7 天趋势
 async function getTrend(env) {
-  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const until = new Date().toISOString();
+  const query = `
+    query {
+      viewer {
+        zones(filter: { zoneTag: "${env.CF_ZONE_ID}" }) {
+          httpRequests1dGroups(
+            limit: 7
+            filter: { date_geq: "${getDateDaysAgo(7)}" }
+          ) {
+            date
+            sum {
+              requests
+              pageViews
+            }
+            uniq {
+              uniques
+            }
+          }
+        }
+      }
+    }
+  `;
   
-  const result = await callCFAPI(env, 'dashboard', { since, until });
+  const result = await callGraphQL(env, query);
+  const groups = result.data.viewer.zones[0].httpRequests1dGroups || [];
   
-  const timeseries = result.timeseries || [];
-  
-  return timeseries.map(t => ({
-    date: t.since ? t.since.split('T')[0] : '',
-    requests: t.requests ? t.requests.all || 0 : 0,
-    pageViews: t.page_views ? t.page_views.all || 0 : 0,
-    uniques: t.uniques ? t.uniques.all || 0 : 0
+  return groups.map(g => ({
+    date: g.date || '',
+    requests: g.sum.requests || 0,
+    pageViews: g.sum.pageViews || 0,
+    uniques: g.uniq.uniques || 0
   }));
+}
+
+// 调用 Cloudflare GraphQL API
+async function callGraphQL(env, query) {
+  const response = await fetch('https://api.cloudflare.com/client/v4/graphql', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.CF_API_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ query })
+  });
+  
+  const data = await response.json();
+  
+  if (data.errors && data.errors.length > 0) {
+    throw new Error(data.errors[0].message);
+  }
+  
+  return data;
+}
+
+// 获取 N 天前的日期（YYYY-MM-DD）
+function getDateDaysAgo(days) {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString().split('T')[0];
 }
 
 function jsonResponse(data, status = 200) {
