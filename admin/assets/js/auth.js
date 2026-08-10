@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/login', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -146,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/init', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -206,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/reset', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },

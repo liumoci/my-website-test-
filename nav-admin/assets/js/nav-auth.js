@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/api/nav-login', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },

@@ -39,7 +39,7 @@ export async function onRequest(context) {
     if (!sessionData || sessionData.expires < Date.now()) {
       // session 不存在或已过期，清除 cookie 并重定向到登录页
       const response = Response.redirect(url.origin + '/admin/login.html', 302);
-      response.headers.append('Set-Cookie', 'admin_session=; Path=/admin; Max-Age=0; HttpOnly; SameSite=Lax');
+      response.headers.append('Set-Cookie', 'admin_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax');
       return response;
     }
     

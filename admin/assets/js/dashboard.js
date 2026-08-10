@@ -3,7 +3,9 @@
 document.addEventListener('DOMContentLoaded', async function() {
     // 检查登录状态（调用 API）
     try {
-        const response = await fetch('/api/check-auth');
+        const response = await fetch('/api/check-auth', {
+            credentials: 'include'
+        });
         const data = await response.json();
         
         if (!data.loggedIn) {
@@ -32,7 +34,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async function() {
             try {
-                await fetch('/api/logout', { method: 'POST' });
+                await fetch('/api/logout', { 
+                    method: 'POST',
+                    credentials: 'include'
+                });
             } catch (e) {
                 // 忽略错误
             }
@@ -78,7 +83,8 @@ function initResetSecret() {
             
             try {
                 const response = await fetch('/api/reset-secret', {
-                    method: 'POST'
+                    method: 'POST',
+                    credentials: 'include'
                 });
                 const data = await response.json();
                 
@@ -104,7 +110,9 @@ async function loadResetSecret() {
     if (!secretValue) return;
     
     try {
-        const response = await fetch('/api/reset-secret');
+        const response = await fetch('/api/reset-secret', {
+            credentials: 'include'
+        });
         const data = await response.json();
         
         if (data.success) {

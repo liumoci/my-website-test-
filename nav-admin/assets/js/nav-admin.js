@@ -1,11 +1,17 @@
 // 导航管理主逻辑
 
-let navData = { categories: [] };
+let navData = { 
+    background: { type: 'color', value: '' },
+    cards: [],
+    categories: [] 
+};
+
 let currentEditLinkIndex = -1;
 let currentEditCategoryIndex = -1;
+let currentEditCardIndex = -1;
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // 检查登录状态（通过加载数据验证）
+    // 加载导航数据
     await loadNavData();
     
     // 保存按钮
@@ -14,6 +20,75 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 退出按钮
     document.getElementById('logoutBtn').addEventListener('click', logout);
     
+    // 标签页切换
+    initTabs();
+    
+    // 链接管理
+    initLinkManager();
+    
+    // 卡片管理
+    initCardManager();
+    
+    // 背景设置
+    initBackgroundManager();
+});
+
+// ===== 标签页切换 =====
+function initTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.getAttribute('data-tab');
+            
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            this.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+            
+            // 切换到对应标签时刷新
+            if (tab === 'cards') renderCards();
+            if (tab === 'background') updateBgPreview();
+        });
+    });
+}
+
+// ===== 加载导航数据 =====
+async function loadNavData() {
+    try {
+        const response = await fetch('/api/nav', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            navData = data.data;
+            // 确保有默认结构
+            if (!navData.background) navData.background = { type: 'color', value: '' };
+            if (!navData.cards) navData.cards = [];
+            if (!navData.categories) navData.categories = [];
+            
+            renderNavData();
+        } else {
+            showStatus('加载失败: ' + (data.message || '未知错误'), 'error');
+        }
+    } catch (err) {
+        // 如果是 401 或其他错误，可能是未登录，跳转到登录页
+        window.location.href = '/nav-admin/login.html';
+    }
+}
+
+// ===== 渲染导航数据 =====
+function renderNavData() {
+    renderCategories();
+    renderCards();
+    renderBackground();
+}
+
+// ===== 链接管理 =====
+function initLinkManager() {
     // 添加分类按钮
     document.getElementById('addCategoryBtn').addEventListener('click', showCategoryModal);
     
@@ -32,28 +107,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('categoryModal').addEventListener('click', function(e) {
         if (e.target === this) hideCategoryModal();
     });
-});
-
-// 加载导航数据
-async function loadNavData() {
-    try {
-        const response = await fetch('/api/nav');
-        const data = await response.json();
-        
-        if (data.success) {
-            navData = data.data;
-            renderNavData();
-        } else {
-            showStatus('加载失败: ' + (data.message || '未知错误'), 'error');
-        }
-    } catch (err) {
-        // 如果是 401 或其他错误，可能是未登录，跳转到登录页
-        window.location.href = '/nav-admin/login.html';
-    }
 }
 
-// 渲染导航数据
-function renderNavData() {
+function renderCategories() {
     const container = document.getElementById('categoriesContainer');
     container.innerHTML = '';
     
@@ -72,9 +128,7 @@ function renderNavData() {
         
         const title = document.createElement('div');
         title.className = 'category-title';
-        title.innerHTML = `
-            <span class="category-name" data-index="${catIndex}">${escapeHtml(category.name)}</span>
-        `;
+        title.innerHTML = `<span class="category-name">${escapeHtml(category.name)}</span>`;
         
         const actions = document.createElement('div');
         actions.className = 'category-actions';
@@ -117,7 +171,6 @@ function renderNavData() {
     });
 }
 
-// 添加链接
 function addLink(categoryIndex) {
     currentEditCategoryIndex = categoryIndex;
     currentEditLinkIndex = -1;
@@ -128,7 +181,6 @@ function addLink(categoryIndex) {
     showLinkModal();
 }
 
-// 编辑链接
 function editLink(categoryIndex, linkIndex) {
     currentEditCategoryIndex = categoryIndex;
     currentEditLinkIndex = linkIndex;
@@ -142,16 +194,14 @@ function editLink(categoryIndex, linkIndex) {
     showLinkModal();
 }
 
-// 删除链接
 function deleteLink(categoryIndex, linkIndex) {
     if (confirm('确定要删除这个链接吗？')) {
         navData.categories[categoryIndex].links.splice(linkIndex, 1);
-        renderNavData();
+        renderCategories();
         showStatus('已删除，点击保存生效', 'success');
     }
 }
 
-// 处理链接表单提交
 function handleLinkSubmit(e) {
     e.preventDefault();
     
@@ -164,10 +214,8 @@ function handleLinkSubmit(e) {
     const linkData = { name, url, icon: icon || '🔗' };
     
     if (currentEditLinkIndex >= 0) {
-        // 编辑
         navData.categories[currentEditCategoryIndex].links[currentEditLinkIndex] = linkData;
     } else {
-        // 新增
         if (!navData.categories[currentEditCategoryIndex].links) {
             navData.categories[currentEditCategoryIndex].links = [];
         }
@@ -175,11 +223,10 @@ function handleLinkSubmit(e) {
     }
     
     hideLinkModal();
-    renderNavData();
+    renderCategories();
     showStatus('已修改，点击保存生效', 'success');
 }
 
-// 显示分类弹窗
 function showCategoryModal() {
     document.getElementById('categoryName').value = '';
     document.getElementById('categoryModal').style.display = 'flex';
@@ -190,7 +237,6 @@ function hideCategoryModal() {
     document.getElementById('categoryModal').style.display = 'none';
 }
 
-// 处理分类表单提交
 function handleCategorySubmit(e) {
     e.preventDefault();
     
@@ -203,28 +249,211 @@ function handleCategorySubmit(e) {
     });
     
     hideCategoryModal();
-    renderNavData();
+    renderCategories();
     showStatus('分类已添加，点击保存生效', 'success');
 }
 
-// 删除分类
 function deleteCategory(categoryIndex) {
     if (confirm('确定要删除这个分类吗？分类下的所有链接也会被删除。')) {
         navData.categories.splice(categoryIndex, 1);
-        renderNavData();
+        renderCategories();
         showStatus('已删除，点击保存生效', 'success');
     }
 }
 
-// 保存导航数据
+function showLinkModal() {
+    document.getElementById('linkModal').style.display = 'flex';
+    document.getElementById('linkName').focus();
+}
+
+function hideLinkModal() {
+    document.getElementById('linkModal').style.display = 'none';
+}
+
+// ===== 卡片管理 =====
+function initCardManager() {
+    document.getElementById('cardForm').addEventListener('submit', handleCardSubmit);
+    document.getElementById('cancelCardBtn').addEventListener('click', hideCardModal);
+    
+    document.getElementById('cardModal').addEventListener('click', function(e) {
+        if (e.target === this) hideCardModal();
+    });
+}
+
+function renderCards() {
+    const container = document.getElementById('cardsList');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!navData.cards || navData.cards.length === 0) {
+        container.innerHTML = '<div class="empty-state">暂无卡片</div>';
+        return;
+    }
+    
+    navData.cards.forEach((card, index) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card-edit-item';
+        cardEl.innerHTML = `
+            <div class="card-edit-icon">${card.icon || '📄'}</div>
+            <div class="card-edit-info">
+                <div class="card-edit-title">${escapeHtml(card.title || '未命名')}</div>
+                <div class="card-edit-desc">${escapeHtml(card.description || '')}</div>
+                <div class="card-edit-url">${escapeHtml(card.url || '')}</div>
+            </div>
+            <div class="card-edit-actions">
+                <button class="btn-secondary btn-small" onclick="editCard(${index})">编辑</button>
+            </div>
+        `;
+        container.appendChild(cardEl);
+    });
+}
+
+function editCard(index) {
+    currentEditCardIndex = index;
+    const card = navData.cards[index];
+    
+    document.getElementById('cardModalTitle').textContent = '编辑卡片';
+    document.getElementById('cardTitle').value = card.title || '';
+    document.getElementById('cardDesc').value = card.description || '';
+    document.getElementById('cardIcon').value = card.icon || '';
+    document.getElementById('cardUrl').value = card.url || '';
+    
+    showCardModal();
+}
+
+function handleCardSubmit(e) {
+    e.preventDefault();
+    
+    const title = document.getElementById('cardTitle').value.trim();
+    const description = document.getElementById('cardDesc').value.trim();
+    const icon = document.getElementById('cardIcon').value.trim();
+    const url = document.getElementById('cardUrl').value.trim();
+    
+    if (!title || !url) return;
+    
+    if (currentEditCardIndex >= 0 && currentEditCardIndex < navData.cards.length) {
+        navData.cards[currentEditCardIndex] = { title, description, icon, url };
+    }
+    
+    hideCardModal();
+    renderCards();
+    showStatus('已修改，点击保存生效', 'success');
+}
+
+function showCardModal() {
+    document.getElementById('cardModal').style.display = 'flex';
+    document.getElementById('cardTitle').focus();
+}
+
+function hideCardModal() {
+    document.getElementById('cardModal').style.display = 'none';
+}
+
+// ===== 背景设置 =====
+function initBackgroundManager() {
+    // 背景类型切换
+    document.querySelectorAll('input[name="bgType"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const type = this.value;
+            document.getElementById('bgColorSection').style.display = type === 'color' ? 'block' : 'none';
+            document.getElementById('bgImageSection').style.display = type === 'image' ? 'block' : 'none';
+            updateBgPreview();
+        });
+    });
+    
+    // 颜色选择器联动
+    document.getElementById('bgColorPicker').addEventListener('input', function() {
+        document.getElementById('bgColorText').value = this.value;
+        updateBgPreview();
+    });
+    
+    document.getElementById('bgColorText').addEventListener('input', function() {
+        const color = this.value;
+        if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+            document.getElementById('bgColorPicker').value = color;
+        }
+        updateBgPreview();
+    });
+    
+    // 图片URL输入
+    document.getElementById('bgImageUrl').addEventListener('input', updateBgPreview);
+}
+
+function renderBackground() {
+    if (!navData.background) return;
+    
+    const bg = navData.background;
+    
+    // 设置类型
+    document.querySelector(`input[name="bgType"][value="${bg.type}"]`).checked = true;
+    
+    // 设置颜色
+    if (bg.type === 'color') {
+        document.getElementById('bgColorSection').style.display = 'block';
+        document.getElementById('bgImageSection').style.display = 'none';
+        if (bg.value) {
+            document.getElementById('bgColorPicker').value = bg.value;
+            document.getElementById('bgColorText').value = bg.value;
+        }
+    }
+    
+    // 设置图片
+    if (bg.type === 'image') {
+        document.getElementById('bgColorSection').style.display = 'none';
+        document.getElementById('bgImageSection').style.display = 'block';
+        document.getElementById('bgImageUrl').value = bg.value || '';
+    }
+    
+    updateBgPreview();
+}
+
+function updateBgPreview() {
+    const preview = document.getElementById('bgPreview');
+    if (!preview) return;
+    
+    const type = document.querySelector('input[name="bgType"]:checked')?.value || 'color';
+    
+    if (type === 'color') {
+        const color = document.getElementById('bgColorText')?.value || '';
+        preview.style.background = color || 'var(--bg-color)';
+    } else {
+        const url = document.getElementById('bgImageUrl')?.value || '';
+        if (url) {
+            preview.style.background = `url('${url}') center/cover no-repeat`;
+        } else {
+            preview.style.background = 'var(--bg-color)';
+        }
+    }
+}
+
+// 从表单收集背景数据
+function collectBackgroundData() {
+    const type = document.querySelector('input[name="bgType"]:checked')?.value || 'color';
+    let value = '';
+    
+    if (type === 'color') {
+        value = document.getElementById('bgColorText')?.value || '';
+    } else {
+        value = document.getElementById('bgImageUrl')?.value || '';
+    }
+    
+    return { type, value };
+}
+
+// ===== 保存导航数据 =====
 async function saveNavData() {
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
     btn.textContent = '保存中...';
     
+    // 收集背景数据
+    navData.background = collectBackgroundData();
+    
     try {
         const response = await fetch('/api/nav', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -239,7 +468,7 @@ async function saveNavData() {
             showStatus('保存失败: ' + (data.message || '未知错误'), 'error');
         }
     } catch (err) {
-        showStatus('网络错误', 'error');
+        showStatus('网络错误或未登录', 'error');
         console.error(err);
     } finally {
         btn.disabled = false;
@@ -247,13 +476,12 @@ async function saveNavData() {
     }
 }
 
-// 退出登录
+// ===== 退出登录 =====
 async function logout() {
-    // 清除 cookie 的方式：调用登出接口或者直接跳走
     window.location.href = '/';
 }
 
-// 显示状态消息
+// ===== 工具函数 =====
 function showStatus(message, type) {
     const statusEl = document.getElementById('statusMsg');
     statusEl.textContent = message;
@@ -264,17 +492,6 @@ function showStatus(message, type) {
     }, 3000);
 }
 
-// 显示/隐藏链接弹窗
-function showLinkModal() {
-    document.getElementById('linkModal').style.display = 'flex';
-    document.getElementById('linkName').focus();
-}
-
-function hideLinkModal() {
-    document.getElementById('linkModal').style.display = 'none';
-}
-
-// HTML 转义
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;

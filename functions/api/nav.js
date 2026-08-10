@@ -46,7 +46,7 @@ export async function onRequest(context) {
       const body = await request.json();
       const navData = body.data;
       
-      if (!navData || !navData.categories) {
+      if (!navData || !navData.categories || !Array.isArray(navData.categories)) {
         return jsonResponse({ success: false, message: '数据格式错误' }, 400);
       }
       
@@ -83,6 +83,36 @@ function getCookieValue(cookieHeader, name) {
 
 function getDefaultNavData() {
   return {
+    background: {
+      type: 'color',
+      value: ''
+    },
+    cards: [
+      {
+        title: '个人主页',
+        description: '关于我的介绍',
+        icon: '👤',
+        url: '/about/'
+      },
+      {
+        title: '博客',
+        description: '我的文章与思考',
+        icon: '📝',
+        url: '/blog/'
+      },
+      {
+        title: '云盘',
+        description: '文件分享与下载',
+        icon: '☁️',
+        url: '/drive/'
+      },
+      {
+        title: '管理面板',
+        description: '网站后台管理',
+        icon: '⚙️',
+        url: '/admin/'
+      }
+    ],
     categories: [
       {
         name: '常用链接',
