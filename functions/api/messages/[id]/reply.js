@@ -1,5 +1,5 @@
 // POST /api/messages/:id/reply - 站长回复留言
-import { verifyAdmin, getMessagesData, saveMessagesData, jsonResponse, getCookieValue } from '../_lib.js';
+import { verifyAdmin, getMessagesData, saveMessagesData, jsonResponse } from '../_lib.js';
 
 export async function onRequest(context) {
   const { request, env, params } = context;

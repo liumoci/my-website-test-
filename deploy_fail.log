@@ -1,0 +1,44 @@
+2026-08-14T15:48:36.018533Z	Cloning repository...
+2026-08-14T15:48:37.872118Z	From https://github.com/liumoci/my-website-test-
+2026-08-14T15:48:37.872579Z	 * branch            b4a25d720e74cdece432ea2997f290550a1090cb -> FETCH_HEAD
+2026-08-14T15:48:37.87271Z	
+2026-08-14T15:48:37.930244Z	HEAD is now at b4a25d7 悬浮按钮垂直居中+多级回复功能
+2026-08-14T15:48:37.93298Z	
+2026-08-14T15:48:38.089808Z	
+2026-08-14T15:48:38.091284Z	Using v2 root directory strategy
+2026-08-14T15:48:38.133099Z	Success: Finished cloning repository files
+2026-08-14T15:48:39.387163Z	No build output detected to cache. Skipping.
+2026-08-14T15:48:39.387878Z	No dependencies detected to cache. Skipping.
+2026-08-14T15:48:41.095592Z	Checking for configuration in a Wrangler configuration file (BETA)
+2026-08-14T15:48:41.096234Z	
+2026-08-14T15:48:41.394811Z	No Wrangler configuration file found. Continuing.
+2026-08-14T15:48:41.395223Z	No build command specified. Skipping build step.
+2026-08-14T15:48:41.395964Z	Found Functions directory at /functions. Uploading.
+2026-08-14T15:48:41.607059Z	 ⛅️ wrangler 3.114.17
+2026-08-14T15:48:41.607596Z	-------------------
+2026-08-14T15:48:43.426967Z	[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mBuild failed with 1 error:[0m
+2026-08-14T15:48:43.429244Z	
+2026-08-14T15:48:43.429367Z	  [31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo matching export in "api/messages/_lib.js" for import "getCookieValue"[0m
+2026-08-14T15:48:43.429754Z	  
+2026-08-14T15:48:43.429916Z	      api/messages/[id]/reply.js:2:71:
+2026-08-14T15:48:43.430013Z	  [37m      2 │ ...saveMessagesData, jsonResponse, [32mgetCookieValue[37m } from '../_lib.js';
+2026-08-14T15:48:43.431323Z	          ╵                                    [32m~~~~~~~~~~~~~~[0m
+2026-08-14T15:48:43.431605Z	  
+2026-08-14T15:48:43.431955Z	  
+2026-08-14T15:48:43.432054Z	
+2026-08-14T15:48:43.432158Z	
+2026-08-14T15:48:43.432933Z	
+2026-08-14T15:48:43.433097Z	[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mBuild failed with 1 error:[0m
+2026-08-14T15:48:43.433533Z	
+2026-08-14T15:48:43.434396Z	  [31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mNo matching export in "api/messages/_lib.js" for import "getCookieValue"[0m
+2026-08-14T15:48:43.434824Z	  
+2026-08-14T15:48:43.43496Z	      api/messages/[id]/reply.js:2:71:
+2026-08-14T15:48:43.43504Z	  [37m      2 │ ...saveMessagesData, jsonResponse, [32mgetCookieValue[37m } from '../_lib.js';
+2026-08-14T15:48:43.435123Z	          ╵                                    [32m~~~~~~~~~~~~~~[0m
+2026-08-14T15:48:43.435176Z	  
+2026-08-14T15:48:43.435228Z	  
+2026-08-14T15:48:43.435272Z	
+2026-08-14T15:48:43.435317Z	
+2026-08-14T15:48:43.463083Z	🪵  Logs were written to "/root/.config/.wrangler/logs/wrangler-2026-08-14_15-48-42_478.log"
+2026-08-14T15:48:43.58173Z	Failed building Pages Functions.
+2026-08-14T15:48:44.444794Z	Failed: generating Pages Functions failed. Check the logs above for more information. If this continues for an unknown reason, contact support: https://cfl.re/3WgEyrH
