@@ -3,59 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>云盘 - 正在跳转...</title>
+    <title>云盘</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
-    <meta http-equiv="refresh" content="3;url=https://drive.liumoci.dpdns.org">
-    <style>
-        .drive-redirect {
-            min-height: 60vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-        }
-        .drive-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            animation: float 2s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .drive-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-        .drive-desc {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-        .drive-btn {
-            display: inline-block;
-            padding: 0.75rem 2rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            text-decoration: none;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .drive-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        .drive-tip {
-            margin-top: 1rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-    </style>
 </head>
 <body>
     <!-- 页面加载动画 -->
@@ -78,14 +28,33 @@
     </header>
 
     <main>
-        <div class="drive-redirect">
-            <div class="drive-icon">☁️</div>
-            <div class="drive-title">我的云盘</div>
-            <div class="drive-desc">基于 Cloudflare R2 的在线文件存储</div>
-            <a href="https://drive.liumoci.dpdns.org" class="drive-btn">立即进入 →</a>
-            <div class="drive-tip">3 秒后自动跳转，如未跳转请点击上方按钮</div>
-        </div>
+        <section class="drive-header">
+            <h1>文件分享</h1>
+            <p>公开资源下载</p>
+        </section>
+
+        <section class="file-list">
+            <div class="file-item">
+                <span class="file-icon">📄</span>
+                <div class="file-info">
+                    <h3>示例文件.txt</h3>
+                    <p>大小：1 KB · 上传时间：2026-08-09</p>
+                </div>
+                <a href="#" class="download-btn" download>下载</a>
+            </div>
+
+            <!-- 更多文件复制上面的结构 -->
+        </section>
+
+        <section class="drive-notice">
+            <h2>说明</h2>
+            <p>当前为静态文件分享模式。如需完整云盘功能（上传、权限管理等），需后续接入后端服务。</p>
+        </section>
     </main>
+
+    <footer>
+        <p>&copy; 2026 My Site. Powered by Cloudflare Pages.</p>
+    </footer>
 
     <script src="../assets/js/main.js"></script>
 </body>
