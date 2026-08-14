@@ -33,6 +33,7 @@ async function submitMessage(env, request) {
     const body = await request.json();
     const name = (body.name || '').trim();
     const content = (body.content || '').trim();
+    const parentId = (body.parentId || '').trim() || null;
     
     if (!name || !content) {
       return jsonResponse({ success: false, message: '昵称和内容不能为空' }, 400);
@@ -71,6 +72,8 @@ async function submitMessage(env, request) {
       content: content,
       time: Date.now(),
       ip: clientIP,
+      parentId: parentId,
+      isAdmin: false,
       reply: null
     };
     data.messages.push(newMessage);

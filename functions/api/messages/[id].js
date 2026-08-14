@@ -1,4 +1,4 @@
-// DELETE /api/messages/:id - 删除留言
+// DELETE /api/messages/:id - 删除留言（同时删除所有子回复）
 import { verifyAdmin, getMessagesData, saveMessagesData, jsonResponse } from './_lib.js';
 
 export async function onRequest(context) {
@@ -14,9 +14,23 @@ export async function onRequest(context) {
   try {
     const messageId = params.id;
     const data = await getMessagesData(env);
-    data.messages = data.messages.filter(m => m.id !== messageId);
+    
+    // 递归收集所有要删除的ID（包括子回复）
+    const toDelete = new Set([messageId]);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      data.messages.forEach(m => {
+        if (m.parentId && toDelete.has(m.parentId) && !toDelete.has(m.id)) {
+          toDelete.add(m.id);
+          changed = true;
+        }
+      });
+    }
+    
+    data.messages = data.messages.filter(m => !toDelete.has(m.id));
     await saveMessagesData(env, data);
-    return jsonResponse({ success: true, message: '删除成功' }, 200);
+    return jsonResponse({ success: true, message: '删除成功', deletedCount: toDelete.size }, 200);
   } catch (e) {
     return jsonResponse({ success: false, message: '删除失败: ' + e.message }, 500);
   }

@@ -1418,55 +1418,103 @@ function renderAdminMessages(messages) {
         return;
     }
     
+    // 组装成树
+    const tree = buildAdminMessageTree(messages);
     let html = '';
-    
-    messages.forEach(msg => {
-        const date = new Date(msg.time);
-        const timeStr = date.toLocaleString('zh-CN');
-        
-        let replyHtml = '';
-        if (msg.reply && msg.reply.content) {
-            const replyDate = new Date(msg.reply.time);
-            const replyTimeStr = replyDate.toLocaleString('zh-CN');
-            replyHtml = `
-                <div class="admin-reply-box">
-                    <div class="reply-label">📢 你的回复</div>
-                    <div class="reply-content">${escapeHtml(msg.reply.content)}</div>
-                    <div class="reply-time">${replyTimeStr}</div>
-                </div>
-            `;
-        }
-        
-        html += `
-            <div class="admin-message-item" data-id="${msg.id}">
-                <div class="admin-message-header">
-                    <div class="admin-message-info">
-                        <span class="admin-message-name">${escapeHtml(msg.name)}</span>
-                        <span class="admin-message-ip">IP: ${msg.ip || 'unknown'}</span>
-                    </div>
-                    <span class="admin-message-time">${timeStr}</span>
-                </div>
-                <div class="admin-message-content">${escapeHtml(msg.content)}</div>
-                ${replyHtml}
-                <div class="admin-message-actions">
-                    <button class="btn-primary btn-small" onclick="showReplyForm('${msg.id}')">
-                        ${msg.reply ? '修改回复' : '回复'}
-                    </button>
-                    <button class="btn-danger btn-small" onclick="deleteAdminMessage('${msg.id}')">删除</button>
-                    <button class="btn-secondary btn-small" onclick="blacklistIP('${msg.ip}')">拉黑IP</button>
-                </div>
-                <div id="replyForm-${msg.id}" class="reply-form" style="display: none;">
-                    <textarea placeholder="输入回复内容..." rows="3" id="replyInput-${msg.id}"></textarea>
-                    <div class="reply-form-actions">
-                        <button class="btn-primary btn-small" onclick="submitReply('${msg.id}')">提交回复</button>
-                        <button class="btn-secondary btn-small" onclick="hideReplyForm('${msg.id}')">取消</button>
-                    </div>
-                </div>
-            </div>
-        `;
+    tree.forEach(msg => {
+        html += renderAdminMessageItem(msg, 0);
     });
     
     container.innerHTML = html;
+}
+
+// 组装留言树
+function buildAdminMessageTree(messages) {
+    const map = {};
+    const roots = [];
+    
+    messages.forEach(msg => {
+        msg.replies = [];
+        map[msg.id] = msg;
+    });
+    
+    messages.forEach(msg => {
+        if (msg.parentId && map[msg.parentId]) {
+            map[msg.parentId].replies.push(msg);
+        } else if (!msg.parentId) {
+            roots.push(msg);
+        }
+    });
+    
+    roots.sort((a, b) => b.time - a.time);
+    function sortReplies(msg) {
+        msg.replies.sort((a, b) => a.time - b.time);
+        msg.replies.forEach(sortReplies);
+    }
+    roots.forEach(sortReplies);
+    
+    return roots;
+}
+
+// 渲染单条管理端留言（递归）
+function renderAdminMessageItem(msg, depth) {
+    const date = new Date(msg.time);
+    const timeStr = date.toLocaleString('zh-CN');
+    const isAdmin = msg.isAdmin === true;
+    const nameLabel = isAdmin ? '📢 站长' : escapeHtml(msg.name);
+    const nameClass = isAdmin ? 'admin-message-name admin-reply-name' : 'admin-message-name';
+    
+    // 缩进样式
+    const marginLeft = depth > 0 ? 'margin-left: 1.5rem; padding-left: 1rem; border-left: 2px solid var(--border-color);' : '';
+    
+    // 向后兼容旧的 reply 字段
+    let oldReplyHtml = '';
+    if (msg.reply && msg.reply.content && (!msg.replies || msg.replies.length === 0)) {
+        const replyDate = new Date(msg.reply.time);
+        const replyTimeStr = replyDate.toLocaleString('zh-CN');
+        oldReplyHtml = `
+            <div class="admin-reply-box">
+                <div class="reply-label">📢 你的回复（旧）</div>
+                <div class="reply-content">${escapeHtml(msg.reply.content)}</div>
+                <div class="reply-time">${replyTimeStr}</div>
+            </div>
+        `;
+    }
+    
+    // 递归渲染子回复
+    let repliesHtml = '';
+    if (msg.replies && msg.replies.length > 0) {
+        msg.replies.forEach(reply => {
+            repliesHtml += renderAdminMessageItem(reply, depth + 1);
+        });
+    }
+    
+    return `
+        <div class="admin-message-item" data-id="${msg.id}" style="${marginLeft}">
+            <div class="admin-message-header">
+                <div class="admin-message-info">
+                    <span class="${nameClass}">${nameLabel}</span>
+                    <span class="admin-message-ip">IP: ${msg.ip || 'unknown'}</span>
+                </div>
+                <span class="admin-message-time">${timeStr}</span>
+            </div>
+            <div class="admin-message-content">${escapeHtml(msg.content)}</div>
+            ${oldReplyHtml}
+            <div class="admin-message-actions">
+                <button class="btn-primary btn-small" onclick="showReplyForm('${msg.id}')">回复</button>
+                <button class="btn-danger btn-small" onclick="deleteAdminMessage('${msg.id}')">删除</button>
+                ${!isAdmin ? `<button class="btn-secondary btn-small" onclick="blacklistIP('${msg.ip}')">拉黑IP</button>` : ''}
+            </div>
+            <div id="replyForm-${msg.id}" class="reply-form" style="display: none;">
+                <textarea placeholder="输入回复内容..." rows="3" id="replyInput-${msg.id}"></textarea>
+                <div class="reply-form-actions">
+                    <button class="btn-primary btn-small" onclick="submitReply('${msg.id}')">提交回复</button>
+                    <button class="btn-secondary btn-small" onclick="hideReplyForm('${msg.id}')">取消</button>
+                </div>
+            </div>
+            ${repliesHtml}
+        </div>
+    `;
 }
 
 // 显示回复表单

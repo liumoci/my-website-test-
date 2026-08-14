@@ -263,13 +263,14 @@ function addFloatingGuestbookBtn() {
     btn.innerHTML = '💬';
     btn.title = '留言板';
     btn.style.position = 'fixed';
-    btn.style.bottom = '2rem';
-    btn.style.right = '2rem';
+    btn.style.top = '50%';
+    btn.style.right = '1.5rem';
+    btn.style.transform = 'translateY(-50%)';
     btn.style.zIndex = '9999';
     
     let isDragging = false;
     let hasMoved = false;
-    let startX, startY;
+    let startX, startY, startLeft, startTop;
     let currentX = 0, currentY = 0;
     
     // 点击跳转
@@ -287,6 +288,16 @@ function addFloatingGuestbookBtn() {
         hasMoved = false;
         startX = clientX;
         startY = clientY;
+        
+        // 把当前位置转换成固定的 left/top，避免 transform 冲突
+        const rect = btn.getBoundingClientRect();
+        btn.style.transform = 'none';
+        btn.style.top = rect.top + 'px';
+        btn.style.left = rect.left + 'px';
+        btn.style.right = 'auto';
+        
+        startLeft = rect.left;
+        startTop = rect.top;
         btn.style.cursor = 'grabbing';
     }
     
@@ -302,7 +313,8 @@ function addFloatingGuestbookBtn() {
         }
         
         if (hasMoved) {
-            btn.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+            btn.style.left = (startLeft + dx) + 'px';
+            btn.style.top = (startTop + dy) + 'px';
         }
     }
     
@@ -311,16 +323,7 @@ function addFloatingGuestbookBtn() {
         if (!isDragging) return;
         isDragging = false;
         btn.style.cursor = 'grab';
-        
-        if (hasMoved) {
-            // 把 transform 转换成固定位置
-            const rect = btn.getBoundingClientRect();
-            btn.style.transform = 'none';
-            btn.style.left = rect.left + 'px';
-            btn.style.top = rect.top + 'px';
-            btn.style.right = 'auto';
-            btn.style.bottom = 'auto';
-        }
+        // 拖拽后位置已经是固定的 left/top，不需要额外处理
     }
     
     // 鼠标事件

@@ -67,12 +67,45 @@ async function loadMessages() {
     }
 }
 
+// 把扁平留言列表组装成树
+function buildMessageTree(messages) {
+    const map = {};
+    const roots = [];
+    
+    // 先把所有留言放入 map
+    messages.forEach(msg => {
+        msg.replies = [];
+        map[msg.id] = msg;
+    });
+    
+    // 组装树
+    messages.forEach(msg => {
+        if (msg.parentId && map[msg.parentId]) {
+            map[msg.parentId].replies.push(msg);
+        } else if (!msg.parentId) {
+            roots.push(msg);
+        }
+    });
+    
+    // 按时间排序（顶级倒序，回复正序）
+    roots.sort((a, b) => b.time - a.time);
+    function sortReplies(msg) {
+        msg.replies.sort((a, b) => a.time - b.time);
+        msg.replies.forEach(sortReplies);
+    }
+    roots.forEach(sortReplies);
+    
+    return roots;
+}
+
 // 渲染留言列表
 function renderMessages(messages) {
     const list = document.getElementById('messagesList');
     const countEl = document.getElementById('messageCount');
     
-    countEl.textContent = messages.length;
+    // 统计顶级留言数量
+    const topLevel = messages.filter(m => !m.parentId);
+    countEl.textContent = topLevel.length;
     
     if (messages.length === 0) {
         list.innerHTML = 
@@ -80,39 +113,131 @@ function renderMessages(messages) {
         return;
     }
     
+    const tree = buildMessageTree(messages);
     list.innerHTML = '';
     
-    messages.forEach(msg => {
-        const item = document.createElement('div');
-        item.className = 'message-item';
-        
-        const date = new Date(msg.time);
-        const timeStr = date.toLocaleString('zh-CN');
-        
-        let replyHtml = '';
-        if (msg.reply && msg.reply.content) {
-            const replyDate = new Date(msg.reply.time);
-            const replyTimeStr = replyDate.toLocaleString('zh-CN');
-            replyHtml = `
-                <div class="message-reply">
-                    <div class="reply-label">📢 站长回复</div>
-                    <div class="reply-content">${escapeHtml(msg.reply.content)}</div>
-                    <div class="reply-time">${replyTimeStr}</div>
-                </div>
-            `;
-        }
-        
-        item.innerHTML = `
-            <div class="message-header">
-                <span class="message-name">${escapeHtml(msg.name)}</span>
-                <span class="message-time">${timeStr}</span>
-            </div>
-            <div class="message-content">${escapeHtml(msg.content)}</div>
-            ${replyHtml}
-        `;
-        
-        list.appendChild(item);
+    tree.forEach(msg => {
+        list.appendChild(renderMessageItem(msg, 0));
     });
+}
+
+// 渲染单条留言（递归）
+function renderMessageItem(msg, depth) {
+    const item = document.createElement('div');
+    item.className = 'message-item';
+    item.dataset.id = msg.id;
+    
+    const date = new Date(msg.time);
+    const timeStr = date.toLocaleString('zh-CN');
+    
+    // 站长回复特殊样式
+    const isAdmin = msg.isAdmin === true;
+    const nameLabel = isAdmin ? '📢 站长' : escapeHtml(msg.name);
+    const nameClass = isAdmin ? 'message-name admin-name' : 'message-name';
+    
+    // 回复按钮（最多嵌套5层）
+    let replyBtnHtml = '';
+    if (depth < 5) {
+        replyBtnHtml = `<button class="reply-btn" onclick="toggleReplyForm('${msg.id}')">💬 回复</button>`;
+    }
+    
+    // 回复表单容器
+    const replyFormHtml = `
+        <div id="replyForm-${msg.id}" class="reply-form-container" style="display:none; margin-top: 0.75rem;">
+            <input type="text" id="replyName-${msg.id}" placeholder="你的昵称" maxlength="50" 
+                style="width:100%;padding:0.5rem 0.75rem;margin-bottom:0.5rem;border:1px solid rgba(255,255,255,0.3);border-radius:0.5rem;background:rgba(255,255,255,0.2);color:white;font-size:0.85rem;box-sizing:border-box;outline:none;">
+            <textarea id="replyContent-${msg.id}" placeholder="回复内容..." maxlength="500"
+                style="width:100%;padding:0.5rem 0.75rem;margin-bottom:0.5rem;border:1px solid rgba(255,255,255,0.3);border-radius:0.5rem;background:rgba(255,255,255,0.2);color:white;font-size:0.85rem;box-sizing:border-box;outline:none;resize:none;min-height:60px;"></textarea>
+            <div style="display:flex;gap:0.5rem;">
+                <button onclick="submitReply('${msg.id}')" 
+                    style="flex:1;padding:0.4rem 0.75rem;border:none;border-radius:0.5rem;background:linear-gradient(135deg,rgba(102,126,234,0.85),rgba(118,75,162,0.85));color:white;font-size:0.85rem;cursor:pointer;">提交回复</button>
+                <button onclick="toggleReplyForm('${msg.id}')"
+                    style="padding:0.4rem 0.75rem;border:1px solid rgba(255,255,255,0.3);border-radius:0.5rem;background:rgba(0,0,0,0.2);color:white;font-size:0.85rem;cursor:pointer;">取消</button>
+            </div>
+        </div>
+    `;
+    
+    // 递归渲染子回复
+    let repliesHtml = '';
+    if (msg.replies && msg.replies.length > 0) {
+        repliesHtml = '<div class="message-replies" style="margin-left: 1rem; margin-top: 0.75rem; padding-left: 0.75rem; border-left: 2px solid rgba(255,255,255,0.2);">';
+        msg.replies.forEach(reply => {
+            const replyEl = renderMessageItem(reply, depth + 1);
+            repliesHtml += replyEl.outerHTML;
+        });
+        repliesHtml += '</div>';
+    }
+    
+    // 向后兼容旧的 reply 字段
+    let oldReplyHtml = '';
+    if (msg.reply && msg.reply.content && (!msg.replies || msg.replies.length === 0)) {
+        const replyDate = new Date(msg.reply.time);
+        const replyTimeStr = replyDate.toLocaleString('zh-CN');
+        oldReplyHtml = `
+            <div class="message-reply" style="margin-top:0.75rem;padding:0.75rem;border-radius:0.5rem;background:rgba(118,75,162,0.15);border-left:3px solid rgba(118,75,162,0.6);">
+                <div style="font-weight:600;color:#c4b5fd;font-size:0.85rem;">📢 站长回复</div>
+                <div style="color:rgba(255,255,255,0.9);margin-top:0.25rem;font-size:0.9rem;">${escapeHtml(msg.reply.content)}</div>
+                <div style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin-top:0.25rem;">${replyTimeStr}</div>
+            </div>
+        `;
+    }
+    
+    item.innerHTML = `
+        <div class="message-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+            <span class="${nameClass}" style="font-weight:600;color:${isAdmin ? '#c4b5fd' : 'white'};">${nameLabel}</span>
+            <span class="message-time" style="color:rgba(255,255,255,0.5);font-size:0.8rem;">${timeStr}</span>
+        </div>
+        <div class="message-content" style="color:rgba(255,255,255,0.9);line-height:1.6;font-size:0.95rem;">${escapeHtml(msg.content)}</div>
+        <div style="margin-top:0.5rem;">${replyBtnHtml}</div>
+        ${replyFormHtml}
+        ${oldReplyHtml}
+        ${repliesHtml}
+    `;
+    
+    return item;
+}
+
+// 切换回复表单显示
+function toggleReplyForm(msgId) {
+    const form = document.getElementById('replyForm-' + msgId);
+    if (form) {
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// 提交回复
+async function submitReply(parentId) {
+    const nameInput = document.getElementById('replyName-' + parentId);
+    const contentInput = document.getElementById('replyContent-' + parentId);
+    const name = nameInput.value.trim();
+    const content = contentInput.value.trim();
+    
+    if (!name || !content) {
+        alert('请填写昵称和回复内容');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, content, parentId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            toggleReplyForm(parentId);
+            loadMessages();
+        } else {
+            alert(data.message || '回复失败');
+        }
+    } catch (err) {
+        alert('网络错误');
+        console.error(err);
+    }
 }
 
 // 提交留言
