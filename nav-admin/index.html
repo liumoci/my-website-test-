@@ -21,12 +21,91 @@
     <main class="container">
         <div id="statusMsg" class="status-msg"></div>
         
-        <div class="categories-container" id="categoriesContainer">
-            <!-- 分类和链接动态生成 -->
+        <!-- 标签页 -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="links">🔗 链接管理</button>
+            <button class="tab-btn" data-tab="cards">🃏 卡片管理</button>
+            <button class="tab-btn" data-tab="background">🖼️ 背景设置</button>
         </div>
         
-        <div class="add-category-section">
-            <button id="addCategoryBtn" class="btn-secondary btn-block">+ 添加分类</button>
+        <!-- 链接管理标签页 -->
+        <div id="tab-links" class="tab-content active">
+            <div class="categories-container" id="categoriesContainer">
+                <!-- 分类和链接动态生成 -->
+            </div>
+            
+            <div class="add-category-section">
+                <button id="addCategoryBtn" class="btn-secondary btn-block">+ 添加分类</button>
+            </div>
+        </div>
+        
+        <!-- 卡片管理标签页 -->
+        <div id="tab-cards" class="tab-content">
+            <div class="cards-manager">
+                <p class="tab-desc">管理首页的入口卡片，可以添加、编辑、删除和排序</p>
+                <div class="cards-list" id="cardsList">
+                    <!-- 卡片列表动态生成 -->
+                </div>
+                <div class="add-card-section">
+                    <button id="addCardBtn" class="btn-secondary btn-block">+ 添加卡片</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 背景设置标签页 -->
+        <div id="tab-background" class="tab-content">
+            <div class="background-manager">
+                <p class="tab-desc">设置首页背景，可以是纯色或图片</p>
+                
+                <div class="form-group">
+                    <label>背景类型</label>
+                    <div class="bg-type-selector">
+                        <label class="bg-type-option">
+                            <input type="radio" name="bgType" value="color" checked>
+                            <span>纯色背景</span>
+                        </label>
+                        <label class="bg-type-option">
+                            <input type="radio" name="bgType" value="image">
+                            <span>图片背景</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="bgColorSection" class="form-group">
+                    <label>背景颜色</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="bgColorPicker" value="#ffffff">
+                        <input type="text" id="bgColorText" placeholder="#ffffff" class="color-text-input">
+                    </div>
+                    <p class="hint">留空使用默认主题色</p>
+                </div>
+                
+                <div id="bgImageSection" class="form-group" style="display: none;">
+                    <label>背景图片</label>
+                    <div id="bgDropZone" class="drop-zone">
+                        <div class="drop-zone-content">
+                            <div class="drop-zone-icon">📁</div>
+                            <p>拖拽图片到此处，或</p>
+                            <p class="drop-zone-hint">点击选择文件</p>
+                        </div>
+                        <input type="file" id="bgFileInput" accept="image/*" style="display: none;">
+                    </div>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label>或输入图片 URL</label>
+                        <input type="url" id="bgImageUrl" placeholder="https://example.com/bg.jpg">
+                    </div>
+                    <p class="hint">支持 JPG/PNG/GIF，建议小于 500KB（会转成 base64 存储）</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>背景预览</label>
+                    <div id="bgPreview" class="bg-preview">
+                        <div class="bg-preview-content">
+                            <span>预览效果</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -66,6 +145,35 @@
                 </div>
                 <div class="modal-actions">
                     <button type="button" id="cancelCategoryBtn" class="btn-secondary">取消</button>
+                    <button type="submit" class="btn-primary">确定</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑卡片弹窗 -->
+    <div id="cardModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 id="cardModalTitle">编辑卡片</h2>
+            <form id="cardForm">
+                <div class="form-group">
+                    <label>标题</label>
+                    <input type="text" id="cardTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <input type="text" id="cardDesc">
+                </div>
+                <div class="form-group">
+                    <label>图标（emoji）</label>
+                    <input type="text" id="cardIcon" placeholder="👤">
+                </div>
+                <div class="form-group">
+                    <label>链接地址</label>
+                    <input type="text" id="cardUrl" required placeholder="/about/ 或 https://...">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelCardBtn" class="btn-secondary">取消</button>
                     <button type="submit" class="btn-primary">确定</button>
                 </div>
             </form>

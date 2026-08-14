@@ -37,7 +37,7 @@ export async function onRequestPost(context) {
     });
     
     // 设置 cookie
-    const cookie = `admin_session=${sessionToken}; Path=/admin; Max-Age=${Math.floor(expiresIn / 1000)}; HttpOnly; SameSite=Lax`;
+    const cookie = `admin_session=${sessionToken}; Path=/; Max-Age=${Math.floor(expiresIn / 1000)}; HttpOnly; SameSite=Lax`;
     
     return jsonResponse({ success: true, message: '登录成功' }, 200, {
       'Set-Cookie': cookie

@@ -7,7 +7,12 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 </head>
-<body>
+<body id="pageBody">
+    <!-- 页面加载动画 -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-spinner"></div>
+    </div>
+
     <header>
         <nav class="navbar">
             <div class="logo">
@@ -29,29 +34,11 @@
             <p>记录生活，分享技术</p>
         </section>
 
-        <section class="nav-cards">
+        <section class="nav-cards" id="navCardsContainer">
+            <!-- 卡片从 API 动态加载 -->
             <div class="card">
                 <a href="/about/">
-                    <h2>个人主页</h2>
-                    <p>了解更多关于我</p>
-                </a>
-            </div>
-            <div class="card">
-                <a href="/blog/">
-                    <h2>博客</h2>
-                    <p>阅读我的文章</p>
-                </a>
-            </div>
-            <div class="card">
-                <a href="/drive/">
-                    <h2>云盘</h2>
-                    <p>文件分享与存储</p>
-                </a>
-            </div>
-            <div class="card">
-                <a href="/admin/">
-                    <h2>管理面板</h2>
-                    <p>网站后台管理</p>
+                    <h2>加载中...</h2>
                 </a>
             </div>
         </section>

@@ -1,0 +1,339 @@
+/* ===== 留言箱页面（图片样式） ===== */
+
+/* 页面整体 - 覆盖全局样式 */
+body.guestbook-body {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+    background: none !important;
+    background-color: transparent !important;
+}
+
+/* 背景图 */
+.guestbook-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
+    background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1920&q=80'), linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    z-index: -2;
+}
+
+.guestbook-bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.25) !important;
+    z-index: -1;
+}
+
+/* 主容器 */
+.guestbook-main {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.guestbook-container {
+    display: flex;
+    gap: 2rem;
+    max-width: 1200px;
+    width: 100%;
+    align-items: stretch;
+}
+
+/* 左右布局 */
+.guestbook-left {
+    flex: 0 0 350px;
+    display: flex;
+    align-items: center;
+}
+
+.guestbook-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+/* 毛玻璃卡片 */
+.glass-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 1.5rem !important;
+    padding: 2rem !important;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    color: white !important;
+}
+
+.glass-title {
+    color: white !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.glass-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.glass-header .glass-title {
+    margin-bottom: 0 !important;
+}
+
+/* 留言数量徽章 */
+.message-count-badge {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: white !important;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* 表单样式 - 覆盖全局 */
+.guestbook-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.guestbook-form .form-group {
+    margin-bottom: 0 !important;
+}
+
+.guestbook-form input,
+.guestbook-form textarea {
+    width: 100% !important;
+    padding: 0.875rem 1rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 0.75rem !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    font-size: 0.95rem !important;
+    font-family: inherit !important;
+    transition: all 0.3s ease !important;
+    box-sizing: border-box !important;
+}
+
+.guestbook-form input::placeholder,
+.guestbook-form textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.guestbook-form input:focus,
+.guestbook-form textarea:focus {
+    outline: none !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+}
+
+.guestbook-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* 按钮组 - 覆盖全局 */
+.form-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.btn-glass {
+    flex: 1;
+    padding: 0.75rem 1.5rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 0.75rem !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+    font-family: inherit !important;
+}
+
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-glass:active {
+    transform: translateY(0);
+}
+
+.btn-primary-glass {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85)) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.btn-primary-glass:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95)) !important;
+}
+
+/* 留言列表滚动区域 */
+.messages-scroll {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* 自定义滚动条 */
+.messages-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.messages-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.messages-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* 留言项 */
+.message-item {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 1rem !important;
+    padding: 1rem 1.25rem !important;
+    transition: all 0.3s ease;
+    color: white !important;
+}
+
+.message-item:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: translateX(4px);
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.message-name {
+    font-weight: 600;
+    color: white !important;
+    font-size: 1rem;
+}
+
+.message-time {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.message-content {
+    color: rgba(255, 255, 255, 0.9) !important;
+    line-height: 1.6;
+    word-wrap: break-word;
+    font-size: 0.95rem;
+}
+
+/* 站长回复 */
+.message-reply {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3)) !important;
+    border-left: 3px solid rgba(255, 255, 255, 0.6);
+    border-radius: 0 0.75rem 0.75rem 0;
+}
+
+.reply-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white !important;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.reply-content {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9) !important;
+    line-height: 1.5;
+}
+
+.reply-time {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin-top: 0.5rem;
+    text-align: right;
+}
+
+/* 表单消息 */
+.form-msg {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.form-msg.success {
+    color: #4ade80 !important;
+}
+
+.form-msg.error {
+    color: #f87171 !important;
+}
+
+/* 移动端适配 */
+@media (max-width: 900px) {
+    .guestbook-container {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .guestbook-left,
+    .guestbook-right {
+        flex: none;
+        width: 100%;
+    }
+    
+    .messages-scroll {
+        max-height: 400px;
+    }
+}
+
+@media (max-width: 480px) {
+    .guestbook-main {
+        padding: 1rem;
+    }
+    
+    .glass-card {
+        padding: 1.5rem !important;
+    }
+    
+    .glass-title {
+        font-size: 1.25rem !important;
+    }
+}

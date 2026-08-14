@@ -8,6 +8,11 @@
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
 </head>
 <body>
+    <!-- 页面加载动画 -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-spinner"></div>
+    </div>
+    
     <!-- 侧边栏 -->
     <aside class="sidebar">
         <div class="sidebar-header">
@@ -24,8 +29,17 @@
                 <li><a href="#posts" class="nav-item" data-page="posts">
                     <span class="nav-icon">📝</span> 文章管理
                 </a></li>
+                <li><a href="#profile" class="nav-item" data-page="profile">
+                    <span class="nav-icon">👤</span> 个人主页
+                </a></li>
                 <li><a href="#stats" class="nav-item" data-page="stats">
                     <span class="nav-icon">📈</span> 访问统计
+                </a></li>
+                <li><a href="#nav" class="nav-item" data-page="nav">
+                    <span class="nav-icon">🔗</span> 导航管理
+                </a></li>
+                <li><a href="#messages" class="nav-item" data-page="messages">
+                    <span class="nav-icon">💬</span> 留言管理
                 </a></li>
                 <li><a href="#settings" class="nav-item" data-page="settings">
                     <span class="nav-icon">⚙️</span> 系统设置
@@ -177,24 +191,304 @@
                 </div>
             </section>
 
+            <!-- 个人主页管理页面 -->
+            <section id="page-profile" class="page-section">
+                <div class="panel">
+                    <h2>基本信息</h2>
+                    <div class="profile-edit-form">
+                        <div class="form-group">
+                            <label>头像</label>
+                            <div class="avatar-upload-area">
+                                <div class="avatar-preview" id="avatarPreview">
+                                    <span style="color: var(--text-secondary);">暂无头像</span>
+                                </div>
+                                <div class="avatar-actions">
+                                    <button type="button" id="uploadAvatarBtn" class="btn-secondary btn-small">上传头像</button>
+                                    <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
+                                    <button type="button" id="removeAvatarBtn" class="btn-danger btn-small">移除</button>
+                                </div>
+                                <p class="hint">建议正方形图片，大小不超过 200KB</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>昵称</label>
+                            <input type="text" id="profileName" placeholder="你的名字">
+                        </div>
+                        <div class="form-group">
+                            <label>个人简介</label>
+                            <textarea id="profileBio" rows="4" placeholder="介绍一下你自己"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2>技能标签</h2>
+                    <div class="skills-editor">
+                        <div class="skills-list" id="skillsList">
+                            <!-- 技能标签动态生成 -->
+                        </div>
+                        <div class="skill-add">
+                            <input type="text" id="newSkillInput" placeholder="添加技能">
+                            <button type="button" id="addSkillBtn" class="btn-secondary btn-small">添加</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2>项目展示</h2>
+                    <div class="projects-editor">
+                        <div class="projects-list" id="projectsList">
+                            <!-- 项目列表动态生成 -->
+                        </div>
+                        <button type="button" id="addProjectBtn" class="btn-secondary btn-block">+ 添加项目</button>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2>联系方式</h2>
+                    <div class="contact-edit-form">
+                        <div class="form-group">
+                            <label>邮箱</label>
+                            <input type="email" id="contactEmail" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>GitHub</label>
+                            <input type="text" id="contactGithub" placeholder="GitHub 用户名">
+                        </div>
+                        <div class="form-group">
+                            <label>Twitter</label>
+                            <input type="text" id="contactTwitter" placeholder="Twitter 用户名">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="save-bar">
+                    <button type="button" id="saveProfileBtn" class="btn-primary">保存个人主页设置</button>
+                    <span id="profileSaveMsg" class="save-msg"></span>
+                </div>
+            </section>
+
+            <!-- 导航管理页面 -->
+            <section id="page-nav" class="page-section">
+                <div class="nav-manager">
+                    <!-- 标签页 -->
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="nav-links">🔗 链接管理</button>
+                        <button class="tab-btn" data-tab="nav-cards">🃏 卡片管理</button>
+                        <button class="tab-btn" data-tab="nav-bg">🖼️ 背景设置</button>
+                    </div>
+                    
+                    <!-- 链接管理标签页 -->
+                    <div id="tab-nav-links" class="tab-content active">
+                        <div class="categories-container" id="navCategoriesContainer">
+                            <!-- 分类和链接动态生成 -->
+                        </div>
+                        <div class="add-category-section">
+                            <button id="addNavCategoryBtn" class="btn-secondary btn-block">+ 添加分类</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 卡片管理标签页 -->
+                    <div id="tab-nav-cards" class="tab-content">
+                        <div class="cards-manager">
+                            <p class="tab-desc">管理首页的入口卡片，可以添加、编辑、删除</p>
+                            <div class="cards-list" id="navCardsList">
+                                <!-- 卡片列表动态生成 -->
+                            </div>
+                            <div class="add-card-section">
+                                <button id="addNavCardBtn" class="btn-secondary btn-block">+ 添加卡片</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 背景设置标签页 -->
+                    <div id="tab-nav-bg" class="tab-content">
+                        <div class="background-manager">
+                            <p class="tab-desc">设置首页背景，可以是纯色或图片</p>
+                            
+                            <div class="form-group">
+                                <label>背景类型</label>
+                                <div class="bg-type-selector">
+                                    <label class="bg-type-option">
+                                        <input type="radio" name="navBgType" value="color" checked>
+                                        <span>纯色背景</span>
+                                    </label>
+                                    <label class="bg-type-option">
+                                        <input type="radio" name="navBgType" value="image">
+                                        <span>图片背景</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="navBgColorSection" class="form-group">
+                                <label>背景颜色</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="navBgColorPicker" value="#ffffff">
+                                    <input type="text" id="navBgColorText" placeholder="#ffffff" class="color-text-input">
+                                </div>
+                                <p class="hint">留空使用默认主题色</p>
+                            </div>
+                            
+                            <div id="navBgImageSection" class="form-group" style="display: none;">
+                                <label>背景图片</label>
+                                <div id="navBgDropZone" class="drop-zone">
+                                    <div class="drop-zone-content">
+                                        <div class="drop-zone-icon">📁</div>
+                                        <p>拖拽图片到此处，或</p>
+                                        <p class="drop-zone-hint">点击选择文件</p>
+                                    </div>
+                                    <input type="file" id="navBgFileInput" accept="image/*" style="display: none;">
+                                </div>
+                                <div class="form-group" style="margin-top: 1rem;">
+                                    <label>或输入图片 URL</label>
+                                    <input type="url" id="navBgImageUrl" placeholder="https://example.com/bg.jpg">
+                                </div>
+                                <p class="hint">支持 JPG/PNG/GIF，建议小于 500KB</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>背景预览</label>
+                                <div id="navBgPreview" class="bg-preview">
+                                    <div class="bg-preview-content">
+                                        <span>预览效果</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 保存栏 -->
+                    <div class="save-bar">
+                        <button type="button" id="saveNavBtn" class="btn-primary">保存导航设置</button>
+                        <span id="navSaveMsg" class="save-msg"></span>
+                    </div>
+                </div>
+            </section>
+
             <!-- 访问统计页面 -->
             <section id="page-stats" class="page-section">
-                <div class="panel">
-                    <h2>访问统计</h2>
-                    <div class="stats-placeholder">
-                        <p>📊 接入 Cloudflare Analytics 后显示详细数据</p>
-                        <ul class="stats-features">
-                            <li>✓ 实时访问量</li>
-                            <li>✓ 访客地区分布</li>
-                            <li>✓ 热门页面排行</li>
-                            <li>✓ 流量来源分析</li>
-                        </ul>
+                <div class="stats-header">
+                    <h2>访问统计（最近 7 天）</h2>
+                    <button id="refreshStatsBtn" class="btn-secondary btn-small">刷新数据</button>
+                </div>
+                
+                <div id="statsLoading" class="stats-loading">
+                    <div class="loader-spinner"></div>
+                    <p>加载中...</p>
+                </div>
+                
+                <div id="statsError" class="stats-error" style="display: none;">
+                    <p id="statsErrorMsg">加载失败</p>
+                </div>
+                
+                <div id="statsContent" style="display: none;">
+                    <!-- 概览卡片 -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👁️</div>
+                            <div class="stat-info">
+                                <h3>总请求数</h3>
+                                <p class="stat-number" id="statRequests">--</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">👤</div>
+                            <div class="stat-info">
+                                <h3>独立访客</h3>
+                                <p class="stat-number" id="statUniques">--</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📄</div>
+                            <div class="stat-info">
+                                <h3>页面浏览</h3>
+                                <p class="stat-number" id="statPageViews">--</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💾</div>
+                            <div class="stat-info">
+                                <h3>总流量</h3>
+                                <p class="stat-number" id="statBytes">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 两列布局 -->
+                    <div class="stats-columns">
+                        <!-- 热门页面 -->
+                        <div class="panel">
+                            <h3>🔥 热门页面 TOP 10</h3>
+                            <div class="rank-list" id="topPagesList">
+                                <!-- 动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 国家分布 -->
+                        <div class="panel">
+                            <h3>🌍 访客地区 TOP 10</h3>
+                            <div class="rank-list" id="countriesList">
+                                <!-- 动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 流量来源 -->
+                    <div class="panel">
+                        <h3>🔗 流量来源 TOP 10</h3>
+                        <div class="rank-list" id="sourcesList">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 访问趋势 -->
+                    <div class="panel">
+                        <h3>📈 最近 7 天访问趋势</h3>
+                        <div class="trend-chart" id="trendChart">
+                            <!-- 动态生成 -->
+                        </div>
                     </div>
                 </div>
             </section>
 
             <!-- 系统设置页面 -->
             <section id="page-settings" class="page-section">
+                <div class="panel">
+                    <h2>网站设置</h2>
+                    <form class="settings-form" id="siteSettingsForm">
+                        <div class="form-group">
+                            <label>网站名称</label>
+                            <input type="text" id="siteNameInput" placeholder="My Site">
+                        </div>
+                        <button type="submit" class="btn-primary">保存网站设置</button>
+                        <span id="siteSettingsMsg" class="form-msg"></span>
+                    </form>
+                </div>
+                
+                <div class="panel">
+                    <h2>修改账号密码</h2>
+                    <form class="settings-form" id="passwordForm">
+                        <div class="form-group">
+                            <label>当前用户名</label>
+                            <input type="text" id="currentUsername" value="admin" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>新用户名（可选，留空则不修改）</label>
+                            <input type="text" id="newUsername" placeholder="留空则不修改">
+                        </div>
+                        <div class="form-group">
+                            <label>旧密码</label>
+                            <input type="password" id="oldPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label>新密码（至少6位）</label>
+                            <input type="password" id="newPassword" required>
+                        </div>
+                        <button type="submit" class="btn-primary">修改账号密码</button>
+                        <span id="passwordMsg" class="form-msg"></span>
+                    </form>
+                </div>
+                
                 <div class="panel">
                     <h2>重置密钥管理</h2>
                     <div class="reset-secret-box">
@@ -210,25 +504,93 @@
                         <p id="secretMsg" class="secret-msg"></p>
                     </div>
                 </div>
-                
-                <div class="panel">
-                    <h2>系统设置</h2>
-                    <form class="settings-form">
-                        <div class="form-group">
-                            <label>网站名称</label>
-                            <input type="text" value="My Site" disabled>
+            </section>
+
+            <!-- 留言管理页面 -->
+            <section id="page-messages" class="page-section">
+                <div class="messages-manager">
+                    <!-- 标签页 -->
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="msg-list">📨 留言列表</button>
+                        <button class="tab-btn" data-tab="msg-settings">⚙️ 留言设置</button>
+                        <button class="tab-btn" data-tab="msg-blacklist">🚫 黑名单</button>
+                    </div>
+
+                    <!-- 留言列表标签页 -->
+                    <div id="tab-msg-list" class="tab-content active">
+                        <div class="msg-list-header">
+                            <h2>全部留言</h2>
+                            <button id="refreshMessagesBtn" class="btn-secondary btn-small">刷新</button>
                         </div>
-                        <div class="form-group">
-                            <label>管理员账号</label>
-                            <input type="text" id="settingsUsername" value="admin" disabled>
+                        <div id="messagesAdminList" class="messages-admin-list">
+                            <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载中...</p>
                         </div>
-                        <div class="form-group">
-                            <label>修改密码</label>
-                            <input type="password" placeholder="新密码" disabled>
+                    </div>
+
+                    <!-- 留言设置标签页 -->
+                    <div id="tab-msg-settings" class="tab-content">
+                        <div class="panel">
+                            <h2>留言箱设置</h2>
+                            
+                            <div class="form-group">
+                                <label>背景颜色</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="msgBgColor" value="#ffffff">
+                                    <input type="text" id="msgBgColorText" placeholder="留空使用默认" class="color-text-input">
+                                </div>
+                                <p class="hint">留言箱页面背景颜色</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>卡片颜色</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="msgCardColor" value="#f9fafb">
+                                    <input type="text" id="msgCardColorText" placeholder="留空使用默认" class="color-text-input">
+                                </div>
+                                <p class="hint">留言卡片背景颜色</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>主题颜色</label>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="msgPrimaryColor" value="#3b82f6">
+                                    <input type="text" id="msgPrimaryColorText" placeholder="留空使用默认" class="color-text-input">
+                                </div>
+                                <p class="hint">主题色（按钮、链接等）</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label>留言频率限制（分钟）</label>
+                                <input type="number" id="msgRateLimit" value="1" min="0" max="60">
+                                <p class="hint">同一IP两次留言的最小间隔，0表示不限制</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="msgEnabled" checked>
+                                    <span>启用留言功能</span>
+                                </label>
+                            </div>
+
+                            <div class="form-actions">
+                                <button id="saveMsgSettingsBtn" class="btn-primary">保存设置</button>
+                                <span id="msgSettingsMsg" class="form-msg"></span>
+                            </div>
                         </div>
-                        <button type="button" class="btn-primary" disabled>保存设置</button>
-                    </form>
-                    <p class="notice">⚠️ 部分功能开发中</p>
+                    </div>
+
+                    <!-- 黑名单标签页 -->
+                    <div id="tab-msg-blacklist" class="tab-content">
+                        <div class="panel">
+                            <div class="blacklist-header">
+                                <h2>IP 黑名单</h2>
+                                <button id="addBlacklistBtn" class="btn-primary btn-small">添加IP</button>
+                            </div>
+                            <div id="blacklistContainer" class="blacklist-list">
+                                <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载中...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
