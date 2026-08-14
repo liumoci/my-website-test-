@@ -1,5 +1,5 @@
 // POST /api/drive-settings/verify - 验证提取密码，正确则返回跳转链接
-import { jsonResponse } from '../../messages/_lib.js';
+import { jsonResponse } from '../messages/_lib.js';
 import { getDriveSettings } from '../drive-settings.js';
 
 export async function onRequest(context) {

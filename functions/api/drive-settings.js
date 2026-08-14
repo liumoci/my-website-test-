@@ -1,6 +1,6 @@
 // GET /api/drive-settings - 获取网盘设置（公开，不含密码）
 // POST /api/drive-settings - 保存网盘设置（需管理员）
-import { verifyAdmin, jsonResponse } from '../messages/_lib.js';
+import { verifyAdmin, jsonResponse } from './messages/_lib.js';
 
 const DEFAULT_SETTINGS = {
   title: '我的云盘',
