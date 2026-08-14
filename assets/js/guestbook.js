@@ -78,6 +78,30 @@ function buildMessageTree(messages) {
         map[msg.id] = msg;
     });
     
+    // 处理旧格式的 reply 字段，转换成独立的回复项
+    messages.forEach(msg => {
+        if (msg.reply && msg.reply.content) {
+            // 检查是否已经有对应的新格式回复
+            const hasNewReply = messages.some(m => m.parentId === msg.id && m.isAdmin);
+            if (!hasNewReply) {
+                // 把旧 reply 转换成独立的回复项
+                const oldReply = {
+                    id: msg.id + '_old_reply',
+                    name: '站长',
+                    content: msg.reply.content,
+                    time: msg.reply.time,
+                    ip: 'admin',
+                    parentId: msg.id,
+                    isAdmin: true,
+                    reply: null,
+                    replies: []
+                };
+                map[oldReply.id] = oldReply;
+                messages.push(oldReply);
+            }
+        }
+    });
+    
     // 组装树
     messages.forEach(msg => {
         if (msg.parentId && map[msg.parentId]) {
@@ -138,7 +162,8 @@ function renderMessageItem(msg, depth) {
     // 回复按钮（最多嵌套5层）
     let replyBtnHtml = '';
     if (depth < 5) {
-        replyBtnHtml = `<button class="reply-btn" onclick="toggleReplyForm('${msg.id}')">💬 回复</button>`;
+        replyBtnHtml = `<button class="reply-btn" onclick="toggleReplyForm('${msg.id}')" 
+            style="margin-top:0.5rem;padding:0.3rem 0.75rem;border:1px solid rgba(255,255,255,0.4);border-radius:0.5rem;background:rgba(255,255,255,0.15);color:white;font-size:0.8rem;cursor:pointer;transition:all 0.2s;">💬 回复</button>`;
     }
     
     // 回复表单容器
@@ -168,20 +193,6 @@ function renderMessageItem(msg, depth) {
         repliesHtml += '</div>';
     }
     
-    // 向后兼容旧的 reply 字段
-    let oldReplyHtml = '';
-    if (msg.reply && msg.reply.content && (!msg.replies || msg.replies.length === 0)) {
-        const replyDate = new Date(msg.reply.time);
-        const replyTimeStr = replyDate.toLocaleString('zh-CN');
-        oldReplyHtml = `
-            <div class="message-reply" style="margin-top:0.75rem;padding:0.75rem;border-radius:0.5rem;background:rgba(118,75,162,0.15);border-left:3px solid rgba(118,75,162,0.6);">
-                <div style="font-weight:600;color:#c4b5fd;font-size:0.85rem;">📢 站长回复</div>
-                <div style="color:rgba(255,255,255,0.9);margin-top:0.25rem;font-size:0.9rem;">${escapeHtml(msg.reply.content)}</div>
-                <div style="color:rgba(255,255,255,0.5);font-size:0.75rem;margin-top:0.25rem;">${replyTimeStr}</div>
-            </div>
-        `;
-    }
-    
     item.innerHTML = `
         <div class="message-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
             <span class="${nameClass}" style="font-weight:600;color:${isAdmin ? '#c4b5fd' : 'white'};">${nameLabel}</span>
@@ -190,7 +201,6 @@ function renderMessageItem(msg, depth) {
         <div class="message-content" style="color:rgba(255,255,255,0.9);line-height:1.6;font-size:0.95rem;">${escapeHtml(msg.content)}</div>
         <div style="margin-top:0.5rem;">${replyBtnHtml}</div>
         ${replyFormHtml}
-        ${oldReplyHtml}
         ${repliesHtml}
     `;
     

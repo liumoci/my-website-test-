@@ -1438,6 +1438,28 @@ function buildAdminMessageTree(messages) {
         map[msg.id] = msg;
     });
     
+    // 处理旧格式的 reply 字段，转换成独立的回复项
+    messages.forEach(msg => {
+        if (msg.reply && msg.reply.content) {
+            const hasNewReply = messages.some(m => m.parentId === msg.id && m.isAdmin);
+            if (!hasNewReply) {
+                const oldReply = {
+                    id: msg.id + '_old_reply',
+                    name: '站长',
+                    content: msg.reply.content,
+                    time: msg.reply.time,
+                    ip: 'admin',
+                    parentId: msg.id,
+                    isAdmin: true,
+                    reply: null,
+                    replies: []
+                };
+                map[oldReply.id] = oldReply;
+                messages.push(oldReply);
+            }
+        }
+    });
+    
     messages.forEach(msg => {
         if (msg.parentId && map[msg.parentId]) {
             map[msg.parentId].replies.push(msg);
@@ -1467,20 +1489,6 @@ function renderAdminMessageItem(msg, depth) {
     // 缩进样式
     const marginLeft = depth > 0 ? 'margin-left: 1.5rem; padding-left: 1rem; border-left: 2px solid var(--border-color);' : '';
     
-    // 向后兼容旧的 reply 字段
-    let oldReplyHtml = '';
-    if (msg.reply && msg.reply.content && (!msg.replies || msg.replies.length === 0)) {
-        const replyDate = new Date(msg.reply.time);
-        const replyTimeStr = replyDate.toLocaleString('zh-CN');
-        oldReplyHtml = `
-            <div class="admin-reply-box">
-                <div class="reply-label">📢 你的回复（旧）</div>
-                <div class="reply-content">${escapeHtml(msg.reply.content)}</div>
-                <div class="reply-time">${replyTimeStr}</div>
-            </div>
-        `;
-    }
-    
     // 递归渲染子回复
     let repliesHtml = '';
     if (msg.replies && msg.replies.length > 0) {
@@ -1499,7 +1507,6 @@ function renderAdminMessageItem(msg, depth) {
                 <span class="admin-message-time">${timeStr}</span>
             </div>
             <div class="admin-message-content">${escapeHtml(msg.content)}</div>
-            ${oldReplyHtml}
             <div class="admin-message-actions">
                 <button class="btn-primary btn-small" onclick="showReplyForm('${msg.id}')">回复</button>
                 <button class="btn-danger btn-small" onclick="deleteAdminMessage('${msg.id}')">删除</button>
