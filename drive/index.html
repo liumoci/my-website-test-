@@ -6,6 +6,95 @@
     <title>云盘</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+    <style>
+        .drive-container {
+            max-width: 500px;
+            margin: 3rem auto;
+            padding: 2rem;
+        }
+        .drive-card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .drive-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: float 2s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .drive-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .drive-desc {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .drive-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .drive-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .drive-btn {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .drive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .drive-btn:active {
+            transform: translateY(0);
+        }
+        .drive-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .drive-error {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 0.75rem;
+            display: none;
+        }
+        .drive-disabled {
+            color: var(--text-secondary);
+            padding: 2rem;
+        }
+        .drive-loading {
+            color: var(--text-secondary);
+            padding: 2rem;
+        }
+    </style>
 </head>
 <body>
     <!-- 页面加载动画 -->
@@ -28,34 +117,128 @@
     </header>
 
     <main>
-        <section class="drive-header">
-            <h1>文件分享</h1>
-            <p>公开资源下载</p>
-        </section>
-
-        <section class="file-list">
-            <div class="file-item">
-                <span class="file-icon">📄</span>
-                <div class="file-info">
-                    <h3>示例文件.txt</h3>
-                    <p>大小：1 KB · 上传时间：2026-08-09</p>
-                </div>
-                <a href="#" class="download-btn" download>下载</a>
+        <div class="drive-container">
+            <div id="driveContent" class="drive-card">
+                <div class="drive-loading">加载中...</div>
             </div>
-
-            <!-- 更多文件复制上面的结构 -->
-        </section>
-
-        <section class="drive-notice">
-            <h2>说明</h2>
-            <p>当前为静态文件分享模式。如需完整云盘功能（上传、权限管理等），需后续接入后端服务。</p>
-        </section>
+        </div>
     </main>
 
-    <footer>
-        <p>&copy; 2026 My Site. Powered by Cloudflare Pages.</p>
-    </footer>
-
     <script src="../assets/js/main.js"></script>
+    <script>
+        let driveSettings = null;
+
+        async function loadDriveSettings() {
+            try {
+                const response = await fetch('/api/drive-settings');
+                const data = await response.json();
+                if (data.success) {
+                    driveSettings = data.data;
+                    renderDrivePage();
+                } else {
+                    showError('加载失败');
+                }
+            } catch (err) {
+                console.error(err);
+                showError('网络错误');
+            }
+        }
+
+        function renderDrivePage() {
+            const container = document.getElementById('driveContent');
+
+            if (!driveSettings.enabled) {
+                container.innerHTML = `
+                    <div class="drive-icon">🔒</div>
+                    <div class="drive-title">云盘未启用</div>
+                    <div class="drive-disabled">管理员暂未开放云盘访问</div>
+                `;
+                return;
+            }
+
+            if (driveSettings.requirePassword) {
+                container.innerHTML = `
+                    <div class="drive-icon">☁️</div>
+                    <div class="drive-title">${escapeHtml(driveSettings.title || '我的云盘')}</div>
+                    <div class="drive-desc">${escapeHtml(driveSettings.description || '请输入提取密码访问云盘')}</div>
+                    <input type="password" id="passwordInput" class="drive-input" placeholder="请输入提取密码" onkeydown="if(event.key==='Enter')verifyPassword()">
+                    <button class="drive-btn" onclick="verifyPassword()" id="verifyBtn">进入云盘</button>
+                    <div class="drive-error" id="errorMsg"></div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="drive-icon">☁️</div>
+                    <div class="drive-title">${escapeHtml(driveSettings.title || '我的云盘')}</div>
+                    <div class="drive-desc">${escapeHtml(driveSettings.description || '点击下方按钮进入云盘')}</div>
+                    <button class="drive-btn" onclick="goToDrive()">进入云盘</button>
+                `;
+            }
+        }
+
+        async function verifyPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const verifyBtn = document.getElementById('verifyBtn');
+
+            if (!password) {
+                errorMsg.textContent = '请输入提取密码';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = '验证中...';
+            errorMsg.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/drive-settings/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await response.json();
+
+                if (data.success && data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    errorMsg.textContent = data.message || '验证失败';
+                    errorMsg.style.display = 'block';
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = '进入云盘';
+                }
+            } catch (err) {
+                console.error(err);
+                errorMsg.textContent = '网络错误';
+                errorMsg.style.display = 'block';
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = '进入云盘';
+            }
+        }
+
+        async function goToDrive() {
+            try {
+                const response = await fetch('/api/drive-settings/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await response.json();
+                if (data.success && data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 页面加载完成后获取设置
+        document.addEventListener('DOMContentLoaded', loadDriveSettings);
+    </script>
 </body>
 </html>

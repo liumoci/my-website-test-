@@ -41,6 +41,9 @@
                 <li><a href="#messages" class="nav-item" data-page="messages">
                     <span class="nav-icon">💬</span> 留言管理
                 </a></li>
+                <li><a href="#drive" class="nav-item" data-page="drive">
+                    <span class="nav-icon">☁️</span> 网盘管理
+                </a></li>
                 <li><a href="#settings" class="nav-item" data-page="settings">
                     <span class="nav-icon">⚙️</span> 系统设置
                 </a></li>
@@ -617,6 +620,49 @@
                                 <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载中...</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 网盘管理页面 -->
+            <section id="page-drive" class="page-section">
+                <div class="panel">
+                    <h2>网盘管理</h2>
+                    <p class="hint">配置云盘跳转页面的标题、链接和提取密码</p>
+
+                    <div class="form-group">
+                        <label>页面标题</label>
+                        <input type="text" id="driveTitle" placeholder="例如：我的云盘" class="form-input">
+                        <p class="hint">显示在云盘页面的标题</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>页面描述</label>
+                        <input type="text" id="driveDesc" placeholder="例如：请输入提取密码访问云盘" class="form-input">
+                        <p class="hint">显示在标题下方的说明文字</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>跳转链接</label>
+                        <input type="url" id="driveUrl" placeholder="https://drive.example.com" class="form-input">
+                        <p class="hint">验证通过后跳转到的网盘地址</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>提取密码</label>
+                        <input type="text" id="drivePassword" placeholder="留空则无需密码" class="form-input">
+                        <p class="hint">访问云盘需要输入的密码，留空则任何人都可以直接进入</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="driveEnabled"> 启用云盘
+                        </label>
+                        <p class="hint">关闭后访客看到"云盘未启用"提示</p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button id="saveDriveSettingsBtn" class="btn-primary">保存设置</button>
                     </div>
                 </div>
             </section>

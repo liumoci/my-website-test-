@@ -54,6 +54,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 留言管理
     initMessagesManager();
     
+    // 网盘管理
+    initDriveManager();
+    
     // 导航管理
     initNavManager();
     
@@ -178,6 +181,7 @@ function initNavigation() {
         'nav': '导航管理',
         'stats': '访问统计',
         'messages': '留言管理',
+        'drive': '网盘管理',
         'settings': '系统设置'
     };
     
@@ -213,6 +217,11 @@ function initNavigation() {
             // 切换到统计页面时加载数据
             if (page === 'stats') {
                 loadAllStats();
+            }
+
+            // 切换到网盘管理页面时加载数据
+            if (page === 'drive') {
+                loadDriveSettings();
             }
         });
     });
@@ -1370,6 +1379,78 @@ function initMessagesManager() {
             });
         }
     });
+}
+
+// ===== 网盘管理 =====
+
+function initDriveManager() {
+    const saveBtn = document.getElementById('saveDriveSettingsBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveDriveSettings);
+    }
+}
+
+async function loadDriveSettings() {
+    try {
+        const response = await fetch('/api/drive-settings', {
+            credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('driveTitle').value = data.data.title || '';
+            document.getElementById('driveDesc').value = data.data.description || '';
+            document.getElementById('driveUrl').value = data.data.redirectUrl || '';
+            document.getElementById('drivePassword').value = data.data.extractPassword || '';
+            document.getElementById('driveEnabled').checked = data.data.enabled !== false;
+        }
+    } catch (err) {
+        console.error('加载网盘设置失败:', err);
+    }
+}
+
+async function saveDriveSettings() {
+    const title = document.getElementById('driveTitle').value;
+    const description = document.getElementById('driveDesc').value;
+    const redirectUrl = document.getElementById('driveUrl').value;
+    const extractPassword = document.getElementById('drivePassword').value;
+    const enabled = document.getElementById('driveEnabled').checked;
+
+    const saveBtn = document.getElementById('saveDriveSettingsBtn');
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = '保存中...';
+
+    try {
+        const response = await fetch('/api/drive-settings', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title,
+                description,
+                redirectUrl,
+                extractPassword,
+                enabled
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showMessage('网盘设置保存成功', 'success');
+        } else {
+            showMessage(data.message || '保存失败', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        showMessage('网络错误', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+    }
 }
 
 // 留言管理标签页切换
