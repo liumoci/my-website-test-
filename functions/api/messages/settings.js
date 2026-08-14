@@ -1,6 +1,6 @@
 // GET /api/messages/settings - 获取设置
 // POST /api/messages/settings - 保存设置
-import { verifyAdmin, getSettingsData, jsonResponse } from '../_lib.js';
+import { verifyAdmin, getSettingsData, jsonResponse } from './_lib.js';
 
 export async function onRequest(context) {
   const { request, env } = context;

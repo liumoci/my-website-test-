@@ -1,5 +1,5 @@
 // DELETE /api/messages/blacklist/:ip - 从黑名单移除
-import { verifyAdmin, getBlacklistData, jsonResponse } from '../../_lib.js';
+import { verifyAdmin, getBlacklistData, jsonResponse } from '../_lib.js';
 
 export async function onRequest(context) {
   const { request, env, params } = context;

@@ -1,6 +1,6 @@
 // GET /api/messages/blacklist - 获取黑名单
 // POST /api/messages/blacklist - 添加黑名单
-import { verifyAdmin, getBlacklistData, jsonResponse } from '../_lib.js';
+import { verifyAdmin, getBlacklistData, jsonResponse } from './_lib.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
