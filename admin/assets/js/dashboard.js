@@ -1339,6 +1339,9 @@ function initMessagesManager() {
         refreshBtn.addEventListener('click', loadAdminMessages);
     }
     
+    // 批量模式
+    initBatchMode();
+    
     // 保存设置按钮
     const saveSettingsBtn = document.getElementById('saveMsgSettingsBtn');
     if (saveSettingsBtn) {
@@ -1500,13 +1503,15 @@ function renderAdminMessageItem(msg, depth) {
     return `
         <div class="admin-message-item" data-id="${msg.id}" style="${marginLeft}">
             <div class="admin-message-header">
-                <div class="admin-message-info">
+                <div class="admin-message-info" style="display:flex;align-items:center;gap:0.5rem;">
+                    ${batchMode ? `<input type="checkbox" class="batch-checkbox" data-id="${msg.id}" data-ip="${msg.ip || ''}" data-isadmin="${isAdmin}" onchange="updateSelectedCount()">` : ''}
                     <span class="${nameClass}">${nameLabel}</span>
                     <span class="admin-message-ip">IP: ${msg.ip || 'unknown'}</span>
                 </div>
                 <span class="admin-message-time">${timeStr}</span>
             </div>
             <div class="admin-message-content">${escapeHtml(msg.content)}</div>
+            ${batchMode ? '' : `
             <div class="admin-message-actions">
                 <button class="btn-primary btn-small" onclick="showReplyForm('${msg.id}')">回复</button>
                 <button class="btn-danger btn-small" onclick="deleteAdminMessage('${msg.id}')">删除</button>
@@ -1518,7 +1523,7 @@ function renderAdminMessageItem(msg, depth) {
                     <button class="btn-primary btn-small" onclick="submitReply('${msg.id}')">提交回复</button>
                     <button class="btn-secondary btn-small" onclick="hideReplyForm('${msg.id}')">取消</button>
                 </div>
-            </div>
+            </div>`}
             ${repliesHtml}
         </div>
     `;
@@ -1627,6 +1632,166 @@ async function blacklistIP(ip) {
         console.error(err);
         alert('网络错误');
     }
+}
+
+// ===== 批量模式 =====
+let batchMode = false;
+
+function initBatchMode() {
+    const batchBtn = document.getElementById('batchModeBtn');
+    const exitBtn = document.getElementById('exitBatchBtn');
+    const selectAll = document.getElementById('selectAllCheckbox');
+    const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+    const batchBlacklistBtn = document.getElementById('batchBlacklistBtn');
+    
+    if (batchBtn) {
+        batchBtn.addEventListener('click', () => toggleBatchMode(true));
+    }
+    if (exitBtn) {
+        exitBtn.addEventListener('click', () => toggleBatchMode(false));
+    }
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.batch-checkbox:enabled');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateSelectedCount();
+        });
+    }
+    if (batchDeleteBtn) {
+        batchDeleteBtn.addEventListener('click', batchDelete);
+    }
+    if (batchBlacklistBtn) {
+        batchBlacklistBtn.addEventListener('click', batchBlacklist);
+    }
+}
+
+function toggleBatchMode(enable) {
+    batchMode = enable;
+    const toolbar = document.getElementById('batchToolbar');
+    const batchBtn = document.getElementById('batchModeBtn');
+    
+    if (toolbar) {
+        toolbar.style.display = enable ? 'flex' : 'none';
+    }
+    if (batchBtn) {
+        batchBtn.style.display = enable ? 'none' : 'inline-block';
+    }
+    
+    // 清除所有选中
+    const checkboxes = document.querySelectorAll('.batch-checkbox');
+    checkboxes.forEach(cb => cb.checked = false);
+    const selectAll = document.getElementById('selectAllCheckbox');
+    if (selectAll) selectAll.checked = false;
+    updateSelectedCount();
+    
+    // 重新渲染留言列表
+    loadAdminMessages();
+}
+
+function updateSelectedCount() {
+    const checkboxes = document.querySelectorAll('.batch-checkbox:checked');
+    const countEl = document.getElementById('selectedCount');
+    if (countEl) {
+        countEl.textContent = `已选 ${checkboxes.length} 条`;
+    }
+    
+    // 同步全选框状态
+    const allCheckboxes = document.querySelectorAll('.batch-checkbox:enabled');
+    const selectAll = document.getElementById('selectAllCheckbox');
+    if (selectAll && allCheckboxes.length > 0) {
+        selectAll.checked = checkboxes.length === allCheckboxes.length;
+    }
+}
+
+function getSelectedMessages() {
+    const checkboxes = document.querySelectorAll('.batch-checkbox:checked');
+    const selected = [];
+    checkboxes.forEach(cb => {
+        selected.push({
+            id: cb.dataset.id,
+            ip: cb.dataset.ip,
+            isAdmin: cb.dataset.isadmin === 'true'
+        });
+    });
+    return selected;
+}
+
+async function batchDelete() {
+    const selected = getSelectedMessages();
+    if (selected.length === 0) {
+        alert('请先选择要删除的留言');
+        return;
+    }
+    
+    if (!confirm(`确定要删除选中的 ${selected.length} 条留言吗？（包含所有子回复）`)) return;
+    
+    let success = 0;
+    let failed = 0;
+    
+    for (const msg of selected) {
+        try {
+            const response = await fetch(`/api/messages/${msg.id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (data.success) {
+                success++;
+            } else {
+                failed++;
+            }
+        } catch (err) {
+            failed++;
+        }
+    }
+    
+    alert(`批量删除完成：成功 ${success} 条，失败 ${failed} 条`);
+    loadAdminMessages();
+}
+
+async function batchBlacklist() {
+    const selected = getSelectedMessages();
+    if (selected.length === 0) {
+        alert('请先选择要拉黑的留言');
+        return;
+    }
+    
+    // 只对非站长留言且有有效IP的进行拉黑
+    const validIPs = [...new Set(selected.filter(m => !m.isAdmin && m.ip && m.ip !== 'unknown').map(m => m.ip))];
+    
+    if (validIPs.length === 0) {
+        alert('选中的留言中没有可拉黑的有效IP（站长回复不支持拉黑）');
+        return;
+    }
+    
+    if (!confirm(`确定要拉黑选中的 ${validIPs.length} 个IP吗？`)) return;
+    
+    let success = 0;
+    let failed = 0;
+    
+    for (const ip of validIPs) {
+        try {
+            const response = await fetch('/api/messages/blacklist', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ip, reason: '批量拉黑' })
+            });
+            const data = await response.json();
+            if (data.success) {
+                success++;
+            } else {
+                failed++;
+            }
+        } catch (err) {
+            failed++;
+        }
+    }
+    
+    alert(`批量拉黑完成：成功 ${success} 个IP，失败 ${failed} 个IP`);
+    loadBlacklist();
 }
 
 // ===== 留言设置 =====

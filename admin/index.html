@@ -520,7 +520,21 @@
                     <div id="tab-msg-list" class="tab-content active">
                         <div class="msg-list-header">
                             <h2>全部留言</h2>
-                            <button id="refreshMessagesBtn" class="btn-secondary btn-small">刷新</button>
+                            <div style="display:flex;gap:0.5rem;align-items:center;">
+                                <button id="batchModeBtn" class="btn-secondary btn-small">批量模式</button>
+                                <button id="refreshMessagesBtn" class="btn-secondary btn-small">刷新</button>
+                            </div>
+                        </div>
+                        <!-- 批量操作工具栏 -->
+                        <div id="batchToolbar" style="display:none;padding:0.75rem 1rem;background:var(--bg-secondary);border-radius:0.5rem;margin-bottom:1rem;align-items:center;gap:0.75rem;">
+                            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.9rem;">
+                                <input type="checkbox" id="selectAllCheckbox"> 全选
+                            </label>
+                            <span id="selectedCount" style="font-size:0.85rem;color:var(--text-secondary);">已选 0 条</span>
+                            <div style="flex:1;"></div>
+                            <button id="batchDeleteBtn" class="btn-danger btn-small">批量删除</button>
+                            <button id="batchBlacklistBtn" class="btn-secondary btn-small">批量拉黑IP</button>
+                            <button id="exitBatchBtn" class="btn-secondary btn-small">退出</button>
                         </div>
                         <div id="messagesAdminList" class="messages-admin-list">
                             <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">加载中...</p>
