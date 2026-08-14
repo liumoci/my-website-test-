@@ -261,135 +261,95 @@ function addFloatingGuestbookBtn() {
     btn.id = 'floatingGuestbookBtn';
     btn.className = 'floating-guestbook-btn';
     btn.innerHTML = '💬';
-    btn.title = '留言板（可拖动）';
+    btn.title = '留言板';
+    btn.style.position = 'fixed';
+    btn.style.bottom = '2rem';
+    btn.style.right = '2rem';
+    btn.style.zIndex = '9999';
+    
+    let isDragging = false;
+    let hasMoved = false;
+    let startX, startY;
+    let currentX = 0, currentY = 0;
     
     // 点击跳转
     btn.addEventListener('click', function(e) {
-        // 如果是拖动后的点击，不跳转
-        if (btn.dataset.dragged === 'true') {
-            btn.dataset.dragged = 'false';
+        if (hasMoved) {
+            hasMoved = false;
             return;
         }
         window.location.href = '/guestbook/';
     });
     
-    // 拖拽功能
-    let isDragging = false;
-    let startX, startY, startLeft, startTop;
-    
-    btn.addEventListener('mousedown', function(e) {
+    // 开始拖拽
+    function startDrag(clientX, clientY) {
         isDragging = true;
-        btn.dataset.dragged = 'false';
-        
-        // 计算初始位置
-        const rect = btn.getBoundingClientRect();
-        startX = e.clientX;
-        startY = e.clientY;
-        startLeft = rect.left;
-        startTop = rect.top;
-        
-        // 切换到 fixed 定位
-        btn.style.position = 'fixed';
-        btn.style.left = startLeft + 'px';
-        btn.style.top = startTop + 'px';
-        btn.style.right = 'auto';
-        btn.style.bottom = 'auto';
-        btn.style.zIndex = '10000';
+        hasMoved = false;
+        startX = clientX;
+        startY = clientY;
         btn.style.cursor = 'grabbing';
+    }
+    
+    // 拖拽中
+    function onDrag(clientX, clientY) {
+        if (!isDragging) return;
         
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        
+        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+            hasMoved = true;
+        }
+        
+        if (hasMoved) {
+            btn.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+        }
+    }
+    
+    // 结束拖拽
+    function endDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        btn.style.cursor = 'grab';
+        
+        if (hasMoved) {
+            // 把 transform 转换成固定位置
+            const rect = btn.getBoundingClientRect();
+            btn.style.transform = 'none';
+            btn.style.left = rect.left + 'px';
+            btn.style.top = rect.top + 'px';
+            btn.style.right = 'auto';
+            btn.style.bottom = 'auto';
+        }
+    }
+    
+    // 鼠标事件
+    btn.addEventListener('mousedown', function(e) {
+        startDrag(e.clientX, e.clientY);
         e.preventDefault();
     });
     
     document.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
-        
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        
-        // 移动距离超过 5px 才算拖动
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-            btn.dataset.dragged = 'true';
-        }
-        
-        let newLeft = startLeft + dx;
-        let newTop = startTop + dy;
-        
-        // 限制在视口范围内
-        const btnWidth = btn.offsetWidth;
-        const btnHeight = btn.offsetHeight;
-        const maxLeft = window.innerWidth - btnWidth;
-        const maxTop = window.innerHeight - btnHeight;
-        
-        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-        newTop = Math.max(0, Math.min(newTop, maxTop));
-        
-        btn.style.left = newLeft + 'px';
-        btn.style.top = newTop + 'px';
+        onDrag(e.clientX, e.clientY);
     });
     
-    document.addEventListener('mouseup', function() {
-        if (isDragging) {
-            isDragging = false;
-            btn.style.cursor = 'grab';
-        }
-    });
+    document.addEventListener('mouseup', endDrag);
     
-    // 移动端触摸支持
+    // 触摸事件
     btn.addEventListener('touchstart', function(e) {
-        isDragging = true;
-        btn.dataset.dragged = 'false';
-        
         const touch = e.touches[0];
-        const rect = btn.getBoundingClientRect();
-        startX = touch.clientX;
-        startY = touch.clientY;
-        startLeft = rect.left;
-        startTop = rect.top;
-        
-        btn.style.position = 'fixed';
-        btn.style.left = startLeft + 'px';
-        btn.style.top = startTop + 'px';
-        btn.style.right = 'auto';
-        btn.style.bottom = 'auto';
-        btn.style.zIndex = '10000';
-        
+        startDrag(touch.clientX, touch.clientY);
         e.preventDefault();
     }, { passive: false });
     
     document.addEventListener('touchmove', function(e) {
         if (!isDragging) return;
-        
         const touch = e.touches[0];
-        const dx = touch.clientX - startX;
-        const dy = touch.clientY - startY;
-        
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-            btn.dataset.dragged = 'true';
-        }
-        
-        let newLeft = startLeft + dx;
-        let newTop = startTop + dy;
-        
-        const btnWidth = btn.offsetWidth;
-        const btnHeight = btn.offsetHeight;
-        const maxLeft = window.innerWidth - btnWidth;
-        const maxTop = window.innerHeight - btnHeight;
-        
-        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-        newTop = Math.max(0, Math.min(newTop, maxTop));
-        
-        btn.style.left = newLeft + 'px';
-        btn.style.top = newTop + 'px';
-        
+        onDrag(touch.clientX, touch.clientY);
         e.preventDefault();
     }, { passive: false });
     
-    document.addEventListener('touchend', function() {
-        if (isDragging) {
-            isDragging = false;
-        }
-    });
+    document.addEventListener('touchend', endDrag);
     
-    btn.style.cursor = 'grab';
     document.body.appendChild(btn);
 }

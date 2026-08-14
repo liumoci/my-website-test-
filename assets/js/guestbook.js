@@ -1,12 +1,47 @@
 // 留言箱脚本
 
 document.addEventListener('DOMContentLoaded', function() {
+    // 加载设置
+    loadGuestbookSettings();
+    
     // 加载留言
     loadMessages();
     
     // 留言表单
     document.getElementById('messageForm').addEventListener('submit', handleMessageSubmit);
 });
+
+// 加载留言箱设置
+async function loadGuestbookSettings() {
+    try {
+        const response = await fetch('/api/messages/settings');
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+            const settings = data.data;
+            
+            // 应用背景图
+            if (settings.backgroundImage) {
+                document.body.style.backgroundImage = 'url(' + settings.backgroundImage + ')';
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundAttachment = 'fixed';
+            }
+            
+            // 应用背景颜色
+            if (settings.backgroundColor) {
+                document.body.style.backgroundColor = settings.backgroundColor;
+            }
+            
+            // 应用主题颜色
+            if (settings.primaryColor) {
+                document.documentElement.style.setProperty('--primary-color', settings.primaryColor);
+            }
+        }
+    } catch (err) {
+        console.error('加载设置失败:', err);
+    }
+}
 
 // 清空表单
 function clearForm() {

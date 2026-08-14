@@ -62,6 +62,23 @@
         }
         .guestbook-form {
             display: flex; flex-direction: column; gap: 1rem; flex: 1;
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .guestbook-form .form-group {
+            margin-bottom: 0 !important;
+        }
+        .guestbook-form input,
+        .guestbook-form textarea {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        }
+        .guestbook-form input::placeholder,
+        .guestbook-form textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6) !important;
         }
         .form-buttons { display: flex; gap: 1rem; margin-top: auto; }
         .messages-scroll {
@@ -127,7 +144,7 @@
                         </div>
                         <div class="form-buttons">
                             <button type="button" onclick="clearForm()"
-                                style="flex:1;padding:0.75rem 1.5rem;border:1px solid rgba(255,255,255,0.3);border-radius:0.75rem;background:rgba(255,255,255,0.15);color:white;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.3s ease;">清空</button>
+                                style="flex:1;padding:0.75rem 1.5rem;border:1px solid rgba(255,255,255,0.3);border-radius:0.75rem;background:rgba(0,0,0,0.2);color:white;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.3s ease;">清空</button>
                             <button type="submit"
                                 style="flex:1;padding:0.75rem 1.5rem;border:1px solid rgba(255,255,255,0.2);border-radius:0.75rem;background:linear-gradient(135deg,rgba(102,126,234,0.85),rgba(118,75,162,0.85));color:white;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.3s ease;">提交</button>
                         </div>

@@ -1,0 +1,32 @@
+2026-08-14T15:13:13.032785Z	Cloning repository...
+2026-08-14T15:13:14.094096Z	From https://github.com/liumoci/my-website-test-
+2026-08-14T15:13:14.094434Z	 * branch            19c3d59ce0597d01d6a17cf9cd19b301a87e8948 -> FETCH_HEAD
+2026-08-14T15:13:14.094507Z	
+2026-08-14T15:13:14.122244Z	HEAD is now at 19c3d59 修复_headers路径格式
+2026-08-14T15:13:14.12278Z	
+2026-08-14T15:13:14.19844Z	
+2026-08-14T15:13:14.198853Z	Using v2 root directory strategy
+2026-08-14T15:13:14.224985Z	Success: Finished cloning repository files
+2026-08-14T15:13:15.723843Z	No build output detected to cache. Skipping.
+2026-08-14T15:13:15.724346Z	No dependencies detected to cache. Skipping.
+2026-08-14T15:13:16.891033Z	Checking for configuration in a Wrangler configuration file (BETA)
+2026-08-14T15:13:16.891386Z	
+2026-08-14T15:13:17.069661Z	No Wrangler configuration file found. Continuing.
+2026-08-14T15:13:17.070335Z	No build command specified. Skipping build step.
+2026-08-14T15:13:17.071068Z	Found Functions directory at /functions. Uploading.
+2026-08-14T15:13:17.079398Z	 ⛅️ wrangler 3.114.17
+2026-08-14T15:13:17.079662Z	-------------------
+2026-08-14T15:13:17.995267Z	✨ Compiled Worker successfully
+2026-08-14T15:13:18.137426Z	Validating asset output directory
+2026-08-14T15:13:20.139503Z	Deploying your site to Cloudflare's global network...
+2026-08-14T15:13:20.904887Z	Parsed 0 valid redirect rules.
+2026-08-14T15:13:20.908924Z	Parsed 3 valid header rules.
+2026-08-14T15:13:22.103483Z	Uploading... (0/23)
+2026-08-14T15:13:22.420283Z	Uploading... (7/23)
+2026-08-14T15:13:22.438818Z	Uploading... (15/23)
+2026-08-14T15:13:22.440753Z	Uploading... (23/23)
+2026-08-14T15:13:22.441239Z	✨ Success! Uploaded 23 files (0.73 sec)
+2026-08-14T15:13:22.441628Z	
+2026-08-14T15:13:22.9081Z	✨ Upload complete!
+2026-08-14T15:13:24.400177Z	Success: Assets published!
+2026-08-14T15:13:26.24967Z	Success: Your site was deployed!

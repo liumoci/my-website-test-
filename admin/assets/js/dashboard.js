@@ -63,6 +63,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 个人主页管理
     initProfileManager();
     
+    // 留言箱背景图上传
+    initMsgBgUpload();
+    
     // 隐藏页面加载动画
     setTimeout(() => {
         const loader = document.getElementById('pageLoader');
@@ -1607,6 +1610,11 @@ async function loadMsgSettings() {
             
             // 启用状态
             document.getElementById('msgEnabled').checked = settings.enabled !== false;
+            
+            // 背景图
+            if (settings.backgroundImage) {
+                showMsgBgPreview(settings.backgroundImage);
+            }
         }
     } catch (err) {
         console.error('加载设置失败:', err);
@@ -1627,7 +1635,8 @@ async function saveMsgSettings() {
             cardColor: document.getElementById('msgCardColorText').value || '',
             primaryColor: document.getElementById('msgPrimaryColorText').value || '',
             rateLimitMinutes: parseInt(document.getElementById('msgRateLimit').value) || 0,
-            enabled: document.getElementById('msgEnabled').checked
+            enabled: document.getElementById('msgEnabled').checked,
+            backgroundImage: window._msgBgImage || ''
         };
         
         const response = await fetch('/api/messages/settings', {
@@ -1660,6 +1669,82 @@ async function saveMsgSettings() {
             msgEl.textContent = '';
             msgEl.className = 'form-msg';
         }, 3000);
+    }
+}
+
+// ===== 留言箱背景图上传 =====
+function initMsgBgUpload() {
+    const dropZone = document.getElementById('msgBgDropZone');
+    const fileInput = document.getElementById('msgBgFileInput');
+    const removeBtn = document.getElementById('msgBgRemoveBtn');
+    
+    if (!dropZone || !fileInput) return;
+    
+    // 点击选择文件
+    dropZone.addEventListener('click', () => fileInput.click());
+    
+    // 文件选择
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleMsgBgFile(file);
+    });
+    
+    // 拖拽事件
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#3b82f6';
+        dropZone.style.background = 'rgba(59, 130, 246, 0.05)';
+    });
+    
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#ccc';
+        dropZone.style.background = 'transparent';
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#ccc';
+        dropZone.style.background = 'transparent';
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            handleMsgBgFile(file);
+        }
+    });
+    
+    // 移除图片
+    if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+            window._msgBgImage = '';
+            document.getElementById('msgBgPreview').style.display = 'none';
+            document.getElementById('msgBgPreviewImg').src = '';
+        });
+    }
+}
+
+function handleMsgBgFile(file) {
+    if (file.size > 2 * 1024 * 1024) {
+        alert('图片大小不能超过2MB');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const base64 = e.target.result;
+        window._msgBgImage = base64;
+        showMsgBgPreview(base64);
+    };
+    reader.readAsDataURL(file);
+}
+
+function showMsgBgPreview(base64) {
+    window._msgBgImage = base64;
+    const preview = document.getElementById('msgBgPreview');
+    const img = document.getElementById('msgBgPreviewImg');
+    if (preview && img) {
+        img.src = base64;
+        preview.style.display = 'block';
     }
 }
 
