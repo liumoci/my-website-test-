@@ -23,9 +23,6 @@
                 <li><a href="#dashboard" class="nav-item active" data-page="dashboard">
                     <span class="nav-icon">📊</span> 概览
                 </a></li>
-                <li><a href="#files" class="nav-item" data-page="files">
-                    <span class="nav-icon">📁</span> 文件管理
-                </a></li>
                 <li><a href="#posts" class="nav-item" data-page="posts">
                     <span class="nav-icon">📝</span> 文章管理
                 </a></li>
@@ -125,49 +122,6 @@
                             <span class="status-text">有效（自动续期）</span>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            <!-- 文件管理页面 -->
-            <section id="page-files" class="page-section">
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2>文件管理</h2>
-                        <button class="btn-primary">上传文件</button>
-                    </div>
-                    <div class="file-browser">
-                        <div class="file-path">
-                            <span>/</span>
-                        </div>
-                        <table class="file-table">
-                            <thead>
-                                <tr>
-                                    <th>名称</th>
-                                    <th>大小</th>
-                                    <th>修改时间</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>📁 assets</td>
-                                    <td>--</td>
-                                    <td>2026-08-09</td>
-                                    <td><button class="btn-link">查看</button></td>
-                                </tr>
-                                <tr>
-                                    <td>📄 index.html</td>
-                                    <td>2 KB</td>
-                                    <td>2026-08-09</td>
-                                    <td>
-                                        <button class="btn-link">编辑</button>
-                                        <button class="btn-link danger">删除</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p class="notice">⚠️ 纯静态模式下文件管理仅为演示，实际操作需要后端支持</p>
                 </div>
             </section>
 
@@ -627,41 +581,70 @@
             <!-- 网盘管理页面 -->
             <section id="page-drive" class="page-section">
                 <div class="panel">
-                    <h2>网盘管理</h2>
-                    <p class="hint">配置云盘跳转页面的标题、链接和提取密码</p>
+                    <div class="panel-header">
+                        <h2>网盘管理</h2>
+                    </div>
+                    <p class="hint" style="margin-bottom:1.5rem;">配置云盘跳转页面的标题、链接和提取密码</p>
 
-                    <div class="form-group">
-                        <label>页面标题</label>
-                        <input type="text" id="driveTitle" placeholder="例如：我的云盘" class="form-input">
-                        <p class="hint">显示在云盘页面的标题</p>
+                    <!-- 设置项：页面标题 -->
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <label class="setting-label">页面标题</label>
+                            <p class="setting-desc">显示在云盘页面的大标题</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" id="driveTitle" placeholder="例如：我的云盘" class="form-input">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>页面描述</label>
-                        <input type="text" id="driveDesc" placeholder="例如：请输入提取密码访问云盘" class="form-input">
-                        <p class="hint">显示在标题下方的说明文字</p>
+                    <!-- 设置项：页面描述 -->
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <label class="setting-label">页面描述</label>
+                            <p class="setting-desc">标题下方的说明文字</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" id="driveDesc" placeholder="例如：请输入提取密码访问云盘" class="form-input">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>跳转链接</label>
-                        <input type="url" id="driveUrl" placeholder="https://drive.example.com" class="form-input">
-                        <p class="hint">验证通过后跳转到的网盘地址</p>
+                    <!-- 设置项：跳转链接 -->
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <label class="setting-label">跳转链接</label>
+                            <p class="setting-desc">验证通过后跳转到的网盘地址</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="url" id="driveUrl" placeholder="https://drive.example.com" class="form-input">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>提取密码</label>
-                        <input type="text" id="drivePassword" placeholder="留空则无需密码" class="form-input">
-                        <p class="hint">访问云盘需要输入的密码，留空则任何人都可以直接进入</p>
+                    <!-- 设置项：提取密码 -->
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <label class="setting-label">提取密码</label>
+                            <p class="setting-desc">留空则无需密码，任何人可直接进入</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="text" id="drivePassword" placeholder="留空则无需密码" class="form-input">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="driveEnabled"> 启用云盘
-                        </label>
-                        <p class="hint">关闭后访客看到"云盘未启用"提示</p>
+                    <!-- 设置项：启用开关 -->
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <label class="setting-label">启用云盘</label>
+                            <p class="setting-desc">关闭后访客看到"云盘未启用"</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox" id="driveEnabled">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="form-actions">
+                    <div class="form-actions" style="margin-top:1.5rem;">
                         <button id="saveDriveSettingsBtn" class="btn-primary">保存设置</button>
                     </div>
                 </div>

@@ -7,70 +7,89 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <style>
-        .drive-container {
-            max-width: 500px;
-            margin: 3rem auto;
-            padding: 2rem;
+        .drive-page {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
         .drive-card {
+            width: 100%;
+            max-width: 420px;
             background: var(--card-bg);
-            border-radius: 1rem;
-            padding: 2.5rem;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-            text-align: center;
+            border-radius: 1.5rem;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             border: 1px solid var(--border-color);
+            text-align: center;
         }
         .drive-icon {
             font-size: 4rem;
             margin-bottom: 1rem;
-            animation: float 2s ease-in-out infinite;
+            display: block;
+            animation: float 3s ease-in-out infinite;
         }
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-10px); }
         }
         .drive-title {
-            font-size: 1.75rem;
+            font-size: 2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
             color: var(--text-primary);
+            letter-spacing: 0.05em;
         }
         .drive-desc {
             color: var(--text-secondary);
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .drive-input-wrap {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+        .drive-label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
         .drive-input {
             width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
+            padding: 0.875rem 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
             font-size: 1rem;
-            margin-bottom: 1rem;
             background: var(--bg-primary);
             color: var(--text-primary);
             box-sizing: border-box;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
         .drive-input:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         .drive-btn {
             width: 100%;
-            padding: 0.85rem;
+            padding: 1rem;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            font-weight: 500;
+            border-radius: 0.75rem;
+            font-size: 1.05rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s;
+            letter-spacing: 0.05em;
         }
         .drive-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
         .drive-btn:active {
             transform: translateY(0);
@@ -85,14 +104,20 @@
             font-size: 0.85rem;
             margin-top: 0.75rem;
             display: none;
+            text-align: center;
         }
         .drive-disabled {
             color: var(--text-secondary);
-            padding: 2rem;
+            padding: 1rem;
         }
         .drive-loading {
             color: var(--text-secondary);
             padding: 2rem;
+        }
+        .drive-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 1.5rem 0;
         }
     </style>
 </head>
@@ -117,7 +142,7 @@
     </header>
 
     <main>
-        <div class="drive-container">
+        <div class="drive-page">
             <div id="driveContent" class="drive-card">
                 <div class="drive-loading">加载中...</div>
             </div>
@@ -149,7 +174,7 @@
 
             if (!driveSettings.enabled) {
                 container.innerHTML = `
-                    <div class="drive-icon">🔒</div>
+                    <span class="drive-icon">🔒</span>
                     <div class="drive-title">云盘未启用</div>
                     <div class="drive-disabled">管理员暂未开放云盘访问</div>
                 `;
@@ -158,18 +183,23 @@
 
             if (driveSettings.requirePassword) {
                 container.innerHTML = `
-                    <div class="drive-icon">☁️</div>
+                    <span class="drive-icon">☁️</span>
                     <div class="drive-title">${escapeHtml(driveSettings.title || '我的云盘')}</div>
                     <div class="drive-desc">${escapeHtml(driveSettings.description || '请输入提取密码访问云盘')}</div>
-                    <input type="password" id="passwordInput" class="drive-input" placeholder="请输入提取密码" onkeydown="if(event.key==='Enter')verifyPassword()">
+                    <div class="drive-divider"></div>
+                    <div class="drive-input-wrap">
+                        <label class="drive-label">提取密码</label>
+                        <input type="password" id="passwordInput" class="drive-input" placeholder="请输入提取密码" onkeydown="if(event.key==='Enter')verifyPassword()">
+                    </div>
                     <button class="drive-btn" onclick="verifyPassword()" id="verifyBtn">进入云盘</button>
                     <div class="drive-error" id="errorMsg"></div>
                 `;
             } else {
                 container.innerHTML = `
-                    <div class="drive-icon">☁️</div>
+                    <span class="drive-icon">☁️</span>
                     <div class="drive-title">${escapeHtml(driveSettings.title || '我的云盘')}</div>
                     <div class="drive-desc">${escapeHtml(driveSettings.description || '点击下方按钮进入云盘')}</div>
+                    <div class="drive-divider"></div>
                     <button class="drive-btn" onclick="goToDrive()">进入云盘</button>
                 `;
             }
@@ -237,7 +267,6 @@
             return div.innerHTML;
         }
 
-        // 页面加载完成后获取设置
         document.addEventListener('DOMContentLoaded', loadDriveSettings);
     </script>
 </body>

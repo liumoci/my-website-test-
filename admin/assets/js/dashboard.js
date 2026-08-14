@@ -175,7 +175,6 @@ function initNavigation() {
     
     const pageTitles = {
         'dashboard': '概览',
-        'files': '文件管理',
         'posts': '文章管理',
         'profile': '个人主页',
         'nav': '导航管理',
