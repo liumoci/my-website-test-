@@ -1734,6 +1734,179 @@ input:checked + .slider:before {
     text-decoration: underline;
 }
 
+/* ===== 手机端优化 ===== */
+@media (max-width: 768px) {
+    /* 侧边栏 */
+    .sidebar {
+        width: 56px;
+    }
+
+    .sidebar-header {
+        padding: 0.75rem 0;
+        justify-content: center;
+    }
+
+    .nav-item {
+        padding: 0.75rem;
+        justify-content: center;
+    }
+
+    .nav-icon {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .main-content {
+        margin-left: 56px;
+    }
+
+    .content-area {
+        padding: 0.75rem;
+    }
+
+    /* 面板 */
+    .panel {
+        padding: 1rem;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .panel-header h2 {
+        font-size: 1.1rem;
+    }
+
+    /* 统计卡片 */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem;
+    }
+
+    .stat-number {
+        font-size: 1.25rem;
+    }
+
+    /* 按钮 */
+    .btn-primary, .btn-secondary, .btn-danger {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-small {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* 表单 */
+    .form-input, .form-select, textarea.form-input {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+
+    .form-group label {
+        font-size: 0.85rem;
+    }
+
+    /* 表格 */
+    .drive-table-container {
+        margin: 0 -0.75rem;
+        padding: 0 0.75rem;
+    }
+
+    .drive-manage-table {
+        font-size: 0.8rem;
+    }
+
+    .drive-manage-table th,
+    .drive-manage-table td {
+        padding: 0.5rem;
+    }
+
+    .drive-manage-table .col-action {
+        width: auto;
+    }
+
+    /* 标签页 */
+    .tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+        white-space: nowrap;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    /* 弹窗 */
+    .modal-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 5vh auto;
+        padding: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-content h3 {
+        font-size: 1.1rem;
+    }
+
+    /* 快速操作 */
+    .quick-actions {
+        flex-direction: column;
+    }
+
+    .quick-actions button {
+        width: 100%;
+    }
+
+    /* 批量工具栏 */
+    #postBatchToolbar, #batchToolbar {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    /* 设置行 */
+    .setting-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .setting-control {
+        width: 100%;
+    }
+
+    /* 两列/三列表单 */
+    .form-grid-2, .form-grid-3 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .panel-header > div {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .panel-header > div button {
+        width: 100%;
+    }
+}
+
 .drive-manage-table .btn-link.danger {
     color: var(--danger-color);
 }
