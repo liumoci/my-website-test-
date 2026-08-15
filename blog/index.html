@@ -7,166 +7,273 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <style>
-        .blog-layout {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 2rem;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #e8f0f7;
+            min-height: 100vh;
         }
 
-        /* 侧边栏 */
+        /* 三栏布局 */
+        .blog-layout {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 260px 1fr 300px;
+            gap: 1.5rem;
+        }
+
+        /* 侧边栏通用 */
         .sidebar {
             position: sticky;
-            top: 100px;
+            top: 80px;
             align-self: start;
         }
 
         .sidebar-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: white;
             border-radius: 1rem;
-            padding: 1.5rem;
-            margin-bottom: 1.25rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
 
+        /* 左侧 - 个人资料卡 */
         .profile-card {
             text-align: center;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .profile-cover {
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .profile-avatar {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            margin: 0 auto 1rem;
+            margin: -45px auto 0.75rem;
             background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.5rem;
             color: white;
+            border: 4px solid white;
+            overflow: hidden;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .profile-name {
             font-size: 1.25rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: #1a1a2e;
             margin-bottom: 0.25rem;
         }
 
         .profile-bio {
             font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
+            color: #666;
+            padding: 0 1rem 1rem;
+            line-height: 1.5;
         }
 
+        .profile-social {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0 1rem 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .social-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* 侧边栏标题 */
         .sidebar-title {
             font-size: 0.95rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: #1a1a2e;
             margin-bottom: 0.75rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary-color, #667eea);
-            display: inline-block;
+            padding-left: 0.5rem;
+            border-left: 3px solid #667eea;
         }
 
+        /* 分类列表 */
         .category-list, .tag-list {
             list-style: none;
-            padding: 0;
-            margin: 0;
         }
 
         .category-list li {
-            padding: 0.4rem 0;
+            padding: 0.5rem 0.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            color: var(--text-secondary);
+            color: #555;
             font-size: 0.9rem;
-            transition: color 0.2s;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
         }
 
         .category-list li:hover {
-            color: var(--primary-color, #667eea);
+            background: #f0f2f5;
+            color: #667eea;
         }
 
         .category-list li.active {
-            color: var(--primary-color, #667eea);
+            background: #eef0ff;
+            color: #667eea;
             font-weight: 600;
         }
 
         .category-count {
-            background: var(--bg-secondary, #f3f4f6);
+            background: #f0f2f5;
             padding: 0.1rem 0.5rem;
             border-radius: 1rem;
             font-size: 0.75rem;
         }
 
+        .category-list li.active .category-count {
+            background: #667eea;
+            color: white;
+        }
+
+        /* 标签云 */
         .tag-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .tag-list li {
-            padding: 0.25rem 0.75rem;
-            background: var(--bg-secondary, #f3f4f6);
+            padding: 0.25rem 0.6rem;
+            background: #f0f2f5;
             border-radius: 1rem;
             font-size: 0.8rem;
-            color: var(--text-secondary);
+            color: #555;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .tag-list li:hover {
-            background: var(--primary-color, #667eea);
+            background: #667eea;
             color: white;
         }
 
         .tag-list li.active {
-            background: var(--primary-color, #667eea);
+            background: #667eea;
             color: white;
         }
 
-        /* 文章列表 */
-        .posts-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
+        /* 中间内容区 */
+        .main-content {
+            min-width: 0;
         }
 
+        /* 筛选标签栏 */
+        .filter-bar {
+            background: white;
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .filter-tab {
+            padding: 0.4rem 0.9rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: #555;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .filter-tab:hover {
+            background: #f0f2f5;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .filter-tab .count {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        /* 文章网格 */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        /* 文章卡片 - 图片在上，标题在下 */
         .post-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: white;
             border-radius: 1rem;
             overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             display: flex;
+            flex-direction: column;
         }
 
         .post-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(0,0,0,0.1);
-            border-color: var(--primary-color, #667eea);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
         }
 
         .post-card.pinned {
-            border-left: 4px solid #f59e0b;
+            border: 2px solid #f59e0b;
         }
 
         .post-cover {
-            width: 240px;
-            min-height: 160px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            flex-shrink: 0;
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3rem;
             color: white;
+            overflow: hidden;
+            position: relative;
         }
 
         .post-cover img {
@@ -175,182 +282,283 @@
             object-fit: cover;
         }
 
-        .post-content {
+        .post-pinned-badge {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background: #f59e0b;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .post-body {
+            padding: 1rem;
             flex: 1;
-            padding: 1.25rem 1.5rem;
             display: flex;
             flex-direction: column;
         }
 
-        .post-meta {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .post-category {
-            background: var(--primary-color, #667eea);
-            color: white;
-            padding: 0.15rem 0.6rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .post-pinned-badge {
-            background: #f59e0b;
-            color: white;
-            padding: 0.15rem 0.6rem;
-            border-radius: 1rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
         .post-title {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: var(--text-primary);
+            color: #1a1a2e;
             margin-bottom: 0.5rem;
             line-height: 1.4;
-        }
-
-        .post-excerpt {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 0.75rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .post-footer {
+        .post-meta {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-top: auto;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .post-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .post-category {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .post-excerpt {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
         }
 
         .post-tags {
             display: flex;
-            gap: 0.4rem;
+            gap: 0.3rem;
             flex-wrap: wrap;
         }
 
         .post-tag {
             font-size: 0.75rem;
-            color: var(--text-secondary);
-            background: var(--bg-secondary, #f3f4f6);
+            color: #667eea;
+            background: #eef0ff;
             padding: 0.15rem 0.5rem;
-            border-radius: 0.25rem;
+            border-radius: 1rem;
         }
 
-        .post-date {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            flex-shrink: 0;
-        }
-
-        .empty-state {
+        /* 右侧边栏小部件 */
+        .widget-clock {
             text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-secondary);
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+        }
+
+        .widget-greeting {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .widget-time {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            font-family: 'Courier New', monospace;
+        }
+
+        .widget-date {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.25rem;
+        }
+
+        .widget-cover {
+            width: 100%;
+            height: 100px;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            overflow: hidden;
+        }
+
+        .widget-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 最新动态 */
+        .recent-list {
+            list-style: none;
+        }
+
+        .recent-item {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .recent-item:last-child {
+            border-bottom: none;
+        }
+
+        .recent-item:hover {
+            color: #667eea;
+        }
+
+        .recent-title {
+            font-size: 0.85rem;
+            color: #333;
+            margin-bottom: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .recent-date {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            background: white;
             border-radius: 1rem;
         }
 
         .empty-state-icon {
-            font-size: 4rem;
+            font-size: 3rem;
             margin-bottom: 1rem;
-            opacity: 0.5;
         }
 
-        @media (max-width: 900px) {
+        .empty-state h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .blog-layout {
+                grid-template-columns: 240px 1fr;
+            }
+            .right-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
             .blog-layout {
                 grid-template-columns: 1fr;
             }
             .sidebar {
                 position: static;
             }
-            .post-card {
-                flex-direction: column;
+            .posts-grid {
+                grid-template-columns: 1fr;
             }
-            .post-cover {
-                width: 100%;
-                height: 180px;
-            }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .post-card {
-            animation: fadeInUp 0.4s ease backwards;
         }
     </style>
 </head>
 <body>
-    <div class="page-loader" id="pageLoader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <header>
-        <nav class="navbar">
-            <div class="logo">
-                <a href="/">My Site</a>
+    <div class="blog-layout">
+        <!-- 左侧边栏 -->
+        <aside class="sidebar left-sidebar">
+            <!-- 个人资料卡 -->
+            <div class="sidebar-card profile-card">
+                <div class="profile-cover"></div>
+                <div class="profile-avatar" id="blogProfileAvatar">📝</div>
+                <div class="profile-name" id="blogProfileName">我的博客</div>
+                <div class="profile-bio" id="blogProfileBio">记录生活与技术</div>
+                <div class="profile-social">
+                    <a href="/" class="social-btn" title="首页">🏠</a>
+                    <a href="/about/" class="social-btn" title="关于">👤</a>
+                    <a href="/drive/" class="social-btn" title="云盘">☁️</a>
+                    <a href="/guestbook/" class="social-btn" title="留言">💬</a>
+                    <a href="/admin/" class="social-btn" title="管理">⚙️</a>
+                </div>
             </div>
-            <ul class="nav-links">
-                <li><a href="/">首页</a></li>
-                <li><a href="/about/">关于我</a></li>
-                <li><a href="/blog/" class="active">博客</a></li>
-                <li><a href="/drive/">云盘</a></li>
-            </ul>
-        </nav>
-    </header>
 
-    <main>
-        <div class="blog-layout">
-            <!-- 侧边栏 -->
-            <aside class="sidebar">
-                <div class="sidebar-card profile-card">
-                    <div class="profile-avatar" id="blogProfileAvatar">📝</div>
-                    <div class="profile-name" id="blogProfileName">我的博客</div>
-                    <div class="profile-bio" id="blogProfileBio">记录生活与技术</div>
-                </div>
+            <!-- 分类 -->
+            <div class="sidebar-card">
+                <div class="sidebar-title">📂 分类</div>
+                <ul class="category-list" id="categoryList">
+                    <li>加载中...</li>
+                </ul>
+            </div>
 
-                <div class="sidebar-card">
-                    <div class="sidebar-title">分类</div>
-                    <ul class="category-list" id="categoryList">
-                        <li class="active" data-category="">全部 <span class="category-count" id="totalCount">0</span></li>
-                    </ul>
-                </div>
+            <!-- 标签 -->
+            <div class="sidebar-card">
+                <div class="sidebar-title">🏷️ 标签</div>
+                <ul class="tag-list" id="tagList">
+                    <li>暂无标签</li>
+                </ul>
+            </div>
+        </aside>
 
-                <div class="sidebar-card">
-                    <div class="sidebar-title">标签</div>
-                    <ul class="tag-list" id="tagList">
-                        <li>暂无标签</li>
-                    </ul>
-                </div>
-            </aside>
+        <!-- 中间内容区 -->
+        <main class="main-content">
+            <!-- 筛选栏 -->
+            <div class="filter-bar" id="filterBar">
+                <div class="filter-tab active" data-filter="all">全部 <span class="count" id="allCount">0</span></div>
+            </div>
 
             <!-- 文章列表 -->
-            <div>
-                <div class="posts-list" id="postsList">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📝</div>
-                        <h3>加载中...</h3>
-                    </div>
+            <div class="posts-grid" id="postsGrid">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📝</div>
+                    <h3>加载中...</h3>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
+
+        <!-- 右侧边栏 -->
+        <aside class="sidebar right-sidebar">
+            <!-- 时钟 -->
+            <div class="sidebar-card widget-clock">
+                <div class="widget-greeting" id="widgetGreeting">晚上好，放松一下！</div>
+                <div class="widget-time" id="widgetTime">00:00</div>
+                <div class="widget-date" id="widgetDate">--</div>
+                <div class="widget-cover">🌙</div>
+            </div>
+
+            <!-- 最新文章 -->
+            <div class="sidebar-card">
+                <div class="sidebar-title">📰 最新文章</div>
+                <ul class="recent-list" id="recentList">
+                    <li class="recent-item">
+                        <div class="recent-title">加载中...</div>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </div>
 
     <script src="../assets/js/main.js"></script>
     <script>
@@ -358,20 +566,22 @@
         let currentCategory = '';
         let currentTag = '';
 
+        // 加载文章
         async function loadPosts() {
             try {
                 const response = await fetch('/api/posts');
                 const data = await response.json();
                 if (data.success) {
                     allPosts = data.data;
+                    renderFilterBar();
                     renderSidebar();
                     renderPosts();
+                    renderRecentPosts();
                 }
-            } catch (err) {
-                console.error(err);
-                document.getElementById('postsList').innerHTML = `
+            } catch (e) {
+                document.getElementById('postsGrid').innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
+                        <div class="empty-state-icon">❌</div>
                         <h3>加载失败</h3>
                         <p>请稍后重试</p>
                     </div>
@@ -379,30 +589,65 @@
             }
         }
 
+        // 渲染筛选栏
+        function renderFilterBar() {
+            const categories = new Set();
+            allPosts.forEach(p => categories.add(p.category || '未分类'));
+
+            const bar = document.getElementById('filterBar');
+            let html = `<div class="filter-tab ${!currentCategory && !currentTag ? 'active' : ''}" data-filter="all">全部 <span class="count">${allPosts.length}</span></div>`;
+
+            categories.forEach(cat => {
+                const count = allPosts.filter(p => (p.category || '未分类') === cat).length;
+                html += `<div class="filter-tab ${currentCategory === cat ? 'active' : ''}" data-category="${escapeAttr(cat)}">${escapeHtml(cat)} <span class="count">${count}</span></div>`;
+            });
+
+            bar.innerHTML = html;
+
+            bar.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    if (this.dataset.filter === 'all') {
+                        currentCategory = '';
+                        currentTag = '';
+                    } else {
+                        currentCategory = this.dataset.category;
+                        currentTag = '';
+                    }
+                    renderFilterBar();
+                    renderSidebar();
+                    renderPosts();
+                });
+            });
+        }
+
+        // 渲染侧边栏
         function renderSidebar() {
-            // 分类统计
+            // 分类
             const categories = {};
             allPosts.forEach(p => {
-                categories[p.category] = (categories[p.category] || 0) + 1;
+                const cat = p.category || '未分类';
+                categories[cat] = (categories[cat] || 0) + 1;
             });
 
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = `<li class="${currentCategory === '' ? 'active' : ''}" data-category="">全部 <span class="category-count">${allPosts.length}</span></li>`;
-            Object.entries(categories).forEach(([cat, count]) => {
-                categoryList.innerHTML += `<li class="${currentCategory === cat ? 'active' : ''}" data-category="${escapeAttr(cat)}">${escapeHtml(cat)} <span class="category-count">${count}</span></li>`;
+            const catList = document.getElementById('categoryList');
+            const catEntries = Object.entries(categories).sort((a, b) => b[1] - a[1]);
+
+            catList.innerHTML = `<li class="${!currentCategory ? 'active' : ''}" data-category="">全部 <span class="category-count">${allPosts.length}</span></li>`;
+            catEntries.forEach(([cat, count]) => {
+                catList.innerHTML += `<li class="${currentCategory === cat ? 'active' : ''}" data-category="${escapeAttr(cat)}">${escapeHtml(cat)} <span class="category-count">${count}</span></li>`;
             });
 
-            // 绑定分类点击
-            categoryList.querySelectorAll('li').forEach(li => {
+            catList.querySelectorAll('li').forEach(li => {
                 li.addEventListener('click', function() {
-                    currentCategory = this.dataset.category;
+                    currentCategory = this.dataset.category || '';
                     currentTag = '';
+                    renderFilterBar();
                     renderSidebar();
                     renderPosts();
                 });
             });
 
-            // 标签统计
+            // 标签
             const tags = new Set();
             allPosts.forEach(p => {
                 const postTags = Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',').filter(Boolean) : []);
@@ -415,11 +660,13 @@
             } else {
                 tagList.innerHTML = '';
                 tags.forEach(tag => {
-                    tagList.innerHTML += `<li class="${currentTag === tag ? 'active' : ''}" data-tag="${escapeAttr(tag)}">${escapeHtml(tag)}</li>`;
+                    tagList.innerHTML += `<li class="${currentTag === tag ? 'active' : ''}" data-tag="${escapeAttr(tag)}">#${escapeHtml(tag)}</li>`;
                 });
                 tagList.querySelectorAll('li').forEach(li => {
                     li.addEventListener('click', function() {
                         currentTag = currentTag === this.dataset.tag ? '' : this.dataset.tag;
+                        currentCategory = '';
+                        renderFilterBar();
                         renderSidebar();
                         renderPosts();
                     });
@@ -427,12 +674,21 @@
             }
         }
 
+        // 渲染文章
         function renderPosts() {
-            let posts = allPosts;
+            let posts = [...allPosts];
+
+            // 置顶优先
+            posts.sort((a, b) => {
+                if (a.pinned && !b.pinned) return -1;
+                if (!a.pinned && b.pinned) return 1;
+                return new Date(b.date) - new Date(a.date);
+            });
 
             if (currentCategory) {
-                posts = posts.filter(p => p.category === currentCategory);
+                posts = posts.filter(p => (p.category || '未分类') === currentCategory);
             }
+
             if (currentTag) {
                 posts = posts.filter(p => {
                     const postTags = Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',').filter(Boolean) : []);
@@ -440,10 +696,10 @@
                 });
             }
 
-            const list = document.getElementById('postsList');
+            const grid = document.getElementById('postsGrid');
 
             if (posts.length === 0) {
-                list.innerHTML = `
+                grid.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📭</div>
                         <h3>暂无文章</h3>
@@ -453,74 +709,111 @@
                 return;
             }
 
-            list.innerHTML = posts.map((post, index) => {
+            grid.innerHTML = posts.map((post, index) => {
                 const date = new Date(post.date);
                 const dateStr = date.toLocaleDateString('zh-CN');
                 const tagsArray = Array.isArray(post.tags) ? post.tags : (typeof post.tags === 'string' ? post.tags.split(',').filter(Boolean) : []);
                 const tagsHtml = tagsArray.slice(0, 3).map(t => `<span class="post-tag">#${escapeHtml(t)}</span>`).join('');
 
                 return `
-                    <article class="post-card ${post.pinned ? 'pinned' : ''}" style="animation-delay:${index * 0.05}s" onclick="location.href='/blog/posts/?id=${post.id}'">
+                    <article class="post-card ${post.pinned ? 'pinned' : ''}" onclick="location.href='/blog/posts/?id=${post.id}'">
                         <div class="post-cover">
+                            ${post.pinned ? '<span class="post-pinned-badge">📌 置顶</span>' : ''}
                             ${post.cover ? `<img src="${escapeAttr(post.cover)}" alt="">` : '📄'}
                         </div>
-                        <div class="post-content">
+                        <div class="post-body">
+                            <h3 class="post-title">${escapeHtml(post.title)}</h3>
                             <div class="post-meta">
-                                ${post.pinned ? '<span class="post-pinned-badge">📌 置顶</span>' : ''}
-                                <span class="post-category">${escapeHtml(post.category || '未分类')}</span>
+                                <span class="post-meta-item">📅 ${dateStr}</span>
+                                <span class="post-meta-item post-category">📁 ${escapeHtml(post.category || '未分类')}</span>
                             </div>
-                            <h2 class="post-title">${escapeHtml(post.title)}</h2>
-                            <p class="post-excerpt">${escapeHtml(post.excerpt || '暂无摘要')}</p>
-                            <div class="post-footer">
-                                <div class="post-tags">${tagsHtml}</div>
-                                <span class="post-date">${dateStr}</span>
-                            </div>
+                            <p class="post-excerpt">${escapeHtml(post.excerpt || post.content?.replace(/<[^>]*>/g, '').substring(0, 100) || '暂无摘要')}</p>
+                            <div class="post-tags">${tagsHtml}</div>
                         </div>
                     </article>
                 `;
             }).join('');
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        // 渲染最新文章
+        function renderRecentPosts() {
+            const recent = [...allPosts].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+            const list = document.getElementById('recentList');
+
+            if (recent.length === 0) {
+                list.innerHTML = '<li class="recent-item"><div class="recent-title">暂无文章</div></li>';
+                return;
+            }
+
+            list.innerHTML = recent.map(post => {
+                const date = new Date(post.date).toLocaleDateString('zh-CN');
+                return `
+                    <li class="recent-item" onclick="location.href='/blog/posts/?id=${post.id}'">
+                        <div class="recent-title">${escapeHtml(post.title)}</div>
+                        <div class="recent-date">${date}</div>
+                    </li>
+                `;
+            }).join('');
         }
 
-        function escapeAttr(text) {
-            return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        // 时钟
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('widgetTime').textContent = `${hours}:${minutes}`;
+
+            const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const dateStr = `${now.getMonth() + 1}/${now.getDate()} ${weekDays[now.getDay()]}`;
+            document.getElementById('widgetDate').textContent = dateStr;
+
+            let greeting = '你好';
+            if (hours < 6) greeting = '夜深了，注意休息';
+            else if (hours < 9) greeting = '早上好，新的一天';
+            else if (hours < 12) greeting = '上午好，加油';
+            else if (hours < 14) greeting = '中午好，该吃饭了';
+            else if (hours < 18) greeting = '下午好，继续努力';
+            else if (hours < 22) greeting = '晚上好，放松一下';
+            else greeting = '夜深了，早点休息';
+            document.getElementById('widgetGreeting').textContent = greeting + '！';
         }
 
-        // 加载个人资料（与个人主页同步）
+        // 加载个人资料
         async function loadBlogProfile() {
             try {
                 const response = await fetch('/api/profile');
                 const data = await response.json();
                 if (data.success && data.data) {
                     const profile = data.data;
-                    // 头像
                     const avatarEl = document.getElementById('blogProfileAvatar');
                     if (profile.avatar) {
-                        avatarEl.innerHTML = `<img src="${profile.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-                        avatarEl.style.background = 'transparent';
+                        avatarEl.innerHTML = `<img src="${profile.avatar}" alt="">`;
                     }
-                    // 名称
                     if (profile.name) {
                         document.getElementById('blogProfileName').textContent = profile.name;
                     }
-                    // 简介
                     if (profile.bio) {
                         document.getElementById('blogProfileBio').textContent = profile.bio;
                     }
                 }
-            } catch (e) {
-                // 加载失败保持默认
-            }
+            } catch (e) {}
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+
+        function escapeAttr(text) {
+            return (text || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             loadPosts();
             loadBlogProfile();
+            updateClock();
+            setInterval(updateClock, 1000);
         });
     </script>
 </body>
