@@ -262,6 +262,11 @@ function initNavigation() {
                 loadAllStats();
             }
 
+            // 切换到概览页面时加载数据
+            if (page === 'dashboard') {
+                loadDashboardStats();
+            }
+
             // 切换到网盘管理页面时加载数据
             if (page === 'drive') {
                 loadDriveSettings();
@@ -555,9 +560,74 @@ function initSettings() {
     
     // 网站设置表单
     document.getElementById('siteSettingsForm').addEventListener('submit', saveSiteSettings);
-    
+
     // 修改密码表单
     document.getElementById('passwordForm').addEventListener('submit', changePassword);
+
+    // 一键跑路
+    initSiteClosedToggle();
+}
+
+function initSiteClosedToggle() {
+    const toggle = document.getElementById('siteClosedToggle');
+    if (!toggle) return;
+
+    // 加载状态
+    loadSiteClosedStatus();
+
+    // 监听变化
+    toggle.addEventListener('change', async function() {
+        const closed = this.checked;
+        if (closed && !confirm('确定要开启跑路模式吗？开启后除管理面板外所有页面将显示404！')) {
+            this.checked = false;
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/site-status', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ closed })
+            });
+            const data = await response.json();
+            if (data.success) {
+                showMessage(data.message, 'success');
+                updateSiteClosedStatus(closed);
+            } else {
+                showMessage(data.message || '操作失败', 'error');
+                this.checked = !closed;
+            }
+        } catch (e) {
+            showMessage('网络错误', 'error');
+            this.checked = !closed;
+        }
+    });
+}
+
+async function loadSiteClosedStatus() {
+    try {
+        const response = await fetch('/api/site-status');
+        const data = await response.json();
+        if (data.success) {
+            const closed = data.data.closed;
+            document.getElementById('siteClosedToggle').checked = closed;
+            updateSiteClosedStatus(closed);
+        }
+    } catch (e) {
+        document.getElementById('siteClosedStatus').textContent = '加载失败';
+    }
+}
+
+function updateSiteClosedStatus(closed) {
+    const statusEl = document.getElementById('siteClosedStatus');
+    if (closed) {
+        statusEl.textContent = '🔴 跑路模式已开启';
+        statusEl.style.color = '#ef4444';
+    } else {
+        statusEl.textContent = '🟢 网站正常运行';
+        statusEl.style.color = '#10b981';
+    }
 }
 
 async function loadSettings() {
@@ -1106,10 +1176,9 @@ function initNavDragAndDrop() {
 }
 
 function handleNavImageFile(file) {
-    if (file.size > 500 * 1024) {
-        if (!confirm('图片超过 500KB，可能会影响加载速度，确定继续吗？')) {
-            return;
-        }
+    if (file.size > 10 * 1024 * 1024) {
+        alert('图片大小不能超过 10MB');
+        return;
     }
     
     const reader = new FileReader();
@@ -1164,6 +1233,49 @@ function updateNavBgPreview() {
         navData.background.type = 'image';
         navData.background.value = url || '';
     }
+}
+
+// ===== 概览数据 =====
+async function loadDashboardStats() {
+    // 文章数量
+    try {
+        const postsRes = await fetch('/api/posts/admin', { credentials: 'include' });
+        const postsData = await postsRes.json();
+        if (postsData.success) {
+            const publishedCount = postsData.data.filter(p => p.published && !p.deleted).length;
+            document.getElementById('totalPosts').textContent = publishedCount;
+        }
+    } catch (e) {
+        document.getElementById('totalPosts').textContent = '0';
+    }
+
+    // 网盘文件数量
+    try {
+        const driveRes = await fetch('/api/drive-items');
+        const driveData = await driveRes.json();
+        if (driveData.success) {
+            document.getElementById('totalFiles').textContent = driveData.data.length;
+        }
+    } catch (e) {
+        document.getElementById('totalFiles').textContent = '0';
+    }
+
+    // 总访问量（从 Analytics 获取）
+    try {
+        const analyticsRes = await fetch('/api/analytics?type=overview', { credentials: 'include' });
+        const analyticsData = await analyticsRes.json();
+        if (analyticsData.success && analyticsData.data) {
+            const total = analyticsData.data.totalRequests || analyticsData.data.requests || '--';
+            document.getElementById('totalVisits').textContent = total;
+        } else {
+            document.getElementById('totalVisits').textContent = '--';
+        }
+    } catch (e) {
+        document.getElementById('totalVisits').textContent = '--';
+    }
+
+    // 存储空间（估算，显示KV使用情况或留空）
+    document.getElementById('storageUsed').textContent = 'KV存储';
 }
 
 // ===== 访问统计 =====
@@ -2736,8 +2848,8 @@ function initMsgBgUpload() {
 }
 
 function handleMsgBgFile(file) {
-    if (file.size > 2 * 1024 * 1024) {
-        alert('图片大小不能超过2MB');
+    if (file.size > 10 * 1024 * 1024) {
+        alert('图片大小不能超过 10MB');
         return;
     }
     

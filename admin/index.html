@@ -98,8 +98,8 @@
                     <h2>快速操作</h2>
                     <div class="quick-actions">
                         <button class="btn-primary" onclick="location.href='#posts'">新建文章</button>
-                        <button class="btn-secondary" onclick="location.href='#files'">上传文件</button>
-                        <button class="btn-secondary" onclick="location.href='#settings'">系统设置</button>
+                        <button class="btn-secondary" onclick="location.href='#drive'">网盘管理</button>
+                        <button class="btn-secondary" onclick="location.href='#messages'">留言管理</button>
                     </div>
                 </div>
 
@@ -495,6 +495,20 @@
                         <button type="submit" class="btn-primary">保存网站设置</button>
                         <span id="siteSettingsMsg" class="form-msg"></span>
                     </form>
+                </div>
+
+                <div class="panel" style="border-left:4px solid #ef4444;">
+                    <h2>🏃‍♂️ 一键跑路</h2>
+                    <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem;">
+                        开启后，除管理面板外所有页面将显示"站长已跑路"的404页面。适合临时关站维护。
+                    </p>
+                    <div style="display:flex;align-items:center;gap:1rem;">
+                        <label class="switch" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                            <input type="checkbox" id="siteClosedToggle">
+                            <span>开启跑路模式</span>
+                        </label>
+                        <span id="siteClosedStatus" style="font-size:0.85rem;color:var(--text-secondary);">加载中...</span>
+                    </div>
                 </div>
                 
                 <div class="panel">
