@@ -569,38 +569,43 @@ function initSettings() {
 }
 
 function initSiteClosedToggle() {
-    const toggle = document.getElementById('siteClosedToggle');
-    if (!toggle) return;
+    const btn = document.getElementById('siteClosedBtn');
+    if (!btn) return;
 
     // 加载状态
     loadSiteClosedStatus();
 
-    // 监听变化
-    toggle.addEventListener('change', async function() {
-        const closed = this.checked;
-        if (closed && !confirm('确定要开启跑路模式吗？开启后除管理面板外所有页面将显示404！')) {
-            this.checked = false;
+    // 点击切换
+    btn.addEventListener('click', async function() {
+        const isClosed = this.dataset.closed === 'true';
+        const newState = !isClosed;
+
+        if (newState && !confirm('确定要开启跑路模式吗？开启后除管理面板外所有页面将显示404！')) {
             return;
         }
+
+        const originalText = this.textContent;
+        this.disabled = true;
+        this.textContent = '处理中...';
 
         try {
             const response = await fetch('/api/site-status', {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ closed })
+                body: JSON.stringify({ closed: newState })
             });
             const data = await response.json();
             if (data.success) {
                 showMessage(data.message, 'success');
-                updateSiteClosedStatus(closed);
+                updateSiteClosedUI(newState);
             } else {
                 showMessage(data.message || '操作失败', 'error');
-                this.checked = !closed;
             }
         } catch (e) {
             showMessage('网络错误', 'error');
-            this.checked = !closed;
+        } finally {
+            this.disabled = false;
         }
     });
 }
@@ -610,23 +615,34 @@ async function loadSiteClosedStatus() {
         const response = await fetch('/api/site-status');
         const data = await response.json();
         if (data.success) {
-            const closed = data.data.closed;
-            document.getElementById('siteClosedToggle').checked = closed;
-            updateSiteClosedStatus(closed);
+            updateSiteClosedUI(data.data.closed);
         }
     } catch (e) {
-        document.getElementById('siteClosedStatus').textContent = '加载失败';
+        const btn = document.getElementById('siteClosedBtn');
+        if (btn) btn.textContent = '加载失败';
     }
 }
 
-function updateSiteClosedStatus(closed) {
+function updateSiteClosedUI(closed) {
+    const btn = document.getElementById('siteClosedBtn');
     const statusEl = document.getElementById('siteClosedStatus');
+    if (!btn) return;
+
+    btn.dataset.closed = closed;
     if (closed) {
-        statusEl.textContent = '🔴 跑路模式已开启';
-        statusEl.style.color = '#ef4444';
+        btn.textContent = '关闭跑路模式';
+        btn.style.background = '#10b981';
+        if (statusEl) {
+            statusEl.textContent = '🔴 跑路模式已开启';
+            statusEl.style.color = '#ef4444';
+        }
     } else {
-        statusEl.textContent = '🟢 网站正常运行';
-        statusEl.style.color = '#10b981';
+        btn.textContent = '开启跑路模式';
+        btn.style.background = '#ef4444';
+        if (statusEl) {
+            statusEl.textContent = '🟢 网站正常运行';
+            statusEl.style.color = '#10b981';
+        }
     }
 }
 

@@ -503,11 +503,8 @@
                         开启后，除管理面板外所有页面将显示"站长已跑路"的404页面。适合临时关站维护。
                     </p>
                     <div style="display:flex;align-items:center;gap:1rem;">
-                        <label class="switch" style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
-                            <input type="checkbox" id="siteClosedToggle">
-                            <span>开启跑路模式</span>
-                        </label>
-                        <span id="siteClosedStatus" style="font-size:0.85rem;color:var(--text-secondary);">加载中...</span>
+                        <button id="siteClosedBtn" class="btn-primary" style="background:#ef4444;">加载中...</button>
+                        <span id="siteClosedStatus" style="font-size:0.85rem;color:var(--text-secondary);"></span>
                     </div>
                 </div>
                 

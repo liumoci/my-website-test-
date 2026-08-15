@@ -404,7 +404,10 @@
 
             // 标签统计
             const tags = new Set();
-            allPosts.forEach(p => (p.tags || []).forEach(t => tags.add(t)));
+            allPosts.forEach(p => {
+                const postTags = Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',').filter(Boolean) : []);
+                postTags.forEach(t => tags.add(t));
+            });
 
             const tagList = document.getElementById('tagList');
             if (tags.size === 0) {
@@ -431,7 +434,10 @@
                 posts = posts.filter(p => p.category === currentCategory);
             }
             if (currentTag) {
-                posts = posts.filter(p => (p.tags || []).includes(currentTag));
+                posts = posts.filter(p => {
+                    const postTags = Array.isArray(p.tags) ? p.tags : (typeof p.tags === 'string' ? p.tags.split(',').filter(Boolean) : []);
+                    return postTags.includes(currentTag);
+                });
             }
 
             const list = document.getElementById('postsList');
@@ -450,7 +456,8 @@
             list.innerHTML = posts.map((post, index) => {
                 const date = new Date(post.date);
                 const dateStr = date.toLocaleDateString('zh-CN');
-                const tagsHtml = (post.tags || []).slice(0, 3).map(t => `<span class="post-tag">#${escapeHtml(t)}</span>`).join('');
+                const tagsArray = Array.isArray(post.tags) ? post.tags : (typeof post.tags === 'string' ? post.tags.split(',').filter(Boolean) : []);
+                const tagsHtml = tagsArray.slice(0, 3).map(t => `<span class="post-tag">#${escapeHtml(t)}</span>`).join('');
 
                 return `
                     <article class="post-card ${post.pinned ? 'pinned' : ''}" style="animation-delay:${index * 0.05}s" onclick="location.href='/blog/posts/?id=${post.id}'">
