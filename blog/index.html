@@ -14,6 +14,51 @@
             min-height: 100vh;
         }
 
+        /* 顶部导航栏 */
+        .blog-navbar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .blog-nav-brand {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .blog-nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .blog-nav-links a {
+            color: #555;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .blog-nav-links a:hover {
+            color: #667eea;
+        }
+
         /* 三栏布局 */
         .blog-layout {
             max-width: 1600px;
@@ -487,6 +532,18 @@
     </style>
 </head>
 <body>
+    <!-- 顶部导航栏 -->
+    <nav class="blog-navbar">
+        <a href="/" class="blog-nav-brand" id="blogSiteName">📝 我的博客</a>
+        <div class="blog-nav-links">
+            <a href="/">🏠 首页</a>
+            <a href="/about/">👤 关于</a>
+            <a href="/drive/">☁️ 云盘</a>
+            <a href="/guestbook/">💬 留言</a>
+            <a href="/admin/">⚙️ 管理</a>
+        </div>
+    </nav>
+
     <div class="blog-layout">
         <!-- 左侧边栏 -->
         <aside class="sidebar left-sidebar">
@@ -496,12 +553,8 @@
                 <div class="profile-avatar" id="blogProfileAvatar">📝</div>
                 <div class="profile-name" id="blogProfileName">我的博客</div>
                 <div class="profile-bio" id="blogProfileBio">记录生活与技术</div>
-                <div class="profile-social">
-                    <a href="/" class="social-btn" title="首页">🏠</a>
-                    <a href="/about/" class="social-btn" title="关于">👤</a>
-                    <a href="/drive/" class="social-btn" title="云盘">☁️</a>
-                    <a href="/guestbook/" class="social-btn" title="留言">💬</a>
-                    <a href="/admin/" class="social-btn" title="管理">⚙️</a>
+                <div class="profile-social" id="profileSocial">
+                    <!-- 联系方式图标由JS动态生成 -->
                 </div>
             </div>
 
@@ -799,6 +852,66 @@
             } catch (e) {}
         }
 
+        // 加载博客设置
+        async function loadBlogSettings() {
+            try {
+                const response = await fetch('/api/blog-settings');
+                const data = await response.json();
+                if (data.success && data.data) {
+                    const settings = data.data;
+                    // 应用背景
+                    applyBlogBackground(settings.backgroundImage, settings.backgroundOpacity);
+                    // 渲染联系方式
+                    renderContactIcons(settings.contacts || {});
+                }
+            } catch (e) {}
+
+            // 加载网站名称
+            try {
+                const siteRes = await fetch('/api/settings');
+                const siteData = await siteRes.json();
+                if (siteData.success && siteData.data && siteData.data.siteName) {
+                    document.getElementById('blogSiteName').textContent = '📝 ' + siteData.data.siteName;
+                }
+            } catch (e) {}
+        }
+
+        // 应用博客背景
+        function applyBlogBackground(image, opacity) {
+            if (image) {
+                document.body.style.backgroundImage = `url(${image})`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundAttachment = 'fixed';
+                document.body.style.backgroundColor = '#e8f0f7';
+                // 用伪元素实现透明度
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(232, 240, 247, ${1 - (opacity || 1)});
+                    z-index: -1; pointer-events: none;
+                `;
+                document.body.appendChild(overlay);
+            }
+        }
+
+        // 渲染联系方式图标
+        function renderContactIcons(contacts) {
+            const container = document.getElementById('profileSocial');
+            const icons = [
+                { key: 'qq', icon: '🐧', name: 'QQ', url: contacts.qq ? (contacts.qq.startsWith('http') ? contacts.qq : `tencent://message/?uin=${contacts.qq}`) : '' },
+                { key: 'email', icon: '✉️', name: 'Email', url: contacts.email ? `mailto:${contacts.email}` : '' },
+                { key: 'github', icon: '🐙', name: 'GitHub', url: contacts.github ? (contacts.github.startsWith('http') ? contacts.github : `https://github.com/${contacts.github}`) : '' },
+                { key: 'telegram', icon: '✈️', name: 'Telegram', url: contacts.telegram ? (contacts.telegram.startsWith('http') ? contacts.telegram : `https://t.me/${contacts.telegram}`) : '' },
+                { key: 'bilibili', icon: '📺', name: '哔哩哔哩', url: contacts.bilibili ? (contacts.bilibili.startsWith('http') ? contacts.bilibili : `https://space.bilibili.com/${contacts.bilibili}`) : '' },
+                { key: 'guestbook', icon: '💬', name: '留言箱', url: contacts.guestbook || '/guestbook/' }
+            ];
+
+            container.innerHTML = icons.filter(i => i.url).map(i =>
+                `<a href="${escapeAttr(i.url)}" class="social-btn" title="${i.name}" target="_blank" rel="noopener">${i.icon}</a>`
+            ).join('');
+        }
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text || '';
@@ -812,6 +925,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadPosts();
             loadBlogProfile();
+            loadBlogSettings();
             updateClock();
             setInterval(updateClock, 1000);
         });

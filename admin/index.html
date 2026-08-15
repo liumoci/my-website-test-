@@ -24,7 +24,7 @@
                     <span class="nav-icon">📊</span> 概览
                 </a></li>
                 <li><a href="#posts" class="nav-item" data-page="posts">
-                    <span class="nav-icon">📝</span> 文章管理
+                    <span class="nav-icon">📝</span> 博客管理
                 </a></li>
                 <li><a href="#profile" class="nav-item" data-page="profile">
                     <span class="nav-icon">👤</span> 个人主页
@@ -125,55 +125,118 @@
                 </div>
             </section>
 
-            <!-- 文章管理页面 -->
+            <!-- 博客管理页面 -->
             <section id="page-posts" class="page-section">
                 <div class="panel">
                     <div class="panel-header">
-                        <h2>文章管理</h2>
-                        <div style="display:flex;gap:0.5rem;">
+                        <h2>博客管理</h2>
+                    </div>
+
+                    <!-- 外层标签页 -->
+                    <div class="tabs" style="margin-bottom:1rem;">
+                        <button class="tab-btn active" data-blog-tab="posts">文章管理</button>
+                        <button class="tab-btn" data-blog-tab="settings">博客设置</button>
+                    </div>
+
+                    <!-- 文章管理标签页 -->
+                    <div id="blog-tab-posts" class="blog-tab-content">
+                        <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
                             <button id="newPostBtn" class="btn-primary btn-small">+ 新建文章</button>
                             <button id="uploadPostBtn" class="btn-secondary btn-small">📁 上传文件</button>
                             <input type="file" id="postFileInput" accept=".txt,.md,.docx" multiple style="display:none;">
                             <button id="batchPostDeleteBtn" class="btn-danger btn-small">批量删除</button>
                         </div>
+
+                        <!-- 内层标签页 -->
+                        <div class="tabs" style="margin-bottom:1rem;">
+                            <button class="tab-btn active" data-post-tab="all">全部文章</button>
+                            <button class="tab-btn" data-post-tab="trash">回收站</button>
+                        </div>
+
+                        <!-- 批量操作工具栏 -->
+                        <div id="postBatchToolbar" style="display:none;padding:0.75rem 1rem;background:var(--bg-color);border-radius:0.5rem;margin-bottom:1rem;align-items:center;gap:0.75rem;">
+                            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.9rem;">
+                                <input type="checkbox" id="postSelectAll"> 全选
+                            </label>
+                            <span id="postSelectedCount" style="font-size:0.85rem;color:var(--text-secondary);">已选 0 篇</span>
+                            <div style="flex:1;"></div>
+                            <button id="postBatchTrashBtn" class="btn-danger btn-small">移到回收站</button>
+                            <button id="postBatchRestoreBtn" class="btn-secondary btn-small" style="display:none;">恢复</button>
+                            <button id="postBatchForceDeleteBtn" class="btn-danger btn-small" style="display:none;">永久删除</button>
+                            <button id="postExitBatchBtn" class="btn-secondary btn-small">退出</button>
+                        </div>
+
+                        <!-- 文章列表 -->
+                        <div class="drive-table-container">
+                            <table class="drive-manage-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-checkbox"><input type="checkbox" id="postTableSelectAll" style="display:none;"></th>
+                                        <th>标题</th>
+                                        <th>分类</th>
+                                        <th>状态</th>
+                                        <th>日期</th>
+                                        <th class="col-action">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="postsAdminList">
+                                    <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-secondary);">加载中...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <!-- 标签页 -->
-                    <div class="tabs" style="margin-bottom:1rem;">
-                        <button class="tab-btn active" data-post-tab="all">全部文章</button>
-                        <button class="tab-btn" data-post-tab="trash">回收站</button>
-                    </div>
+                    <!-- 博客设置标签页 -->
+                    <div id="blog-tab-settings" class="blog-tab-content" style="display:none;">
+                        <h3 style="margin-bottom:1rem;">背景设置</h3>
+                        <div class="form-group">
+                            <label>背景图片</label>
+                            <div style="display:flex;gap:0.5rem;align-items:center;">
+                                <input type="text" id="blogBgImageInput" placeholder="背景图片URL（可选）" class="form-input" style="flex:1;">
+                                <button id="uploadBlogBgBtn" class="btn-secondary btn-small">上传图片</button>
+                                <input type="file" id="blogBgFileInput" accept="image/*" style="display:none;">
+                            </div>
+                            <p class="hint">留空则使用默认浅蓝色背景</p>
+                        </div>
+                        <div class="form-group">
+                            <label>背景透明度：<span id="blogBgOpacityValue">100%</span></label>
+                            <input type="range" id="blogBgOpacityInput" min="0" max="100" value="100" style="width:100%;">
+                            <p class="hint">调整背景图片的透明度，0%为完全透明</p>
+                        </div>
 
-                    <!-- 批量操作工具栏 -->
-                    <div id="postBatchToolbar" style="display:none;padding:0.75rem 1rem;background:var(--bg-color);border-radius:0.5rem;margin-bottom:1rem;align-items:center;gap:0.75rem;">
-                        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.9rem;">
-                            <input type="checkbox" id="postSelectAll"> 全选
-                        </label>
-                        <span id="postSelectedCount" style="font-size:0.85rem;color:var(--text-secondary);">已选 0 篇</span>
-                        <div style="flex:1;"></div>
-                        <button id="postBatchTrashBtn" class="btn-danger btn-small">移到回收站</button>
-                        <button id="postBatchRestoreBtn" class="btn-secondary btn-small" style="display:none;">恢复</button>
-                        <button id="postBatchForceDeleteBtn" class="btn-danger btn-small" style="display:none;">永久删除</button>
-                        <button id="postExitBatchBtn" class="btn-secondary btn-small">退出</button>
-                    </div>
+                        <h3 style="margin:1.5rem 0 1rem;">联系方式链接</h3>
+                        <p class="hint" style="margin-bottom:1rem;">填写后会显示在博客页面个人资料卡下方，留空则不显示该图标</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                            <div class="form-group">
+                                <label>QQ</label>
+                                <input type="text" id="contactQQ" placeholder="QQ号或QQ链接" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="text" id="contactEmail" placeholder="邮箱地址" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>GitHub</label>
+                                <input type="text" id="contactGithub" placeholder="GitHub主页链接" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Telegram</label>
+                                <input type="text" id="contactTelegram" placeholder="Telegram链接" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>哔哩哔哩</label>
+                                <input type="text" id="contactBilibili" placeholder="B站主页链接" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label>留言箱</label>
+                                <input type="text" id="contactGuestbook" value="/guestbook/" class="form-input">
+                            </div>
+                        </div>
 
-                    <!-- 文章列表 -->
-                    <div class="drive-table-container">
-                        <table class="drive-manage-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-checkbox"><input type="checkbox" id="postTableSelectAll" style="display:none;"></th>
-                                    <th>标题</th>
-                                    <th>分类</th>
-                                    <th>状态</th>
-                                    <th>日期</th>
-                                    <th class="col-action">操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="postsAdminList">
-                                <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-secondary);">加载中...</td></tr>
-                            </tbody>
-                        </table>
+                        <div style="margin-top:1.5rem;display:flex;gap:0.5rem;align-items:center;">
+                            <button id="saveBlogSettingsBtn" class="btn-primary">保存设置</button>
+                            <span id="blogSettingsMsg" class="form-msg"></span>
+                        </div>
                     </div>
                 </div>
             </section>

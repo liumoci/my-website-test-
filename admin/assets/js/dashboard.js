@@ -1986,6 +1986,106 @@ function initPostManager() {
     document.getElementById('postEditorModal')?.addEventListener('click', function(e) {
         if (e.target === this) closePostEditor();
     });
+
+    // 博客管理外层标签页切换
+    document.querySelectorAll('[data-blog-tab]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-blog-tab]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const tab = this.dataset.blogTab;
+            document.getElementById('blog-tab-posts').style.display = tab === 'posts' ? 'block' : 'none';
+            document.getElementById('blog-tab-settings').style.display = tab === 'settings' ? 'block' : 'none';
+            if (tab === 'settings') loadBlogSettings();
+        });
+    });
+
+    // 博客设置
+    document.getElementById('saveBlogSettingsBtn')?.addEventListener('click', saveBlogSettings);
+    document.getElementById('blogBgOpacityInput')?.addEventListener('input', function() {
+        document.getElementById('blogBgOpacityValue').textContent = this.value + '%';
+    });
+    document.getElementById('uploadBlogBgBtn')?.addEventListener('click', () => {
+        document.getElementById('blogBgFileInput').click();
+    });
+    document.getElementById('blogBgFileInput')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) {
+            alert('图片大小不能超过 10MB');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('blogBgImageInput').value = ev.target.result;
+            showMessage('背景图已上传，点击保存生效', 'success');
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// 加载博客设置
+async function loadBlogSettings() {
+    try {
+        const response = await fetch('/api/blog-settings');
+        const data = await response.json();
+        if (data.success && data.data) {
+            const s = data.data;
+            document.getElementById('blogBgImageInput').value = s.backgroundImage || '';
+            document.getElementById('blogBgOpacityInput').value = (s.backgroundOpacity || 1) * 100;
+            document.getElementById('blogBgOpacityValue').textContent = ((s.backgroundOpacity || 1) * 100) + '%';
+            const c = s.contacts || {};
+            document.getElementById('contactQQ').value = c.qq || '';
+            document.getElementById('contactEmail').value = c.email || '';
+            document.getElementById('contactGithub').value = c.github || '';
+            document.getElementById('contactTelegram').value = c.telegram || '';
+            document.getElementById('contactBilibili').value = c.bilibili || '';
+            document.getElementById('contactGuestbook').value = c.guestbook || '/guestbook/';
+        }
+    } catch (e) {
+        showMessage('加载博客设置失败', 'error');
+    }
+}
+
+// 保存博客设置
+async function saveBlogSettings() {
+    const btn = document.getElementById('saveBlogSettingsBtn');
+    const msg = document.getElementById('blogSettingsMsg');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '保存中...';
+
+    try {
+        const body = {
+            backgroundImage: document.getElementById('blogBgImageInput').value,
+            backgroundOpacity: parseInt(document.getElementById('blogBgOpacityInput').value) / 100,
+            contacts: {
+                qq: document.getElementById('contactQQ').value.trim(),
+                email: document.getElementById('contactEmail').value.trim(),
+                github: document.getElementById('contactGithub').value.trim(),
+                telegram: document.getElementById('contactTelegram').value.trim(),
+                bilibili: document.getElementById('contactBilibili').value.trim(),
+                guestbook: document.getElementById('contactGuestbook').value.trim()
+            }
+        };
+
+        const response = await fetch('/api/blog-settings', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('博客设置已保存', 'success');
+        } else {
+            showMessage(data.message || '保存失败', 'error');
+        }
+    } catch (e) {
+        showMessage('网络错误', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
 }
 
 async function loadAdminPosts() {
