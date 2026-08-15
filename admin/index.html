@@ -668,8 +668,15 @@
                 <div class="modal-content">
                     <h3 id="driveItemModalTitle">添加文件</h3>
                     <div class="form-group">
-                        <label>图标（emoji）</label>
-                        <input type="text" id="driveItemIcon" placeholder="📁 或 📄" class="form-input" value="📄">
+                        <label>图标</label>
+                        <div style="position:relative;">
+                            <button type="button" id="iconPickerBtn" class="form-input" style="text-align:left;cursor:pointer;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:0.5rem;padding:0.625rem 1rem;font-size:1.25rem;width:100%;">
+                                📁
+                            </button>
+                            <div id="iconPicker" style="display:none;position:absolute;top:100%;left:0;margin-top:0.5rem;background:var(--card-bg);border:1px solid var(--border-color);border-radius:0.5rem;padding:0.75rem;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.1);grid-template-columns:repeat(8,1fr);gap:0.25rem;max-width:320px;">
+                            </div>
+                        </div>
+                        <input type="hidden" id="driveItemIcon" value="📁">
                     </div>
                     <div class="form-group">
                         <label>文件名 *</label>

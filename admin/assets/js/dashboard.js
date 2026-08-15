@@ -1,5 +1,46 @@
 // ===== 管理面板功能 =====
 
+// 全局消息提示
+function showMessage(text, type = 'info') {
+    // 移除已有的提示
+    const existing = document.getElementById('globalToast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'globalToast';
+    toast.textContent = text;
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 500;
+        z-index: 9999;
+        opacity: 0;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+    `;
+    document.body.appendChild(toast);
+
+    // 显示
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+    });
+
+    // 3秒后消失
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
     // 检查登录状态（调用 API）
     try {
@@ -1429,6 +1470,45 @@ function initDriveManager() {
             }
         });
     });
+
+    // 图标选择器
+    initIconPicker();
+}
+
+// 图标选择器
+const ICON_OPTIONS = ['📁','📂','📄','📝','📊','📈','📉','🎵','🎬','📷','🖼️','📚','📦','💾','🗂️','📋','📌','🔖','⭐','🌟','🔥','💡','🎯','🚀','📱','💻','🎮','🎨','🎭','🏠'];
+
+function initIconPicker() {
+    const picker = document.getElementById('iconPicker');
+    const btn = document.getElementById('iconPickerBtn');
+    if (!picker || !btn) return;
+
+    // 生成图标选项
+    picker.innerHTML = ICON_OPTIONS.map(icon => 
+        `<button type="button" data-icon="${icon}" style="background:none;border:none;font-size:1.25rem;padding:0.375rem;cursor:pointer;border-radius:0.25rem;transition:background 0.2s;">${icon}</button>`
+    ).join('');
+
+    // 点击按钮切换选择器
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
+    });
+
+    // 选择图标
+    picker.addEventListener('click', function(e) {
+        const btn = e.target.closest('button[data-icon]');
+        if (btn) {
+            const icon = btn.dataset.icon;
+            document.getElementById('driveItemIcon').value = icon;
+            document.getElementById('iconPickerBtn').textContent = icon;
+            picker.style.display = 'none';
+        }
+    });
+
+    // 点击其他地方关闭
+    document.addEventListener('click', function() {
+        picker.style.display = 'none';
+    });
 }
 
 let editingDriveItemId = null;
@@ -1525,7 +1605,9 @@ function renderDriveItems(items) {
 function openDriveItemModal(item = null) {
     editingDriveItemId = item ? item.id : null;
     document.getElementById('driveItemModalTitle').textContent = item ? '编辑文件' : '添加文件';
-    document.getElementById('driveItemIcon').value = item ? (item.icon || '📄') : '📄';
+    const defaultIcon = item ? (item.icon || '📁') : '📁';
+    document.getElementById('driveItemIcon').value = defaultIcon;
+    document.getElementById('iconPickerBtn').textContent = defaultIcon;
     document.getElementById('driveItemName').value = item ? (item.name || '') : '';
     document.getElementById('driveItemDesc').value = item ? (item.description || '') : '';
     document.getElementById('driveItemCode').value = item ? (item.extractCode || '') : '';
@@ -1539,7 +1621,7 @@ function closeDriveItemModal() {
 }
 
 async function saveDriveItem() {
-    const icon = document.getElementById('driveItemIcon').value || '📄';
+    const icon = document.getElementById('driveItemIcon').value || '📁';
     const name = document.getElementById('driveItemName').value.trim();
     const description = document.getElementById('driveItemDesc').value.trim();
     const extractCode = document.getElementById('driveItemCode').value.trim();
@@ -1549,6 +1631,11 @@ async function saveDriveItem() {
         showMessage('文件名不能为空', 'error');
         return;
     }
+
+    const saveBtn = document.getElementById('driveItemSaveBtn');
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = '保存中...';
 
     const body = { name, description, extractCode, url, icon };
     const urlPath = editingDriveItemId ? `/api/drive-items/${editingDriveItemId}` : '/api/drive-items';
@@ -1571,6 +1658,9 @@ async function saveDriveItem() {
         }
     } catch (err) {
         showMessage('网络错误', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
     }
 }
 
@@ -1634,9 +1724,14 @@ async function batchAddDriveItems() {
             description: parts[1] || '',
             extractCode: parts[2] || '',
             url: parts[3] || '',
-            icon: '📄'
+            icon: '📁'
         };
     });
+
+    const saveBtn = document.getElementById('driveBatchSaveBtn');
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = '添加中...';
 
     try {
         const response = await fetch('/api/drive-items?action=batch', {
@@ -1655,6 +1750,9 @@ async function batchAddDriveItems() {
         }
     } catch (err) {
         showMessage('网络错误', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
     }
 }
 
