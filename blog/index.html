@@ -320,9 +320,9 @@
             <!-- 侧边栏 -->
             <aside class="sidebar">
                 <div class="sidebar-card profile-card">
-                    <div class="profile-avatar">📝</div>
-                    <div class="profile-name">我的博客</div>
-                    <div class="profile-bio">记录生活与技术</div>
+                    <div class="profile-avatar" id="blogProfileAvatar">📝</div>
+                    <div class="profile-name" id="blogProfileName">我的博客</div>
+                    <div class="profile-bio" id="blogProfileBio">记录生活与技术</div>
                 </div>
 
                 <div class="sidebar-card">
@@ -484,7 +484,37 @@
             return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        document.addEventListener('DOMContentLoaded', loadPosts);
+        // 加载个人资料（与个人主页同步）
+        async function loadBlogProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                const data = await response.json();
+                if (data.success && data.data) {
+                    const profile = data.data;
+                    // 头像
+                    const avatarEl = document.getElementById('blogProfileAvatar');
+                    if (profile.avatar) {
+                        avatarEl.innerHTML = `<img src="${profile.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                        avatarEl.style.background = 'transparent';
+                    }
+                    // 名称
+                    if (profile.name) {
+                        document.getElementById('blogProfileName').textContent = profile.name;
+                    }
+                    // 简介
+                    if (profile.bio) {
+                        document.getElementById('blogProfileBio').textContent = profile.bio;
+                    }
+                }
+            } catch (e) {
+                // 加载失败保持默认
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPosts();
+            loadBlogProfile();
+        });
     </script>
 </body>
 </html>
