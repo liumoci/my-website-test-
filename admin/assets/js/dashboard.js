@@ -97,7 +97,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // 网盘管理
     initDriveManager();
-    
+
+    // 文章管理
+    initPostManager();
+
     // 导航管理
     initNavManager();
     
@@ -1803,6 +1806,357 @@ async function batchDeleteDriveItems() {
     } catch (err) {
         showMessage('网络错误', 'error');
     }
+}
+
+// ===== 文章管理 =====
+let editingPostId = null;
+let postCurrentTab = 'all';
+let postBatchMode = false;
+
+function initPostManager() {
+    // 新建文章
+    document.getElementById('newPostBtn')?.addEventListener('click', () => openPostEditor());
+
+    // 上传文件
+    document.getElementById('uploadPostBtn')?.addEventListener('click', () => {
+        document.getElementById('postFileInput').click();
+    });
+    document.getElementById('postFileInput')?.addEventListener('change', handlePostFileUpload);
+
+    // 批量删除模式
+    document.getElementById('batchPostDeleteBtn')?.addEventListener('click', enterPostBatchMode);
+    document.getElementById('postExitBatchBtn')?.addEventListener('click', exitPostBatchMode);
+    document.getElementById('postSelectAll')?.addEventListener('change', function() {
+        document.querySelectorAll('.post-item-checkbox:enabled').forEach(cb => cb.checked = this.checked);
+        updatePostSelectedCount();
+    });
+    document.getElementById('postBatchTrashBtn')?.addEventListener('click', batchPostAction('trash'));
+    document.getElementById('postBatchRestoreBtn')?.addEventListener('click', batchPostAction('restore'));
+    document.getElementById('postBatchForceDeleteBtn')?.addEventListener('click', batchPostAction('delete'));
+
+    // 编辑器
+    document.getElementById('postEditorCancelBtn')?.addEventListener('click', closePostEditor);
+    document.getElementById('postEditorSaveBtn')?.addEventListener('click', savePost);
+
+    // 标签页切换
+    document.querySelectorAll('[data-post-tab]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-post-tab]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            postCurrentTab = this.dataset.postTab;
+            exitPostBatchMode();
+            loadAdminPosts();
+        });
+    });
+
+    // 点击弹窗背景关闭
+    document.getElementById('postEditorModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closePostEditor();
+    });
+}
+
+async function loadAdminPosts() {
+    try {
+        const response = await fetch('/api/posts/admin', { credentials: 'include' });
+        const data = await response.json();
+        if (data.success) {
+            renderAdminPosts(data.data);
+        }
+    } catch (err) {
+        console.error('加载文章失败:', err);
+        document.getElementById('postsAdminList').innerHTML = 
+            '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-secondary);">加载失败</td></tr>';
+    }
+}
+
+function renderAdminPosts(posts) {
+    const tbody = document.getElementById('postsAdminList');
+    let filtered = posts;
+
+    if (postCurrentTab === 'trash') {
+        filtered = posts.filter(p => p.deleted);
+    } else {
+        filtered = posts.filter(p => !p.deleted);
+    }
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-secondary);">${postCurrentTab === 'trash' ? '回收站为空' : '暂无文章，点击"新建文章"开始'}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(post => {
+        const date = new Date(post.date).toLocaleDateString('zh-CN');
+        const statusBadge = post.deleted ? 
+            '<span style="color:#ef4444;">已删除</span>' :
+            (post.published ? '<span style="color:#10b981;">已发布</span>' : '<span style="color:#f59e0b;">草稿</span>');
+
+        let actions = '';
+        if (post.deleted) {
+            actions = `
+                <button class="btn-link" onclick="restorePost('${post.id}')">恢复</button>
+                <button class="btn-link danger" onclick="forceDeletePost('${post.id}')">永久删除</button>
+            `;
+        } else {
+            actions = `
+                <button class="btn-link" onclick="editPost('${post.id}')">编辑</button>
+                <button class="btn-link danger" onclick="deletePost('${post.id}')">删除</button>
+            `;
+        }
+
+        return `
+            <tr data-id="${post.id}">
+                <td class="col-checkbox">
+                    <input type="checkbox" class="post-item-checkbox" data-id="${post.id}" style="${postBatchMode ? '' : 'display:none;'}">
+                </td>
+                <td style="font-weight:500;">${post.pinned ? '📌 ' : ''}${escapeHtml(post.title)}</td>
+                <td>${escapeHtml(post.category || '未分类')}</td>
+                <td>${statusBadge}</td>
+                <td style="font-size:0.85rem;color:var(--text-secondary);">${date}</td>
+                <td class="col-action">${actions}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function openPostEditor(post = null) {
+    editingPostId = post ? post.id : null;
+    document.getElementById('postEditorTitle').textContent = post ? '编辑文章' : '新建文章';
+    document.getElementById('postTitleInput').value = post ? (post.title || '') : '';
+    document.getElementById('postCategoryInput').value = post ? (post.category || '') : '';
+    document.getElementById('postTagsInput').value = post ? (post.tags || []).join(',') : '';
+    document.getElementById('postCoverInput').value = post ? (post.cover || '') : '';
+    document.getElementById('postExcerptInput').value = post ? (post.excerpt || '') : '';
+    document.getElementById('postContentInput').value = post ? (post.content || '') : '';
+    document.getElementById('postPublishedInput').checked = post ? post.published !== false : true;
+    document.getElementById('postPinnedInput').checked = post ? post.pinned || false : false;
+    document.getElementById('postEditorModal').classList.add('show');
+}
+
+function closePostEditor() {
+    document.getElementById('postEditorModal').classList.remove('show');
+    editingPostId = null;
+}
+
+function editPost(id) {
+    // 从当前数据中获取文章
+    fetch(`/api/posts/${id}`).then(r => r.json()).then(data => {
+        if (data.success) openPostEditor(data.data);
+    });
+}
+
+async function savePost() {
+    const title = document.getElementById('postTitleInput').value.trim();
+    if (!title) {
+        showMessage('请输入文章标题', 'error');
+        return;
+    }
+
+    const content = document.getElementById('postContentInput').value;
+    const tags = document.getElementById('postTagsInput').value.split(',').map(t => t.trim()).filter(Boolean);
+
+    const body = {
+        title,
+        content,
+        excerpt: document.getElementById('postExcerptInput').value.trim() || content.substring(0, 150),
+        category: document.getElementById('postCategoryInput').value.trim() || '未分类',
+        tags,
+        cover: document.getElementById('postCoverInput').value.trim(),
+        published: document.getElementById('postPublishedInput').checked,
+        pinned: document.getElementById('postPinnedInput').checked,
+        readTime: Math.ceil(content.length / 500) || 1
+    };
+
+    const saveBtn = document.getElementById('postEditorSaveBtn');
+    const originalText = saveBtn.textContent;
+    saveBtn.disabled = true;
+    saveBtn.textContent = '保存中...';
+
+    try {
+        const url = editingPostId ? `/api/posts/${editingPostId}` : '/api/posts';
+        const method = editingPostId ? 'PUT' : 'POST';
+        const response = await fetch(url, {
+            method,
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage(editingPostId ? '修改成功' : '创建成功', 'success');
+            closePostEditor();
+            loadAdminPosts();
+        } else {
+            showMessage(data.message || '保存失败', 'error');
+        }
+    } catch (err) {
+        showMessage('网络错误', 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+    }
+}
+
+async function deletePost(id) {
+    if (!confirm('确定要将这篇文章移到回收站吗？')) return;
+    try {
+        const response = await fetch(`/api/posts/${id}`, { method: 'DELETE', credentials: 'include' });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('已移到回收站', 'success');
+            loadAdminPosts();
+        } else {
+            showMessage(data.message || '操作失败', 'error');
+        }
+    } catch (err) {
+        showMessage('网络错误', 'error');
+    }
+}
+
+async function restorePost(id) {
+    try {
+        const response = await fetch('/api/posts/batch', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: [id], action: 'restore' })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('已恢复', 'success');
+            loadAdminPosts();
+        } else {
+            showMessage(data.message || '操作失败', 'error');
+        }
+    } catch (err) {
+        showMessage('网络错误', 'error');
+    }
+}
+
+async function forceDeletePost(id) {
+    if (!confirm('确定要永久删除这篇文章吗？此操作不可恢复！')) return;
+    try {
+        const response = await fetch('/api/posts/batch', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: [id], action: 'delete' })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('已永久删除', 'success');
+            loadAdminPosts();
+        } else {
+            showMessage(data.message || '操作失败', 'error');
+        }
+    } catch (err) {
+        showMessage('网络错误', 'error');
+    }
+}
+
+// 批量模式
+function enterPostBatchMode() {
+    postBatchMode = true;
+    document.getElementById('postBatchToolbar').style.display = 'flex';
+    document.getElementById('batchPostDeleteBtn').style.display = 'none';
+    const isTrash = postCurrentTab === 'trash';
+    document.getElementById('postBatchTrashBtn').style.display = isTrash ? 'none' : 'inline-block';
+    document.getElementById('postBatchRestoreBtn').style.display = isTrash ? 'inline-block' : 'none';
+    document.getElementById('postBatchForceDeleteBtn').style.display = isTrash ? 'inline-block' : 'none';
+    loadAdminPosts();
+}
+
+function exitPostBatchMode() {
+    postBatchMode = false;
+    document.getElementById('postBatchToolbar').style.display = 'none';
+    document.getElementById('batchPostDeleteBtn').style.display = 'inline-block';
+    document.getElementById('postSelectAll').checked = false;
+    loadAdminPosts();
+}
+
+function updatePostSelectedCount() {
+    const checked = document.querySelectorAll('.post-item-checkbox:checked');
+    document.getElementById('postSelectedCount').textContent = `已选 ${checked.length} 篇`;
+}
+
+function batchPostAction(action) {
+    return async function() {
+        const checked = document.querySelectorAll('.post-item-checkbox:checked');
+        if (checked.length === 0) {
+            showMessage('请先选择文章', 'error');
+            return;
+        }
+        const ids = Array.from(checked).map(cb => cb.dataset.id);
+        const actionText = action === 'trash' ? '移到回收站' : action === 'restore' ? '恢复' : '永久删除';
+        if (!confirm(`确定要${actionText}选中的 ${ids.length} 篇文章吗？`)) return;
+
+        try {
+            const response = await fetch('/api/posts/batch', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids, action })
+            });
+            const data = await response.json();
+            if (data.success) {
+                showMessage(`${actionText}成功`, 'success');
+                exitPostBatchMode();
+            } else {
+                showMessage(data.message || '操作失败', 'error');
+            }
+        } catch (err) {
+            showMessage('网络错误', 'error');
+        }
+    };
+}
+
+// 文件上传
+async function handlePostFileUpload(e) {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    let success = 0;
+    let failed = 0;
+
+    for (const file of files) {
+        try {
+            let content = '';
+            if (file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+                content = await file.text();
+            } else if (file.name.endsWith('.docx')) {
+                // docx 简单处理：提示用户转换
+                showMessage(`文件 ${file.name} 为 docx 格式，请先转换为 txt/md 后上传`, 'error');
+                failed++;
+                continue;
+            } else {
+                content = await file.text();
+            }
+
+            const title = file.name.replace(/\.(txt|md|docx)$/i, '');
+            const response = await fetch('/api/posts', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title,
+                    content: content.replace(/\n/g, '<br>'),
+                    excerpt: content.substring(0, 150),
+                    category: '未分类',
+                    tags: [],
+                    published: true,
+                    readTime: Math.ceil(content.length / 500) || 1
+                })
+            });
+            const data = await response.json();
+            if (data.success) success++;
+            else failed++;
+        } catch (err) {
+            failed++;
+        }
+    }
+
+    showMessage(`上传完成：成功 ${success} 篇，失败 ${failed} 篇`, success > 0 ? 'success' : 'error');
+    e.target.value = '';
+    loadAdminPosts();
 }
 
 // 留言管理标签页切换

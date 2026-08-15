@@ -130,23 +130,98 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h2>文章管理</h2>
-                        <button class="btn-primary">新建文章</button>
-                    </div>
-                    <div class="post-list-admin">
-                        <div class="post-item-admin">
-                            <div class="post-info">
-                                <h3>示例文章标题</h3>
-                                <p class="post-meta">发布于 2026-08-09 · 标签：示例</p>
-                            </div>
-                            <div class="post-actions">
-                                <button class="btn-link">编辑</button>
-                                <button class="btn-link danger">删除</button>
-                            </div>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button id="newPostBtn" class="btn-primary btn-small">+ 新建文章</button>
+                            <button id="uploadPostBtn" class="btn-secondary btn-small">📁 上传文件</button>
+                            <input type="file" id="postFileInput" accept=".txt,.md,.docx" multiple style="display:none;">
+                            <button id="batchPostDeleteBtn" class="btn-danger btn-small">批量删除</button>
                         </div>
                     </div>
-                    <p class="notice">⚠️ 纯静态模式下文章管理仅为演示，实际操作需要后端支持</p>
+
+                    <!-- 标签页 -->
+                    <div class="tabs" style="margin-bottom:1rem;">
+                        <button class="tab-btn active" data-post-tab="all">全部文章</button>
+                        <button class="tab-btn" data-post-tab="trash">回收站</button>
+                    </div>
+
+                    <!-- 批量操作工具栏 -->
+                    <div id="postBatchToolbar" style="display:none;padding:0.75rem 1rem;background:var(--bg-color);border-radius:0.5rem;margin-bottom:1rem;align-items:center;gap:0.75rem;">
+                        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.9rem;">
+                            <input type="checkbox" id="postSelectAll"> 全选
+                        </label>
+                        <span id="postSelectedCount" style="font-size:0.85rem;color:var(--text-secondary);">已选 0 篇</span>
+                        <div style="flex:1;"></div>
+                        <button id="postBatchTrashBtn" class="btn-danger btn-small">移到回收站</button>
+                        <button id="postBatchRestoreBtn" class="btn-secondary btn-small" style="display:none;">恢复</button>
+                        <button id="postBatchForceDeleteBtn" class="btn-danger btn-small" style="display:none;">永久删除</button>
+                        <button id="postExitBatchBtn" class="btn-secondary btn-small">退出</button>
+                    </div>
+
+                    <!-- 文章列表 -->
+                    <div class="drive-table-container">
+                        <table class="drive-manage-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-checkbox"><input type="checkbox" id="postTableSelectAll" style="display:none;"></th>
+                                    <th>标题</th>
+                                    <th>分类</th>
+                                    <th>状态</th>
+                                    <th>日期</th>
+                                    <th class="col-action">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="postsAdminList">
+                                <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-secondary);">加载中...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
+
+            <!-- 文章编辑弹窗 -->
+            <div id="postEditorModal" class="modal">
+                <div class="modal-content" style="max-width:900px;width:95%;">
+                    <h3 id="postEditorTitle">新建文章</h3>
+                    <div class="form-group">
+                        <label>文章标题 *</label>
+                        <input type="text" id="postTitleInput" placeholder="输入文章标题" class="form-input">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                        <div class="form-group" style="margin:0;">
+                            <label>分类</label>
+                            <input type="text" id="postCategoryInput" placeholder="未分类" class="form-input">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>标签（逗号分隔）</label>
+                            <input type="text" id="postTagsInput" placeholder="标签1,标签2" class="form-input">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>封面图URL</label>
+                            <input type="text" id="postCoverInput" placeholder="可选" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>摘要</label>
+                        <textarea id="postExcerptInput" rows="2" placeholder="文章摘要（可选，不填则自动截取）" class="form-input"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>文章内容 *</label>
+                        <textarea id="postContentInput" rows="12" placeholder="支持HTML标签，如 &lt;p&gt;段落&lt;/p&gt; &lt;h2&gt;标题&lt;/h2&gt; &lt;code&gt;代码&lt;/code&gt;" class="form-input" style="font-family:monospace;font-size:0.85rem;line-height:1.6;"></textarea>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+                        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                            <input type="checkbox" id="postPublishedInput" checked> 立即发布
+                        </label>
+                        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                            <input type="checkbox" id="postPinnedInput"> 置顶
+                        </label>
+                    </div>
+                    <div class="form-actions" style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                        <button id="postEditorCancelBtn" class="btn-secondary">取消</button>
+                        <button id="postEditorSaveBtn" class="btn-primary">保存</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- 个人主页管理页面 -->
             <section id="page-profile" class="page-section">
