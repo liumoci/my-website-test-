@@ -1,7 +1,7 @@
 // GET /api/posts/:id - 获取文章详情（公开）
 // PUT /api/posts/:id - 修改文章（管理员）
 // DELETE /api/posts/:id - 移到回收站（管理员）
-import { getPostsData, savePostsData, verifyAdmin, jsonResponse } from '../_lib.js';
+import { getPostsData, savePostsData, verifyAdmin, jsonResponse } from './_lib.js';
 
 export async function onRequest(context) {
   const { request, env, params } = context;
