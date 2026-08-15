@@ -1384,35 +1384,66 @@ function initMessagesManager() {
 
 function initDriveManager() {
     const saveBtn = document.getElementById('saveDriveSettingsBtn');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', saveDriveSettings);
-    }
+    if (saveBtn) saveBtn.addEventListener('click', saveDriveSettings);
+
+    // 添加文件
+    const addBtn = document.getElementById('addDriveItemBtn');
+    if (addBtn) addBtn.addEventListener('click', () => openDriveItemModal());
+
+    // 批量添加
+    const batchAddBtn = document.getElementById('batchAddDriveItemBtn');
+    if (batchAddBtn) batchAddBtn.addEventListener('click', openDriveBatchModal);
+
+    // 批量删除模式
+    const batchDeleteBtn = document.getElementById('batchDeleteDriveItemBtn');
+    if (batchDeleteBtn) batchDeleteBtn.addEventListener('click', enterDriveBatchMode);
+
+    const exitBatchBtn = document.getElementById('driveExitBatch');
+    if (exitBatchBtn) exitBatchBtn.addEventListener('click', exitDriveBatchMode);
+
+    const selectAll = document.getElementById('driveSelectAll');
+    if (selectAll) selectAll.addEventListener('change', function() {
+        document.querySelectorAll('.drive-item-checkbox:enabled').forEach(cb => cb.checked = this.checked);
+        updateDriveSelectedCount();
+    });
+
+    const confirmBatchDelete = document.getElementById('driveConfirmBatchDelete');
+    if (confirmBatchDelete) confirmBatchDelete.addEventListener('click', batchDeleteDriveItems);
+
+    // 弹窗按钮
+    const itemCancel = document.getElementById('driveItemCancelBtn');
+    if (itemCancel) itemCancel.addEventListener('click', closeDriveItemModal);
+    const itemSave = document.getElementById('driveItemSaveBtn');
+    if (itemSave) itemSave.addEventListener('click', saveDriveItem);
+
+    const batchCancel = document.getElementById('driveBatchCancelBtn');
+    if (batchCancel) batchCancel.addEventListener('click', closeDriveBatchModal);
+    const batchSave = document.getElementById('driveBatchSaveBtn');
+    if (batchSave) batchSave.addEventListener('click', batchAddDriveItems);
 }
+
+let editingDriveItemId = null;
+let driveBatchMode = false;
 
 async function loadDriveSettings() {
     try {
-        const response = await fetch('/api/drive-settings', {
-            credentials: 'include'
-        });
+        const response = await fetch('/api/drive-settings', { credentials: 'include' });
         const data = await response.json();
-        
         if (data.success) {
             document.getElementById('driveTitle').value = data.data.title || '';
             document.getElementById('driveDesc').value = data.data.description || '';
-            document.getElementById('driveUrl').value = data.data.redirectUrl || '';
-            document.getElementById('drivePassword').value = data.data.extractPassword || '';
             document.getElementById('driveEnabled').checked = data.data.enabled !== false;
         }
     } catch (err) {
         console.error('加载网盘设置失败:', err);
     }
+    // 同时加载文件列表
+    loadDriveItems();
 }
 
 async function saveDriveSettings() {
     const title = document.getElementById('driveTitle').value;
     const description = document.getElementById('driveDesc').value;
-    const redirectUrl = document.getElementById('driveUrl').value;
-    const extractPassword = document.getElementById('drivePassword').value;
     const enabled = document.getElementById('driveEnabled').checked;
 
     const saveBtn = document.getElementById('saveDriveSettingsBtn');
@@ -1424,31 +1455,246 @@ async function saveDriveSettings() {
         const response = await fetch('/api/drive-settings', {
             method: 'POST',
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title,
-                description,
-                redirectUrl,
-                extractPassword,
-                enabled
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, description, enabled })
         });
-
         const data = await response.json();
-
         if (data.success) {
-            showMessage('网盘设置保存成功', 'success');
+            showMessage('设置保存成功', 'success');
         } else {
             showMessage(data.message || '保存失败', 'error');
         }
     } catch (err) {
-        console.error(err);
         showMessage('网络错误', 'error');
     } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = originalText;
+    }
+}
+
+// ===== 文件列表管理 =====
+async function loadDriveItems() {
+    try {
+        const response = await fetch('/api/drive-items');
+        const data = await response.json();
+        if (data.success) {
+            renderDriveItems(data.data);
+        }
+    } catch (err) {
+        console.error('加载文件列表失败:', err);
+        document.getElementById('driveItemsBody').innerHTML = 
+            '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-secondary);">加载失败</td></tr>';
+    }
+}
+
+function renderDriveItems(items) {
+    const tbody = document.getElementById('driveItemsBody');
+    if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-secondary);">暂无文件，点击"添加文件"开始</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = items.map(item => `
+        <tr data-id="${item.id}">
+            <td class="col-checkbox">
+                <input type="checkbox" class="drive-item-checkbox" data-id="${item.id}" style="${driveBatchMode ? '' : 'display:none;'}">
+            </td>
+            <td class="col-icon">${escapeHtml(item.icon || '📄')}</td>
+            <td class="col-name">${escapeHtml(item.name)}</td>
+            <td class="col-desc">${escapeHtml(item.description || '-')}</td>
+            <td class="col-code">${item.extractCode ? escapeHtml(item.extractCode) : '-'}</td>
+            <td class="col-url" title="${escapeHtml(item.url || '')}">${item.url ? escapeHtml(item.url) : '-'}</td>
+            <td class="col-action">
+                <button class="btn-link" onclick="editDriveItem('${item.id}')">编辑</button>
+                <button class="btn-link danger" onclick="deleteDriveItem('${item.id}')">删除</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// 添加/编辑弹窗
+function openDriveItemModal(item = null) {
+    editingDriveItemId = item ? item.id : null;
+    document.getElementById('driveItemModalTitle').textContent = item ? '编辑文件' : '添加文件';
+    document.getElementById('driveItemIcon').value = item ? (item.icon || '📄') : '📄';
+    document.getElementById('driveItemName').value = item ? (item.name || '') : '';
+    document.getElementById('driveItemDesc').value = item ? (item.description || '') : '';
+    document.getElementById('driveItemCode').value = item ? (item.extractCode || '') : '';
+    document.getElementById('driveItemUrl').value = item ? (item.url || '') : '';
+    document.getElementById('driveItemModal').style.display = 'flex';
+}
+
+function closeDriveItemModal() {
+    document.getElementById('driveItemModal').style.display = 'none';
+    editingDriveItemId = null;
+}
+
+async function saveDriveItem() {
+    const icon = document.getElementById('driveItemIcon').value || '📄';
+    const name = document.getElementById('driveItemName').value.trim();
+    const description = document.getElementById('driveItemDesc').value.trim();
+    const extractCode = document.getElementById('driveItemCode').value.trim();
+    const url = document.getElementById('driveItemUrl').value.trim();
+
+    if (!name) {
+        showMessage('文件名不能为空', 'error');
+        return;
+    }
+
+    const body = { name, description, extractCode, url, icon };
+    const urlPath = editingDriveItemId ? `/api/drive-items/${editingDriveItemId}` : '/api/drive-items';
+    const method = editingDriveItemId ? 'PUT' : 'POST';
+
+    try {
+        const response = await fetch(urlPath, {
+            method,
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage(editingDriveItemId ? '修改成功' : '添加成功', 'success');
+            closeDriveItemModal();
+            loadDriveItems();
+        } else {
+            showMessage(data.message || '操作失败', 'error');
+        }
+    } catch (err) {
+        showMessage('网络错误', 'error');
+    }
+}
+
+function editDriveItem(id) {
+    // 从当前渲染的数据中找到对应项
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    if (!row) return;
+    const cells = row.querySelectorAll('td');
+    const item = {
+        id,
+        icon: cells[1].textContent.trim(),
+        name: cells[2].textContent.trim(),
+        description: cells[3].textContent.trim() === '-' ? '' : cells[3].textContent.trim(),
+        extractCode: cells[4].textContent.trim() === '-' ? '' : cells[4].textContent.trim(),
+        url: cells[5].getAttribute('title') || ''
+    };
+    openDriveItemModal(item);
+}
+
+async function deleteDriveItem(id) {
+    if (!confirm('确定要删除这个文件吗？')) return;
+    try {
+        const response = await fetch(`/api/drive-items/${id}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('删除成功', 'success');
+            loadDriveItems();
+        } else {
+            showMessage(data.message || '删除失败', 'error');
+        }
+    } catch (err) {
+        showMessage('网络错误', 'error');
+    }
+}
+
+// 批量添加
+function openDriveBatchModal() {
+    document.getElementById('driveBatchInput').value = '';
+    document.getElementById('driveBatchModal').style.display = 'flex';
+}
+
+function closeDriveBatchModal() {
+    document.getElementById('driveBatchModal').style.display = 'none';
+}
+
+async function batchAddDriveItems() {
+    const input = document.getElementById('driveBatchInput').value.trim();
+    if (!input) {
+        showMessage('请输入文件内容', 'error');
+        return;
+    }
+
+    const lines = input.split('\n').filter(line => line.trim());
+    const items = lines.map(line => {
+        const parts = line.split('|').map(p => p.trim());
+        return {
+            name: parts[0] || '未命名',
+            description: parts[1] || '',
+            extractCode: parts[2] || '',
+            url: parts[3] || '',
+            icon: '📄'
+        };
+    });
+
+    try {
+        const response = await fetch('/api/drive-items?action=batch', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage(`成功添加 ${items.length} 个文件`, 'success');
+            closeDriveBatchModal();
+            loadDriveItems();
+        } else {
+            showMessage(data.message || '添加失败', 'error');
+        }
+    } catch (err) {
+        showMessage('网络错误', 'error');
+    }
+}
+
+// 批量删除模式
+function enterDriveBatchMode() {
+    driveBatchMode = true;
+    document.getElementById('driveBatchToolbar').style.display = 'flex';
+    document.getElementById('batchDeleteDriveItemBtn').style.display = 'none';
+    loadDriveItems();
+}
+
+function exitDriveBatchMode() {
+    driveBatchMode = false;
+    document.getElementById('driveBatchToolbar').style.display = 'none';
+    document.getElementById('batchDeleteDriveItemBtn').style.display = 'inline-block';
+    document.getElementById('driveSelectAll').checked = false;
+    loadDriveItems();
+}
+
+function updateDriveSelectedCount() {
+    const checked = document.querySelectorAll('.drive-item-checkbox:checked');
+    document.getElementById('driveSelectedCount').textContent = `已选 ${checked.length} 项`;
+}
+
+async function batchDeleteDriveItems() {
+    const checked = document.querySelectorAll('.drive-item-checkbox:checked');
+    if (checked.length === 0) {
+        showMessage('请先选择要删除的文件', 'error');
+        return;
+    }
+    if (!confirm(`确定要删除选中的 ${checked.length} 个文件吗？`)) return;
+
+    const ids = Array.from(checked).map(cb => cb.dataset.id);
+    try {
+        const response = await fetch('/api/drive-items?action=batch-delete', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage(`成功删除 ${ids.length} 个文件`, 'success');
+            exitDriveBatchMode();
+        } else {
+            showMessage(data.message || '删除失败', 'error');
+        }
+    } catch (err) {
+        showMessage('网络错误', 'error');
     }
 }
 

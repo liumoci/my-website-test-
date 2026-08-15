@@ -8,121 +8,149 @@
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <style>
         .drive-page {
-            min-height: calc(100vh - 80px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 1rem;
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
         }
-        .drive-card {
-            width: 100%;
-            max-width: 420px;
-            background: var(--card-bg);
-            border-radius: 1.5rem;
-            padding: 3rem 2.5rem;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
+        .drive-header {
             text-align: center;
-        }
-        .drive-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            display: block;
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            margin-bottom: 2rem;
         }
         .drive-title {
             font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
             color: var(--text-primary);
-            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
         }
         .drive-desc {
             color: var(--text-secondary);
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-        .drive-input-wrap {
-            margin-bottom: 1.25rem;
-            text-align: left;
-        }
-        .drive-label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-        .drive-input {
-            width: 100%;
-            padding: 0.875rem 1.25rem;
-            border: 2px solid var(--border-color);
-            border-radius: 0.75rem;
             font-size: 1rem;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            box-sizing: border-box;
-            transition: all 0.2s;
         }
-        .drive-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        .drive-btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
+        .drive-table-container {
+            background: var(--card-bg);
             border-radius: 0.75rem;
-            font-size: 1.05rem;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+        }
+        .drive-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .drive-table thead {
+            background: var(--bg-secondary, #f9fafb);
+            border-bottom: 2px solid var(--border-color);
+        }
+        .drive-table th {
+            padding: 1rem 1.25rem;
+            text-align: left;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.05em;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            white-space: nowrap;
         }
-        .drive-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        .drive-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            vertical-align: middle;
         }
-        .drive-btn:active {
-            transform: translateY(0);
+        .drive-table tbody tr:last-child td {
+            border-bottom: none;
         }
-        .drive-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .drive-table tbody tr:hover {
+            background: var(--bg-secondary, #f9fafb);
         }
-        .drive-error {
-            color: #ef4444;
+        .file-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .file-icon {
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+        .file-name {
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        .file-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .extract-code {
+            font-family: monospace;
+            background: var(--bg-secondary, #f3f4f6);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
             font-size: 0.85rem;
-            margin-top: 0.75rem;
-            display: none;
+            color: var(--text-primary);
+        }
+        .jump-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .jump-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+        .jump-link.disabled {
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+        .empty-state {
             text-align: center;
-        }
-        .drive-disabled {
+            padding: 4rem 2rem;
             color: var(--text-secondary);
-            padding: 1rem;
         }
-        .drive-loading {
-            color: var(--text-secondary);
-            padding: 2rem;
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
         }
-        .drive-divider {
-            height: 1px;
-            background: var(--border-color);
-            margin: 1.5rem 0;
+        .col-checkbox {
+            width: 40px;
+        }
+        .col-name {
+            min-width: 200px;
+        }
+        .col-desc {
+            min-width: 250px;
+        }
+        .col-code {
+            width: 120px;
+        }
+        .col-action {
+            width: 100px;
+            text-align: right;
+        }
+        @media (max-width: 768px) {
+            .drive-table thead {
+                display: none;
+            }
+            .drive-table, .drive-table tbody, .drive-table tr, .drive-table td {
+                display: block;
+                width: 100%;
+            }
+            .drive-table tr {
+                padding: 1rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .drive-table td {
+                border: none;
+                padding: 0.25rem 0;
+            }
+            .col-action {
+                text-align: left;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- 页面加载动画 -->
     <div class="page-loader" id="pageLoader">
         <div class="loader-spinner"></div>
     </div>
@@ -143,122 +171,100 @@
 
     <main>
         <div class="drive-page">
-            <div id="driveContent" class="drive-card">
-                <div class="drive-loading">加载中...</div>
+            <div class="drive-header">
+                <h1 class="drive-title" id="driveTitle">我的云盘</h1>
+                <p class="drive-desc" id="driveDesc">点击链接跳转至对应资源</p>
+            </div>
+            <div class="drive-table-container">
+                <table class="drive-table">
+                    <thead>
+                        <tr>
+                            <th class="col-checkbox"></th>
+                            <th class="col-name">文档名称</th>
+                            <th class="col-desc">说明</th>
+                            <th class="col-code">提取码</th>
+                            <th class="col-action"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="driveTableBody">
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📂</div>
+                                    <div>加载中...</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
 
     <script src="../assets/js/main.js"></script>
     <script>
-        let driveSettings = null;
-
-        async function loadDriveSettings() {
+        async function loadDrivePage() {
             try {
-                const response = await fetch('/api/drive-settings');
-                const data = await response.json();
-                if (data.success) {
-                    driveSettings = data.data;
-                    renderDrivePage();
-                } else {
-                    showError('加载失败');
+                // 加载设置
+                const settingsRes = await fetch('/api/drive-settings');
+                const settingsData = await settingsRes.json();
+                if (settingsData.success) {
+                    document.getElementById('driveTitle').textContent = settingsData.data.title || '我的云盘';
+                    document.getElementById('driveDesc').textContent = settingsData.data.description || '点击链接跳转至对应资源';
+                }
+
+                // 加载文件列表
+                const itemsRes = await fetch('/api/drive-items');
+                const itemsData = await itemsRes.json();
+                if (itemsData.success) {
+                    renderDriveItems(itemsData.data);
                 }
             } catch (err) {
                 console.error(err);
-                showError('网络错误');
+                document.getElementById('driveTableBody').innerHTML = `
+                    <tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">⚠️</div><div>加载失败</div></div></td></tr>
+                `;
             }
         }
 
-        function renderDrivePage() {
-            const container = document.getElementById('driveContent');
+        function renderDriveItems(items) {
+            const tbody = document.getElementById('driveTableBody');
 
-            if (!driveSettings.enabled) {
-                container.innerHTML = `
-                    <span class="drive-icon">🔒</span>
-                    <div class="drive-title">云盘未启用</div>
-                    <div class="drive-disabled">管理员暂未开放云盘访问</div>
+            if (!items || items.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="5">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📂</div>
+                            <div>暂无文件</div>
+                        </div>
+                    </td></tr>
                 `;
                 return;
             }
 
-            if (driveSettings.requirePassword) {
-                container.innerHTML = `
-                    <span class="drive-icon">☁️</span>
-                    <div class="drive-title">${escapeHtml(driveSettings.title || '我的云盘')}</div>
-                    <div class="drive-desc">${escapeHtml(driveSettings.description || '请输入提取密码访问云盘')}</div>
-                    <div class="drive-divider"></div>
-                    <div class="drive-input-wrap">
-                        <label class="drive-label">提取密码</label>
-                        <input type="password" id="passwordInput" class="drive-input" placeholder="请输入提取密码" onkeydown="if(event.key==='Enter')verifyPassword()">
-                    </div>
-                    <button class="drive-btn" onclick="verifyPassword()" id="verifyBtn">进入云盘</button>
-                    <div class="drive-error" id="errorMsg"></div>
-                `;
-            } else {
-                container.innerHTML = `
-                    <span class="drive-icon">☁️</span>
-                    <div class="drive-title">${escapeHtml(driveSettings.title || '我的云盘')}</div>
-                    <div class="drive-desc">${escapeHtml(driveSettings.description || '点击下方按钮进入云盘')}</div>
-                    <div class="drive-divider"></div>
-                    <button class="drive-btn" onclick="goToDrive()">进入云盘</button>
-                `;
-            }
-        }
-
-        async function verifyPassword() {
-            const password = document.getElementById('passwordInput').value;
-            const errorMsg = document.getElementById('errorMsg');
-            const verifyBtn = document.getElementById('verifyBtn');
-
-            if (!password) {
-                errorMsg.textContent = '请输入提取密码';
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            verifyBtn.disabled = true;
-            verifyBtn.textContent = '验证中...';
-            errorMsg.style.display = 'none';
-
-            try {
-                const response = await fetch('/api/drive-settings/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password })
-                });
-                const data = await response.json();
-
-                if (data.success && data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                } else {
-                    errorMsg.textContent = data.message || '验证失败';
-                    errorMsg.style.display = 'block';
-                    verifyBtn.disabled = false;
-                    verifyBtn.textContent = '进入云盘';
-                }
-            } catch (err) {
-                console.error(err);
-                errorMsg.textContent = '网络错误';
-                errorMsg.style.display = 'block';
-                verifyBtn.disabled = false;
-                verifyBtn.textContent = '进入云盘';
-            }
-        }
-
-        async function goToDrive() {
-            try {
-                const response = await fetch('/api/drive-settings/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
-                });
-                const data = await response.json();
-                if (data.success && data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                }
-            } catch (err) {
-                console.error(err);
-            }
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td class="col-checkbox"></td>
+                    <td class="col-name">
+                        <div class="file-name-cell">
+                            <span class="file-icon">${escapeHtml(item.icon || (item.type === 'folder' ? '📁' : '📄'))}</span>
+                            <span class="file-name">${escapeHtml(item.name)}</span>
+                        </div>
+                    </td>
+                    <td class="col-desc">
+                        <span class="file-desc">${escapeHtml(item.description || '-')}</span>
+                    </td>
+                    <td class="col-code">
+                        ${item.extractCode ? `<span class="extract-code">${escapeHtml(item.extractCode)}</span>` : '-'}
+                    </td>
+                    <td class="col-action">
+                        ${item.url ? 
+                            `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" class="jump-link">点击跳转</a>` : 
+                            `<span class="jump-link disabled">暂无链接</span>`
+                        }
+                    </td>
+                </tr>
+            `).join('');
         }
 
         function escapeHtml(text) {
@@ -267,7 +273,7 @@
             return div.innerHTML;
         }
 
-        document.addEventListener('DOMContentLoaded', loadDriveSettings);
+        document.addEventListener('DOMContentLoaded', loadDrivePage);
     </script>
 </body>
 </html>

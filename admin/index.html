@@ -580,13 +580,11 @@
 
             <!-- 网盘管理页面 -->
             <section id="page-drive" class="page-section">
-                <div class="panel">
+                <!-- 全局设置 -->
+                <div class="panel" style="margin-bottom:1.5rem;">
                     <div class="panel-header">
-                        <h2>网盘管理</h2>
+                        <h2>页面设置</h2>
                     </div>
-                    <p class="hint" style="margin-bottom:1.5rem;">配置云盘跳转页面的标题、链接和提取密码</p>
-
-                    <!-- 设置项：页面标题 -->
                     <div class="setting-row">
                         <div class="setting-info">
                             <label class="setting-label">页面标题</label>
@@ -596,41 +594,15 @@
                             <input type="text" id="driveTitle" placeholder="例如：我的云盘" class="form-input">
                         </div>
                     </div>
-
-                    <!-- 设置项：页面描述 -->
                     <div class="setting-row">
                         <div class="setting-info">
                             <label class="setting-label">页面描述</label>
                             <p class="setting-desc">标题下方的说明文字</p>
                         </div>
                         <div class="setting-control">
-                            <input type="text" id="driveDesc" placeholder="例如：请输入提取密码访问云盘" class="form-input">
+                            <input type="text" id="driveDesc" placeholder="例如：点击链接跳转至对应资源" class="form-input">
                         </div>
                     </div>
-
-                    <!-- 设置项：跳转链接 -->
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <label class="setting-label">跳转链接</label>
-                            <p class="setting-desc">验证通过后跳转到的网盘地址</p>
-                        </div>
-                        <div class="setting-control">
-                            <input type="url" id="driveUrl" placeholder="https://drive.example.com" class="form-input">
-                        </div>
-                    </div>
-
-                    <!-- 设置项：提取密码 -->
-                    <div class="setting-row">
-                        <div class="setting-info">
-                            <label class="setting-label">提取密码</label>
-                            <p class="setting-desc">留空则无需密码，任何人可直接进入</p>
-                        </div>
-                        <div class="setting-control">
-                            <input type="text" id="drivePassword" placeholder="留空则无需密码" class="form-input">
-                        </div>
-                    </div>
-
-                    <!-- 设置项：启用开关 -->
                     <div class="setting-row">
                         <div class="setting-info">
                             <label class="setting-label">启用云盘</label>
@@ -643,12 +615,99 @@
                             </label>
                         </div>
                     </div>
-
-                    <div class="form-actions" style="margin-top:1.5rem;">
+                    <div class="form-actions" style="margin-top:1rem;">
                         <button id="saveDriveSettingsBtn" class="btn-primary">保存设置</button>
                     </div>
                 </div>
+
+                <!-- 文件列表管理 -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>文件列表</h2>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button id="addDriveItemBtn" class="btn-primary btn-small">+ 添加文件</button>
+                            <button id="batchAddDriveItemBtn" class="btn-secondary btn-small">批量添加</button>
+                            <button id="batchDeleteDriveItemBtn" class="btn-danger btn-small">批量删除</button>
+                        </div>
+                    </div>
+
+                    <!-- 批量操作工具栏 -->
+                    <div id="driveBatchToolbar" style="display:none;padding:0.75rem 1rem;background:var(--bg-color);border-radius:0.5rem;margin-bottom:1rem;align-items:center;gap:0.75rem;">
+                        <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.9rem;">
+                            <input type="checkbox" id="driveSelectAll"> 全选
+                        </label>
+                        <span id="driveSelectedCount" style="font-size:0.85rem;color:var(--text-secondary);">已选 0 项</span>
+                        <div style="flex:1;"></div>
+                        <button id="driveConfirmBatchDelete" class="btn-danger btn-small">删除选中</button>
+                        <button id="driveExitBatch" class="btn-secondary btn-small">退出</button>
+                    </div>
+
+                    <div class="drive-table-container">
+                        <table class="drive-manage-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-checkbox"><input type="checkbox" id="driveTableSelectAll" style="display:none;"></th>
+                                    <th class="col-icon">图标</th>
+                                    <th class="col-name">文件名</th>
+                                    <th class="col-desc">说明</th>
+                                    <th class="col-code">提取码</th>
+                                    <th class="col-url">跳转链接</th>
+                                    <th class="col-action">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="driveItemsBody">
+                                <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-secondary);">加载中...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </section>
+
+            <!-- 添加/编辑文件弹窗 -->
+            <div id="driveItemModal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+                <div class="modal-content" style="background:var(--card-bg);border-radius:1rem;padding:2rem;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;">
+                    <h3 id="driveItemModalTitle">添加文件</h3>
+                    <div class="form-group">
+                        <label>图标（emoji）</label>
+                        <input type="text" id="driveItemIcon" placeholder="📁 或 📄" class="form-input" value="📄">
+                    </div>
+                    <div class="form-group">
+                        <label>文件名 *</label>
+                        <input type="text" id="driveItemName" placeholder="例如：学习资料" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>说明</label>
+                        <input type="text" id="driveItemDesc" placeholder="文件说明" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>提取码</label>
+                        <input type="text" id="driveItemCode" placeholder="例如：1234" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>跳转链接</label>
+                        <input type="url" id="driveItemUrl" placeholder="https://..." class="form-input">
+                    </div>
+                    <div class="form-actions" style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                        <button id="driveItemCancelBtn" class="btn-secondary">取消</button>
+                        <button id="driveItemSaveBtn" class="btn-primary">保存</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 批量添加弹窗 -->
+            <div id="driveBatchModal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+                <div class="modal-content" style="background:var(--card-bg);border-radius:1rem;padding:2rem;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;">
+                    <h3>批量添加文件</h3>
+                    <p class="hint" style="margin-bottom:1rem;">每行一个文件，格式：文件名 | 说明 | 提取码 | 跳转链接</p>
+                    <div class="form-group">
+                        <textarea id="driveBatchInput" rows="10" placeholder="学习资料 | 各类学习文档 | 1234 | https://pan.baidu.com/xxx&#10;电影合集 | 经典电影 | 5678 | https://..." class="form-input" style="font-family:monospace;font-size:0.85rem;"></textarea>
+                    </div>
+                    <div class="form-actions" style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                        <button id="driveBatchCancelBtn" class="btn-secondary">取消</button>
+                        <button id="driveBatchSaveBtn" class="btn-primary">批量添加</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
