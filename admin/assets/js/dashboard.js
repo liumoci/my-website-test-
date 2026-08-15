@@ -266,6 +266,11 @@ function initNavigation() {
             if (page === 'drive') {
                 loadDriveSettings();
             }
+
+            // 切换到文章管理页面时加载数据
+            if (page === 'posts') {
+                loadAdminPosts();
+            }
         });
     });
     
