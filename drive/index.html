@@ -7,147 +7,297 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
     <style>
-        .drive-page {
-            max-width: 1100px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        .drive-page {
+            min-height: calc(100vh - 80px);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem 1rem;
+        }
+
+        .drive-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 头部 */
         .drive-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
+            color: white;
         }
-        .drive-title {
-            font-size: 2rem;
+
+        .drive-header h1 {
+            font-size: 2.5rem;
             font-weight: 700;
-            color: var(--text-primary);
             margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
-        .drive-desc {
-            color: var(--text-secondary);
-            font-size: 1rem;
+
+        .drive-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
         }
-        .drive-table-container {
-            background: var(--card-bg);
-            border-radius: 0.75rem;
-            overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border: 1px solid var(--border-color);
+
+        /* 搜索框 */
+        .drive-search {
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            position: relative;
         }
-        .drive-table {
+
+        .drive-search input {
             width: 100%;
-            border-collapse: collapse;
+            padding: 1rem 1rem 1rem 3rem;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            outline: none;
+            transition: all 0.3s;
         }
-        .drive-table thead {
-            background: var(--bg-secondary, #f9fafb);
-            border-bottom: 2px solid var(--border-color);
+
+        .drive-search input:focus {
+            box-shadow: 0 6px 30px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
         }
-        .drive-table th {
-            padding: 1rem 1.25rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            white-space: nowrap;
+
+        .drive-search::before {
+            content: "🔍";
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
         }
-        .drive-table td {
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-primary);
-            vertical-align: middle;
+
+        /* 文件网格 */
+        .drive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
         }
-        .drive-table tbody tr:last-child td {
-            border-bottom: none;
+
+        /* 文件卡片 */
+        .file-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
-        .drive-table tbody tr:hover {
-            background: var(--bg-secondary, #f9fafb);
+
+        .file-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s;
         }
-        .file-name-cell {
+
+        .file-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .file-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .file-card-header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
+
         .file-icon {
-            font-size: 1.75rem;
+            font-size: 2.5rem;
             flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f0f4ff, #e8ecff);
+            border-radius: 0.75rem;
         }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
         .file-name {
-            font-weight: 500;
-            font-size: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+
         .file-desc {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        .extract-code {
-            font-family: monospace;
-            background: var(--bg-secondary, #f3f4f6);
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
             font-size: 0.85rem;
-            color: var(--text-primary);
+            color: #6b7280;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .jump-link {
-            color: #3b82f6;
+
+        .file-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .extract-code {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .extract-code span {
+            background: #f3f4f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-family: monospace;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .jump-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
             text-decoration: none;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
             font-weight: 500;
+            transition: all 0.2s;
+            border: none;
             cursor: pointer;
-            transition: color 0.2s;
         }
-        .jump-link:hover {
-            color: #1d4ed8;
-            text-decoration: underline;
+
+        .jump-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
-        .jump-link.disabled {
-            color: var(--text-secondary);
+
+        .jump-btn.disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
             cursor: not-allowed;
-            text-decoration: none;
         }
+
+        .jump-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 空状态 */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
-            color: var(--text-secondary);
+            color: white;
         }
+
         .empty-state-icon {
-            font-size: 3rem;
+            font-size: 5rem;
             margin-bottom: 1rem;
-            opacity: 0.5;
+            opacity: 0.8;
         }
-        .col-checkbox {
-            width: 40px;
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
         }
-        .col-name {
-            min-width: 200px;
+
+        .empty-state p {
+            opacity: 0.8;
         }
-        .col-desc {
-            min-width: 250px;
+
+        /* 统计信息 */
+        .drive-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            color: white;
         }
-        .col-code {
-            width: 120px;
+
+        .stat-item {
+            text-align: center;
         }
-        .col-action {
-            width: 100px;
-            text-align: right;
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
         }
-        @media (max-width: 768px) {
-            .drive-table thead {
-                display: none;
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* 响应式 */
+        @media (max-width: 640px) {
+            .drive-header h1 {
+                font-size: 1.75rem;
             }
-            .drive-table, .drive-table tbody, .drive-table tr, .drive-table td {
-                display: block;
-                width: 100%;
+
+            .drive-grid {
+                grid-template-columns: 1fr;
             }
-            .drive-table tr {
-                padding: 1rem;
-                border-bottom: 1px solid var(--border-color);
-            }
-            .drive-table td {
-                border: none;
-                padding: 0.25rem 0;
-            }
-            .col-action {
-                text-align: left;
+
+            .drive-stats {
+                gap: 1rem;
             }
         }
+
+        /* 动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .file-card {
+            animation: fadeInUp 0.4s ease backwards;
+        }
+
+        .file-card:nth-child(1) { animation-delay: 0.05s; }
+        .file-card:nth-child(2) { animation-delay: 0.1s; }
+        .file-card:nth-child(3) { animation-delay: 0.15s; }
+        .file-card:nth-child(4) { animation-delay: 0.2s; }
+        .file-card:nth-child(5) { animation-delay: 0.25s; }
+        .file-card:nth-child(6) { animation-delay: 0.3s; }
     </style>
 </head>
 <body>
@@ -171,38 +321,34 @@
 
     <main>
         <div class="drive-page">
-            <div class="drive-header">
-                <h1 class="drive-title" id="driveTitle">我的云盘</h1>
-                <p class="drive-desc" id="driveDesc">点击链接跳转至对应资源</p>
-            </div>
-            <div class="drive-table-container">
-                <table class="drive-table">
-                    <thead>
-                        <tr>
-                            <th class="col-checkbox"></th>
-                            <th class="col-name">文档名称</th>
-                            <th class="col-desc">说明</th>
-                            <th class="col-code">提取码</th>
-                            <th class="col-action"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="driveTableBody">
-                        <tr>
-                            <td colspan="5">
-                                <div class="empty-state">
-                                    <div class="empty-state-icon">📂</div>
-                                    <div>加载中...</div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="drive-container">
+                <div class="drive-header">
+                    <h1 id="driveTitle">我的云盘</h1>
+                    <p id="driveDesc">点击卡片跳转至对应资源</p>
+                </div>
+
+                <div class="drive-search">
+                    <input type="text" id="searchInput" placeholder="搜索文件名或说明...">
+                </div>
+
+                <div class="drive-stats" id="driveStats" style="display:none;">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">个文件</div>
+                    </div>
+                </div>
+
+                <div class="drive-grid" id="driveGrid">
+                    <!-- 文件卡片动态生成 -->
+                </div>
             </div>
         </div>
     </main>
 
     <script src="../assets/js/main.js"></script>
     <script>
+        let allItems = [];
+
         async function loadDrivePage() {
             try {
                 // 加载设置
@@ -210,67 +356,102 @@
                 const settingsData = await settingsRes.json();
                 if (settingsData.success) {
                     document.getElementById('driveTitle').textContent = settingsData.data.title || '我的云盘';
-                    document.getElementById('driveDesc').textContent = settingsData.data.description || '点击链接跳转至对应资源';
+                    document.getElementById('driveDesc').textContent = settingsData.data.description || '点击卡片跳转至对应资源';
+
+                    if (!settingsData.data.enabled) {
+                        document.getElementById('driveGrid').innerHTML = `
+                            <div class="empty-state" style="grid-column:1/-1;">
+                                <div class="empty-state-icon">🔒</div>
+                                <h3>云盘未启用</h3>
+                                <p>管理员暂未开放云盘访问</p>
+                            </div>
+                        `;
+                        return;
+                    }
                 }
 
                 // 加载文件列表
                 const itemsRes = await fetch('/api/drive-items');
                 const itemsData = await itemsRes.json();
                 if (itemsData.success) {
-                    renderDriveItems(itemsData.data);
+                    allItems = itemsData.data;
+                    renderDriveItems(allItems);
                 }
             } catch (err) {
                 console.error(err);
-                document.getElementById('driveTableBody').innerHTML = `
-                    <tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">⚠️</div><div>加载失败</div></div></td></tr>
+                document.getElementById('driveGrid').innerHTML = `
+                    <div class="empty-state" style="grid-column:1/-1;">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>加载失败</h3>
+                        <p>请稍后重试</p>
+                    </div>
                 `;
             }
         }
 
         function renderDriveItems(items) {
-            const tbody = document.getElementById('driveTableBody');
+            const grid = document.getElementById('driveGrid');
+            const stats = document.getElementById('driveStats');
 
             if (!items || items.length === 0) {
-                tbody.innerHTML = `
-                    <tr><td colspan="5">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📂</div>
-                            <div>暂无文件</div>
-                        </div>
-                    </td></tr>
+                stats.style.display = 'none';
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column:1/-1;">
+                        <div class="empty-state-icon">📂</div>
+                        <h3>暂无文件</h3>
+                        <p>管理员还未添加任何文件</p>
+                    </div>
                 `;
                 return;
             }
 
-            tbody.innerHTML = items.map(item => `
-                <tr>
-                    <td class="col-checkbox"></td>
-                    <td class="col-name">
-                        <div class="file-name-cell">
-                            <span class="file-icon">${escapeHtml(item.icon || (item.type === 'folder' ? '📁' : '📄'))}</span>
-                            <span class="file-name">${escapeHtml(item.name)}</span>
+            stats.style.display = 'flex';
+            document.getElementById('totalCount').textContent = items.length;
+
+            grid.innerHTML = items.map(item => `
+                <div class="file-card" onclick="${item.url ? `window.open('${escapeAttr(item.url)}', '_blank')` : ''}">
+                    <div class="file-card-header">
+                        <div class="file-icon">${escapeHtml(item.icon || (item.type === 'folder' ? '📁' : '📄'))}</div>
+                        <div class="file-info">
+                            <div class="file-name">${escapeHtml(item.name)}</div>
+                            <div class="file-desc">${escapeHtml(item.description || '暂无说明')}</div>
                         </div>
-                    </td>
-                    <td class="col-desc">
-                        <span class="file-desc">${escapeHtml(item.description || '-')}</span>
-                    </td>
-                    <td class="col-code">
-                        ${item.extractCode ? `<span class="extract-code">${escapeHtml(item.extractCode)}</span>` : '-'}
-                    </td>
-                    <td class="col-action">
+                    </div>
+                    <div class="file-meta">
+                        <div class="extract-code">
+                            ${item.extractCode ? `提取码: <span>${escapeHtml(item.extractCode)}</span>` : '<span style="background:transparent;padding:0;">无提取码</span>'}
+                        </div>
                         ${item.url ? 
-                            `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" class="jump-link">点击跳转</a>` : 
-                            `<span class="jump-link disabled">暂无链接</span>`
+                            `<a href="${escapeAttr(item.url)}" target="_blank" rel="noopener" class="jump-btn" onclick="event.stopPropagation()">跳转 →</a>` : 
+                            `<span class="jump-btn disabled">暂无链接</span>`
                         }
-                    </td>
-                </tr>
+                    </div>
+                </div>
             `).join('');
         }
+
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const keyword = e.target.value.toLowerCase().trim();
+            if (!keyword) {
+                renderDriveItems(allItems);
+                return;
+            }
+            const filtered = allItems.filter(item => 
+                item.name.toLowerCase().includes(keyword) ||
+                (item.description && item.description.toLowerCase().includes(keyword))
+            );
+            renderDriveItems(filtered);
+        });
 
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        function escapeAttr(text) {
+            return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
         document.addEventListener('DOMContentLoaded', loadDrivePage);

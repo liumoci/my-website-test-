@@ -1642,6 +1642,12 @@ input:checked + .slider:before {
 }
 
 /* ===== 网盘管理表格 ===== */
+.drive-table-container {
+    overflow-x: auto;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+}
+
 .drive-manage-table {
     width: 100%;
     border-collapse: collapse;
@@ -1734,11 +1740,36 @@ input:checked + .slider:before {
 
 /* 弹窗 */
 .modal {
-    display: flex !important;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
 }
 
-.modal[style*="display:none"] {
-    display: none !important;
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-content h3 {
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
 }
 
 @keyframes fadeIn {

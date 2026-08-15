@@ -1420,6 +1420,15 @@ function initDriveManager() {
     if (batchCancel) batchCancel.addEventListener('click', closeDriveBatchModal);
     const batchSave = document.getElementById('driveBatchSaveBtn');
     if (batchSave) batchSave.addEventListener('click', batchAddDriveItems);
+
+    // 点击弹窗背景关闭
+    document.querySelectorAll('#driveItemModal, #driveBatchModal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    });
 }
 
 let editingDriveItemId = null;
@@ -1521,11 +1530,11 @@ function openDriveItemModal(item = null) {
     document.getElementById('driveItemDesc').value = item ? (item.description || '') : '';
     document.getElementById('driveItemCode').value = item ? (item.extractCode || '') : '';
     document.getElementById('driveItemUrl').value = item ? (item.url || '') : '';
-    document.getElementById('driveItemModal').style.display = 'flex';
+    document.getElementById('driveItemModal').classList.add('show');
 }
 
 function closeDriveItemModal() {
-    document.getElementById('driveItemModal').style.display = 'none';
+    document.getElementById('driveItemModal').classList.remove('show');
     editingDriveItemId = null;
 }
 
@@ -1603,11 +1612,11 @@ async function deleteDriveItem(id) {
 // 批量添加
 function openDriveBatchModal() {
     document.getElementById('driveBatchInput').value = '';
-    document.getElementById('driveBatchModal').style.display = 'flex';
+    document.getElementById('driveBatchModal').classList.add('show');
 }
 
 function closeDriveBatchModal() {
-    document.getElementById('driveBatchModal').style.display = 'none';
+    document.getElementById('driveBatchModal').classList.remove('show');
 }
 
 async function batchAddDriveItems() {
