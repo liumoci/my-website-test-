@@ -219,7 +219,7 @@ function initNavigation() {
     
     const pageTitles = {
         'dashboard': '概览',
-        'posts': '文章管理',
+        'posts': '博客管理',
         'profile': '个人主页',
         'nav': '导航管理',
         'stats': '访问统计',
@@ -286,6 +286,14 @@ function initNavigation() {
         if (targetNav) {
             targetNav.click();
         }
+    }
+}
+
+// 全局页面切换函数（供快速操作按钮等调用）
+function switchAdminPage(page) {
+    const targetNav = document.querySelector(`.nav-item[data-page="${page}"]`);
+    if (targetNav) {
+        targetNav.click();
     }
 }
 

@@ -1800,7 +1800,8 @@ input:checked + .slider:before {
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-family: inherit;
+    font-size: inherit;
 }
 
 .drive-manage-table .col-action {
