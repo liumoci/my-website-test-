@@ -685,8 +685,9 @@ footer {
 /* ===== 悬浮留言按钮 ===== */
 .floating-guestbook-btn {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 1.5rem;
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -704,18 +705,17 @@ footer {
 }
 
 .floating-guestbook-btn:hover {
-    transform: scale(1.1) rotate(10deg);
+    transform: translateY(-50%) scale(1.1) rotate(10deg);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
 .floating-guestbook-btn:active {
-    transform: scale(0.95);
+    transform: translateY(-50%) scale(0.95);
 }
 
 @media (max-width: 768px) {
     .floating-guestbook-btn {
-        bottom: 1.5rem;
-        right: 1.5rem;
+        right: 1rem;
         width: 48px;
         height: 48px;
         font-size: 1.25rem;
