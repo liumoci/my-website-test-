@@ -20,9 +20,10 @@ async function loadGuestbookSettings() {
         if (data.success && data.data) {
             const settings = data.data;
             
-            // 应用背景图
-            if (settings.backgroundImage) {
-                document.body.style.backgroundImage = 'url(' + settings.backgroundImage + ')';
+            // 应用背景图（优先URL，其次上传的base64）
+            const bgUrl = settings.backgroundImageUrl || settings.backgroundImage;
+            if (bgUrl) {
+                document.body.style.backgroundImage = 'url(' + bgUrl + ')';
                 document.body.style.backgroundSize = 'cover';
                 document.body.style.backgroundPosition = 'center';
                 document.body.style.backgroundAttachment = 'fixed';

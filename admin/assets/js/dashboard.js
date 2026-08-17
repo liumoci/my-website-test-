@@ -321,6 +321,14 @@ function initProfileManager() {
         if (e.key === 'Enter') addTodo();
     });
 
+    // 背景透明度滑块
+    document.getElementById('profileBgOpacity')?.addEventListener('input', function() {
+        document.getElementById('profileBgOpacityValue').textContent = this.value + '%';
+    });
+    // 背景模糊滑块
+    document.getElementById('profileBgBlur')?.addEventListener('input', function() {
+        document.getElementById('profileBgBlurValue').textContent = this.value + 'px';
+    });
     // 表情选择器
     initEmojiPicker();
 
@@ -376,10 +384,20 @@ function renderProfileForm() {
     document.getElementById('profileName').value = profileData.name || '';
     document.getElementById('profileBio').value = profileData.bio || '';
     document.getElementById('profileLocation').value = (profileData.contact && profileData.contact.location) || '';
+    document.getElementById('profileSchool').value = (profileData.contact && profileData.contact.school) || '';
     document.getElementById('profileQuote').value = profileData.quote || '';
     document.getElementById('profileAvatarEmoji').value = profileData.avatarEmoji || '😊';
     const emojiBtn = document.getElementById('emojiPickerBtn');
     if (emojiBtn) emojiBtn.textContent = profileData.avatarEmoji || '😊';
+
+    // 背景设置
+    document.getElementById('profileBgImage').value = profileData.backgroundImage || '';
+    const bgOp = Math.round((profileData.backgroundOpacity != null ? profileData.backgroundOpacity : 0.5) * 100);
+    document.getElementById('profileBgOpacity').value = bgOp;
+    document.getElementById('profileBgOpacityValue').textContent = bgOp + '%';
+    const bgBl = profileData.backgroundBlur != null ? profileData.backgroundBlur : 0;
+    document.getElementById('profileBgBlur').value = bgBl;
+    document.getElementById('profileBgBlurValue').textContent = bgBl + 'px';
 
     renderSkills();
     renderTodos();
@@ -391,8 +409,11 @@ function renderProfileForm() {
         document.getElementById('contactTelegram').value = profileData.contact.telegram || '';
         document.getElementById('contactBilibili').value = profileData.contact.bilibili || '';
         document.getElementById('contactBlog').value = profileData.contact.blog || '';
+        document.getElementById('contactMusic').value = profileData.contact.music || '';
     }
 }
+
+
 
 // 表情选择器
 function initEmojiPicker() {
@@ -540,9 +561,13 @@ async function saveProfile() {
 
     profileData.avatar = document.getElementById('profileAvatar').value.trim();
     profileData.name = document.getElementById('profileName').value.trim();
-    profileData.bio = document.getElementById('profileBio').value.trim();
+    profileData.bio = document.getElementById('profileBio').value;
     profileData.avatarEmoji = document.getElementById('profileAvatarEmoji').value.trim() || '😊';
     profileData.quote = document.getElementById('profileQuote').value.trim();
+    profileData.backgroundImage = document.getElementById('profileBgImage').value.trim();
+    profileData.backgroundOpacity = parseInt(document.getElementById('profileBgOpacity').value) / 100;
+    profileData.backgroundBlur = parseInt(document.getElementById('profileBgBlur').value);
+
     if (!profileData.contact) profileData.contact = {};
     profileData.contact = {
         ...profileData.contact,
@@ -552,7 +577,9 @@ async function saveProfile() {
         telegram: document.getElementById('contactTelegram').value.trim(),
         bilibili: document.getElementById('contactBilibili').value.trim(),
         blog: document.getElementById('contactBlog').value.trim(),
-        location: document.getElementById('profileLocation').value.trim()
+        music: document.getElementById('contactMusic').value.trim(),
+        location: document.getElementById('profileLocation').value.trim(),
+        school: document.getElementById('profileSchool').value.trim()
     };
 
     try {
@@ -576,6 +603,8 @@ async function saveProfile() {
         btn.textContent = '保存个人主页设置';
     }
 }
+
+
 
 
 
@@ -2894,6 +2923,11 @@ async function loadMsgSettings() {
             
             // 背景图
             if (settings.backgroundImage) {
+                // 背景图 URL
+                if (settings.backgroundImageUrl) {
+                    document.getElementById("msgBgImageUrl").value = settings.backgroundImageUrl;
+                }
+                // 背景图（上传）
                 showMsgBgPreview(settings.backgroundImage);
             }
         }
@@ -2917,7 +2951,8 @@ async function saveMsgSettings() {
             primaryColor: document.getElementById('msgPrimaryColorText').value || '',
             rateLimitMinutes: parseInt(document.getElementById('msgRateLimit').value) || 0,
             enabled: document.getElementById('msgEnabled').checked,
-            backgroundImage: window._msgBgImage || ''
+            backgroundImage: window._msgBgImage || '',
+            backgroundImageUrl: document.getElementById('msgBgImageUrl').value.trim() || ''
         };
         
         const response = await fetch('/api/messages/settings', {

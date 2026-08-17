@@ -190,7 +190,12 @@
                     <div id="blog-tab-settings" class="blog-tab-content" style="display:none;">
                         <h3 style="margin-bottom:1rem;">背景设置</h3>
                         <div class="form-group">
-                            <label>背景图片</label>
+                            <label>背景图片 URL</label>
+                                <input type="url" id="msgBgImageUrl" placeholder="https://example.com/bg.jpg" class="form-input">
+                                <p class="hint">优先使用URL链接</p>
+                            </div>
+                            <div class="form-group">
+                                <label>或上传背景图片</label>
                             <div style="display:flex;gap:0.5rem;align-items:center;">
                                 <input type="text" id="blogBgImageInput" placeholder="背景图片URL（可选）" class="form-input" style="flex:1;">
                                 <button id="uploadBlogBgBtn" class="btn-secondary btn-small">上传图片</button>
@@ -294,7 +299,7 @@
                         <div class="form-group">
                             <label>头像 URL</label>
                             <input type="url" id="profileAvatar" placeholder="https://example.com/avatar.jpg" class="form-input">
-                            <p class="hint">输入头像图片链接，建议正方形，不存储在本站</p>
+                            <p class="hint">输入头像图片链接，建议正方形</p>
                         </div>
                         <div class="form-group">
                             <label>头像旁表情</label>
@@ -312,16 +317,39 @@
                         </div>
                         <div class="form-group">
                             <label>位置</label>
-                            <input type="text" id="profileLocation" placeholder="如：广东省 惠州市" class="form-input">
+                            <input type="text" id="profileLocation" placeholder="如：广东省" class="form-input">
                         </div>
                         <div class="form-group">
-                            <label>个人简介</label>
-                            <textarea id="profileBio" rows="4" placeholder="介绍一下你自己" class="form-input"></textarea>
+                            <label>学校/单位</label>
+                            <input type="text" id="profileSchool" placeholder="如：惠州城市职业学校" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>个人简介（支持HTML）</label>
+                            <textarea id="profileBio" rows="5" placeholder="你好鸭，很高兴认识你~" class="form-input"></textarea>
                         </div>
                         <div class="form-group">
                             <label>引用语</label>
                             <input type="text" id="profileQuote" placeholder="你好鸭，欢迎来到我的主页" class="form-input">
                         </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>背景设置</h2>
+                    <div class="form-group">
+                        <label>背景图片 URL</label>
+                        <input type="url" id="profileBgImage" placeholder="https://example.com/bg.jpg（留空用默认浅蓝）" class="form-input">
+                        <p class="hint">输入背景图片链接，不存储在本站</p>
+                    </div>
+                    <div class="form-group">
+                        <label>背景遮罩透明度：<span id="profileBgOpacityValue">50%</span></label>
+                        <input type="range" id="profileBgOpacity" min="0" max="100" value="50" style="width:100%;">
+                        <p class="hint">0%完全显示背景图，100%完全遮罩</p>
+                    </div>
+                    <div class="form-group">
+                        <label>背景模糊：<span id="profileBgBlurValue">0px</span></label>
+                        <input type="range" id="profileBgBlur" min="0" max="20" value="0" style="width:100%;">
+                        <p class="hint">背景图片的高斯模糊程度</p>
                     </div>
                 </div>
 
@@ -372,6 +400,10 @@
                         <div class="form-group">
                             <label>博客</label>
                             <input type="text" id="contactBlog" placeholder="博客链接" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>网易云音乐</label>
+                            <input type="text" id="contactMusic" placeholder="网易云主页链接" class="form-input">
                         </div>
                     </div>
                 </div>
