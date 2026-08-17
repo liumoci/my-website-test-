@@ -189,11 +189,7 @@
                     <!-- 博客设置标签页 -->
                     <div id="blog-tab-settings" class="blog-tab-content" style="display:none;">
                         <h3 style="margin-bottom:1rem;">背景设置</h3>
-                        <div class="form-group">
-                            <label>背景图片 URL</label>
-                                <input type="url" id="msgBgImageUrl" placeholder="https://example.com/bg.jpg" class="form-input">
-                                <p class="hint">优先使用URL链接</p>
-                            </div>
+                        
                             <div class="form-group">
                                 <label>或上传背景图片</label>
                             <div style="display:flex;gap:0.5rem;align-items:center;">
@@ -714,6 +710,8 @@
 
                             <div class="form-group">
                                 <label>背景图片</label>
+                                <input type="url" id="msgBgImageUrl" placeholder="https://example.com/bg.jpg（留空用上传的图片）" class="form-input">
+                                <p class="hint">优先使用URL链接，不存储在本站</p>
                                 <div id="msgBgDropZone" class="drop-zone" style="border:2px dashed #ccc;border-radius:0.5rem;padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.3s;">
                                     <p style="margin:0;color:#666;">拖拽图片到这里，或点击选择文件</p>
                                     <input type="file" id="msgBgFileInput" accept="image/*" style="display:none;">
