@@ -6,65 +6,412 @@
     <title>关于我</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+    <style>
+        /* 个人主页清新可爱风格 */
+        .about-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #d4e8f7 0%, #e8f4fd 50%, #f0f8ff 100%);
+            padding: 2rem 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .about-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        /* 顶部个人信息 */
+        .about-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: rgba(255,255,255,0.7);
+            border-radius: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+        }
+        .about-avatar-wrap {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        .about-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #fff;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            overflow: hidden;
+        }
+        .about-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .about-avatar-emoji {
+            position: absolute;
+            bottom: 0;
+            right: -5px;
+            font-size: 2rem;
+            background: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .about-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin: 0.5rem 0;
+            font-family: Georgia, serif;
+            font-style: italic;
+            background: linear-gradient(90deg, #ff6b9d, #feca57, #ff6b9d);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+        .about-location {
+            color: #888;
+            font-size: 0.95rem;
+        }
+        /* 两栏布局 */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .about-card {
+            background: rgba(255,255,255,0.8);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .about-card h3 {
+            margin: 0 0 1rem 0;
+            color: #555;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        /* 待办计划 */
+        .todo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .todo-item:last-child { border-bottom: none; }
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            flex-shrink: 0;
+        }
+        .todo-item.done .todo-checkbox {
+            background: #4ade80;
+            border-color: #4ade80;
+        }
+        .todo-text {
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .todo-item.done .todo-text {
+            text-decoration: line-through;
+            color: #aaa;
+        }
+        /* 时光进度 */
+        .time-progress {
+            margin-top: 1rem;
+        }
+        .progress-item {
+            margin-bottom: 0.75rem;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.25rem;
+        }
+        .progress-bar {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        /* 自我介绍 */
+        .about-bio {
+            color: #666;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+        /* 技术栈 */
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .tech-icon {
+            width: 40px;
+            height: 40px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+        /* 引用语 */
+        .about-quote {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #fef9c3;
+            border-radius: 0.75rem;
+            color: #92400e;
+            font-size: 0.9rem;
+            font-style: italic;
+            border-left: 4px solid #fbbf24;
+        }
+        /* 社交按钮 */
+        .social-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+        .social-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .social-qq { background: #12b7f5; }
+        .social-email { background: #ea4335; }
+        .social-github { background: #333; }
+        .social-telegram { background: #0088cc; }
+        .social-bilibili { background: #fb7299; }
+        .social-blog { background: #7c3aed; }
+        .social-guestbook { background: #10b981; }
+        /* 响应式 */
+        @media (max-width: 640px) {
+            .about-grid { grid-template-columns: 1fr; }
+            .about-name { font-size: 1.5rem; }
+        }
+    </style>
 </head>
 <body>
-    <!-- 页面加载动画 -->
-    <div class="page-loader" id="pageLoader">
-        <div class="loader-spinner"></div>
-    </div>
-
     <header>
         <nav class="navbar">
             <div class="logo">
-                <a href="/">My Site</a>
+                <a href="/" id="siteName">My Site</a>
             </div>
             <ul class="nav-links">
                 <li><a href="/">首页</a></li>
                 <li><a href="/about/" class="active">关于我</a></li>
                 <li><a href="/blog/">博客</a></li>
                 <li><a href="/drive/">云盘</a></li>
+                <li><a href="/guestbook/">留言</a></li>
             </ul>
         </nav>
     </header>
 
-    <main>
-        <section class="profile">
-            <div class="avatar" id="profileAvatar">
-                <img src="../assets/images/avatar.png" alt="头像" width="150" height="150">
+    <div class="about-page">
+        <div class="about-container">
+            <!-- 顶部个人信息 -->
+            <div class="about-header">
+                <div class="about-avatar-wrap">
+                    <div class="about-avatar" id="aboutAvatar">👤</div>
+                    <div class="about-avatar-emoji" id="aboutAvatarEmoji">😊</div>
+                </div>
+                <h1 class="about-name">Hi, I'm <span id="aboutName">加载中...</span></h1>
+                <div class="about-location">📍 <span id="aboutLocation">中国</span></div>
             </div>
-            <h1 id="profileName">加载中...</h1>
-            <p class="bio" id="profileBio">加载中...</p>
-        </section>
 
-        <section class="skills" id="skillsSection">
-            <h2>技能</h2>
-            <ul id="skillsList">
-                <li>加载中...</li>
-            </ul>
-        </section>
+            <!-- 两栏内容 -->
+            <div class="about-grid">
+                <!-- 左侧：待办+时光 -->
+                <div>
+                    <div class="about-card">
+                        <h3>📝 小计划</h3>
+                        <ul class="todo-list" id="todoList">
+                            <li class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">加载中...</span></li>
+                        </ul>
+                    </div>
+                    <div class="about-card" style="margin-top:1.5rem;">
+                        <h3>⏰ 时光进度</h3>
+                        <div class="time-progress" id="timeProgress">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
 
-        <section class="projects" id="projectsSection">
-            <h2>项目</h2>
-            <div class="project-list" id="projectsList">
-                <div class="project-item">
-                    <h3>加载中...</h3>
+                <!-- 右侧：介绍+技术栈+引用 -->
+                <div>
+                    <div class="about-card">
+                        <h3>💭 关于我</h3>
+                        <p class="about-bio" id="aboutBio">加载中...</p>
+                        <div class="tech-stack" id="techStack"></div>
+                        <div class="about-quote" id="aboutQuote">你好鸭，欢迎来到我的主页</div>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <section class="contact" id="contactSection">
-            <h2>联系方式</h2>
-            <div id="contactList">
-                <p>加载中...</p>
-            </div>
-        </section>
-    </main>
+            <!-- 社交按钮 -->
+            <div class="social-links" id="socialLinks"></div>
+        </div>
+    </div>
 
-    <footer>
-        <p>&copy; 2026 My Site. Powered by Cloudflare Pages.</p>
-    </footer>
+    <script>
+        // 加载个人资料
+        async function loadProfile() {
+            try {
+                const res = await fetch('/api/profile');
+                const data = await res.json();
+                if (data.success && data.data && typeof data.data === 'object') {
+                    applyProfile(data.data);
+                } else {
+                    showError('数据格式错误');
+                }
+            } catch (e) {
+                console.error('加载失败:', e);
+                showError('加载失败');
+            }
+        }
 
-    <script src="../assets/js/main.js"></script>
-    <script src="../assets/js/about.js"></script>
+        function showError(msg) {
+            document.getElementById('aboutName').textContent = msg;
+            document.getElementById('aboutBio').textContent = '请稍后重试';
+        }
+
+        function applyProfile(p) {
+            // 头像（URL）
+            const avatarEl = document.getElementById('aboutAvatar');
+            if (p.avatar && p.avatar.startsWith('http')) {
+                avatarEl.innerHTML = `<img src="${p.avatar}" alt="头像">`;
+            }
+            // 表情
+            document.getElementById('aboutAvatarEmoji').textContent = p.avatarEmoji || '😊';
+            // 名字
+            document.getElementById('aboutName').textContent = p.name || '我的名字';
+            // 位置
+            if (p.contact && p.contact.location) {
+                document.getElementById('aboutLocation').textContent = p.contact.location;
+            }
+            // 简介
+            document.getElementById('aboutBio').textContent = p.bio || '这是我的个人简介';
+            // 引用语
+            if (p.quote) {
+                document.getElementById('aboutQuote').textContent = p.quote;
+            }
+            // 技术栈
+            if (p.skills && p.skills.length > 0) {
+                const icons = ['💻','🎨','📱','🌐','⚡','🔥','💎','🚀','📊','🎯'];
+                document.getElementById('techStack').innerHTML = p.skills.slice(0,10).map((s,i) =>
+                    `<div class="tech-icon" title="${s}">${icons[i%icons.length]}</div>`
+                ).join('');
+            }
+            // 待办计划
+            const todos = p.todos || (p.projects || []).map(x => ({text:x.name, done:false}));
+            if (todos && todos.length > 0) {
+                document.getElementById('todoList').innerHTML = todos.map(t =>
+                    `<li class="todo-item ${t.done?'done':''}">
+                        <div class="todo-checkbox"></div>
+                        <span class="todo-text">${t.text||'计划'}</span>
+                    </li>`
+                ).join('');
+            }
+            // 社交链接
+            renderSocial(p.contact || {});
+        }
+
+        function renderSocial(c) {
+            const links = [];
+            if (c.qq) links.push({icon:'🐧', text:'QQ', url:'tencent://message/?uin='+c.qq, cls:'social-qq'});
+            if (c.email) links.push({icon:'✉️', text:'Email', url:'mailto:'+c.email, cls:'social-email'});
+            if (c.github) links.push({icon:'🐙', text:'GitHub', url:c.github.startsWith('http')?c.github:'https://github.com/'+c.github, cls:'social-github'});
+            if (c.telegram) links.push({icon:'✈️', text:'TG', url:c.telegram.startsWith('http')?c.telegram:'https://t.me/'+c.telegram, cls:'social-telegram'});
+            if (c.bilibili) links.push({icon:'📺', text:'B站', url:c.bilibili.startsWith('http')?c.bilibili:'https://space.bilibili.com/'+c.bilibili, cls:'social-bilibili'});
+            if (c.blog) links.push({icon:'📝', text:'博客', url:c.blog, cls:'social-blog'});
+            links.push({icon:'💬', text:'留言箱', url:'/guestbook/', cls:'social-guestbook'});
+            document.getElementById('socialLinks').innerHTML = links.map(l =>
+                `<a href="${l.url}" class="social-btn ${l.cls}" target="_blank">${l.icon} ${l.text}</a>`
+            ).join('');
+        }
+
+        // 时光进度
+        function updateTimeProgress() {
+            const now = new Date();
+            const items = [
+                { label: '今天', start: new Date(now.getFullYear(), now.getMonth(), now.getDate()), end: new Date(now.getFullYear(), now.getMonth(), now.getDate()+1) },
+                { label: '本周', start: new Date(now.getFullYear(), now.getMonth(), now.getDate()-now.getDay()), end: new Date(now.getFullYear(), now.getMonth(), now.getDate()-now.getDay()+7) },
+                { label: '本月', start: new Date(now.getFullYear(), now.getMonth(), 1), end: new Date(now.getFullYear(), now.getMonth()+1, 1) },
+                { label: '今年', start: new Date(now.getFullYear(), 0, 1), end: new Date(now.getFullYear()+1, 0, 1) }
+            ];
+            document.getElementById('timeProgress').innerHTML = items.map(item => {
+                const pct = Math.min(100, Math.max(0, ((now - item.start) / (item.end - item.start)) * 100));
+                return `<div class="progress-item">
+                    <div class="progress-label"><span>${item.label}</span><span>${pct.toFixed(1)}%</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                </div>`;
+            }).join('');
+        }
+
+        // 加载网站名称
+        async function loadSiteName() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                if (data.success && data.data && data.data.siteName) {
+                    document.getElementById('siteName').textContent = data.data.siteName;
+                    document.title = '关于我 - ' + data.data.siteName;
+                }
+            } catch (e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProfile();
+            loadSiteName();
+            updateTimeProgress();
+            setInterval(updateTimeProgress, 60000);
+        });
+    </script>
 </body>
 </html>

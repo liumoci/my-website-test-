@@ -292,71 +292,90 @@
                     <h2>基本信息</h2>
                     <div class="profile-edit-form">
                         <div class="form-group">
-                            <label>头像</label>
-                            <div class="avatar-upload-area">
-                                <div class="avatar-preview" id="avatarPreview">
-                                    <span style="color: var(--text-secondary);">暂无头像</span>
-                                </div>
-                                <div class="avatar-actions">
-                                    <button type="button" id="uploadAvatarBtn" class="btn-secondary btn-small">上传头像</button>
-                                    <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
-                                    <button type="button" id="removeAvatarBtn" class="btn-danger btn-small">移除</button>
-                                </div>
-                                <p class="hint">建议正方形图片，大小不超过 5MB</p>
+                            <label>头像 URL</label>
+                            <input type="url" id="profileAvatar" placeholder="https://example.com/avatar.jpg" class="form-input">
+                            <p class="hint">输入头像图片链接，建议正方形，不存储在本站</p>
+                        </div>
+                        <div class="form-group">
+                            <label>头像旁表情</label>
+                            <div style="display:flex;gap:0.5rem;align-items:center;">
+                                <button type="button" id="emojiPickerBtn" style="font-size:1.5rem;padding:0.3rem 0.8rem;border:1px solid var(--border-color);border-radius:0.5rem;background:var(--card-bg);cursor:pointer;">😊</button>
+                                <input type="text" id="profileAvatarEmoji" placeholder="😊" maxlength="4" style="width:80px;font-size:1.2rem;text-align:center;" readonly>
+                            </div>
+                            <div id="emojiPickerPanel" style="display:none;position:absolute;margin-top:0.5rem;padding:0.75rem;background:var(--card-bg);border:1px solid var(--border-color);border-radius:0.5rem;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:100;max-width:280px;">
+                                <div id="emojiGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:0.25rem;"></div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label>昵称</label>
-                            <input type="text" id="profileName" placeholder="你的名字">
+                            <input type="text" id="profileName" placeholder="你的名字" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>位置</label>
+                            <input type="text" id="profileLocation" placeholder="如：广东省 惠州市" class="form-input">
                         </div>
                         <div class="form-group">
                             <label>个人简介</label>
-                            <textarea id="profileBio" rows="4" placeholder="介绍一下你自己"></textarea>
+                            <textarea id="profileBio" rows="4" placeholder="介绍一下你自己" class="form-input"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>引用语</label>
+                            <input type="text" id="profileQuote" placeholder="你好鸭，欢迎来到我的主页" class="form-input">
                         </div>
                     </div>
                 </div>
-                
+
+                <div class="panel">
+                    <h2>小计划</h2>
+                    <p class="hint" style="margin-bottom:1rem;">显示在个人主页左侧的待办计划</p>
+                    <div class="todos-list" id="todosList"></div>
+                    <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+                        <input type="text" id="newTodoInput" placeholder="添加新计划" class="form-input" style="flex:1;">
+                        <button type="button" id="addTodoBtn" class="btn-secondary btn-small">添加</button>
+                    </div>
+                </div>
+
                 <div class="panel">
                     <h2>技能标签</h2>
                     <div class="skills-editor">
-                        <div class="skills-list" id="skillsList">
-                            <!-- 技能标签动态生成 -->
-                        </div>
+                        <div class="skills-list" id="skillsList"></div>
                         <div class="skill-add">
-                            <input type="text" id="newSkillInput" placeholder="添加技能">
+                            <input type="text" id="newSkillInput" placeholder="添加技能" class="form-input">
                             <button type="button" id="addSkillBtn" class="btn-secondary btn-small">添加</button>
                         </div>
                     </div>
                 </div>
-                
-                <div class="panel">
-                    <h2>项目展示</h2>
-                    <div class="projects-editor">
-                        <div class="projects-list" id="projectsList">
-                            <!-- 项目列表动态生成 -->
-                        </div>
-                        <button type="button" id="addProjectBtn" class="btn-secondary btn-block">+ 添加项目</button>
-                    </div>
-                </div>
-                
+
                 <div class="panel">
                     <h2>联系方式</h2>
                     <div class="contact-edit-form">
                         <div class="form-group">
+                            <label>QQ</label>
+                            <input type="text" id="contactQQ" placeholder="QQ号" class="form-input">
+                        </div>
+                        <div class="form-group">
                             <label>邮箱</label>
-                            <input type="email" id="contactEmail" placeholder="your@email.com">
+                            <input type="email" id="contactEmail" placeholder="your@email.com" class="form-input">
                         </div>
                         <div class="form-group">
                             <label>GitHub</label>
-                            <input type="text" id="contactGithub" placeholder="GitHub 用户名">
+                            <input type="text" id="contactGithub" placeholder="用户名或链接" class="form-input">
                         </div>
                         <div class="form-group">
-                            <label>Twitter</label>
-                            <input type="text" id="contactTwitter" placeholder="Twitter 用户名">
+                            <label>Telegram</label>
+                            <input type="text" id="contactTelegram" placeholder="用户名或链接" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>哔哩哔哩</label>
+                            <input type="text" id="contactBilibili" placeholder="UID或链接" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>博客</label>
+                            <input type="text" id="contactBlog" placeholder="博客链接" class="form-input">
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="save-bar">
                     <button type="button" id="saveProfileBtn" class="btn-primary">保存个人主页设置</button>
                     <span id="profileSaveMsg" class="save-msg"></span>

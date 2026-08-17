@@ -307,29 +307,26 @@ function initStats() {
 let profileData = null;
 
 function initProfileManager() {
-    // 检查是否有个人主页页面
     if (!document.getElementById('page-profile')) return;
-    
-    // 头像上传
-    document.getElementById('uploadAvatarBtn').addEventListener('click', () => {
-        document.getElementById('avatarFileInput').click();
-    });
-    
-    document.getElementById('avatarFileInput').addEventListener('change', handleAvatarUpload);
-    document.getElementById('removeAvatarBtn').addEventListener('click', removeAvatar);
-    
+
     // 技能管理
-    document.getElementById('addSkillBtn').addEventListener('click', addSkill);
-    document.getElementById('newSkillInput').addEventListener('keypress', (e) => {
+    document.getElementById('addSkillBtn')?.addEventListener('click', addSkill);
+    document.getElementById('newSkillInput')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addSkill();
     });
-    
-    // 项目管理
-    document.getElementById('addProjectBtn').addEventListener('click', addProject);
-    
+
+    // 小计划管理
+    document.getElementById('addTodoBtn')?.addEventListener('click', addTodo);
+    document.getElementById('newTodoInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTodo();
+    });
+
+    // 表情选择器
+    initEmojiPicker();
+
     // 保存按钮
-    document.getElementById('saveProfileBtn').addEventListener('click', saveProfile);
-    
+    document.getElementById('saveProfileBtn')?.addEventListener('click', saveProfile);
+
     // 加载数据
     loadProfileData();
 }
@@ -337,203 +334,237 @@ function initProfileManager() {
 // 加载个人主页数据
 async function loadProfileData() {
     try {
-        const response = await fetch('/api/profile', {
-            credentials: 'include'
-        });
+        const response = await fetch('/api/profile', { credentials: 'include' });
         const data = await response.json();
-        
-        if (data.success && data.data) {
+
+        if (data.success && data.data && typeof data.data === 'object') {
             profileData = data.data;
-            renderProfileForm();
+            if (!profileData.contact) profileData.contact = {};
+            if (!profileData.skills) profileData.skills = [];
+            if (!profileData.todos) profileData.todos = [];
+        } else {
+            profileData = getDefaultProfileData();
+            showProfileMsg('数据格式异常，已重置', 'error');
         }
     } catch (e) {
         console.error('加载个人主页数据失败:', e);
+        profileData = getDefaultProfileData();
+        showProfileMsg('加载失败: ' + e.message, 'error');
     }
+    renderProfileForm();
+}
+
+function getDefaultProfileData() {
+    return {
+        avatar: '',
+        avatarEmoji: '😊',
+        name: '',
+        bio: '',
+        quote: '',
+        skills: [],
+        todos: [],
+        projects: [],
+        contact: { email: '', github: '', qq: '', telegram: '', bilibili: '', blog: '', location: '' }
+    };
 }
 
 // 渲染个人主页表单
 function renderProfileForm() {
-    if (!profileData) return;
-    
-    // 头像
-    if (profileData.avatar) {
-        const preview = document.getElementById('avatarPreview');
-        preview.innerHTML = `<img src="${profileData.avatar}" alt="头像">`;
-    }
-    
-    // 基本信息
+    if (!profileData || typeof profileData !== 'object') return;
+
+    document.getElementById('profileAvatar').value = profileData.avatar || '';
     document.getElementById('profileName').value = profileData.name || '';
     document.getElementById('profileBio').value = profileData.bio || '';
-    
-    // 技能
+    document.getElementById('profileLocation').value = (profileData.contact && profileData.contact.location) || '';
+    document.getElementById('profileQuote').value = profileData.quote || '';
+    document.getElementById('profileAvatarEmoji').value = profileData.avatarEmoji || '😊';
+    const emojiBtn = document.getElementById('emojiPickerBtn');
+    if (emojiBtn) emojiBtn.textContent = profileData.avatarEmoji || '😊';
+
     renderSkills();
-    
-    // 项目
-    renderProjects();
-    
-    // 联系方式
+    renderTodos();
+
     if (profileData.contact) {
+        document.getElementById('contactQQ').value = profileData.contact.qq || '';
         document.getElementById('contactEmail').value = profileData.contact.email || '';
         document.getElementById('contactGithub').value = profileData.contact.github || '';
-        document.getElementById('contactTwitter').value = profileData.contact.twitter || '';
+        document.getElementById('contactTelegram').value = profileData.contact.telegram || '';
+        document.getElementById('contactBilibili').value = profileData.contact.bilibili || '';
+        document.getElementById('contactBlog').value = profileData.contact.blog || '';
     }
 }
 
-// 头像上传
-function handleAvatarUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    if (file.size > 5 * 1024 * 1024) {
-        alert('图片大小不能超过 5MB');
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const base64 = e.target.result;
-        profileData.avatar = base64;
-        
-        const preview = document.getElementById('avatarPreview');
-        preview.innerHTML = `<img src="${base64}" alt="头像">`;
-        
-        showProfileMsg('头像已上传，点击保存生效', 'success');
-    };
-    reader.readAsDataURL(file);
-}
+// 表情选择器
+function initEmojiPicker() {
+    const btn = document.getElementById('emojiPickerBtn');
+    const panel = document.getElementById('emojiPickerPanel');
+    const grid = document.getElementById('emojiGrid');
+    const input = document.getElementById('profileAvatarEmoji');
+    if (!btn || !panel || !grid || !input) return;
 
-// 移除头像
-function removeAvatar() {
-    if (!confirm('确定要移除头像吗？')) return;
-    
-    profileData.avatar = '';
-    document.getElementById('avatarPreview').innerHTML = '<span style="color: var(--text-secondary);">暂无头像</span>';
-    showProfileMsg('已移除，点击保存生效', 'success');
+    const emojis = ['😊','😄','😁','😆','😅','🤣','😂','🙂','😉','😇','🥰','😍','🤩','😘','😗','😚',
+        '😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶',
+        '😏','😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🥵',
+        '🥶','🥴','😵','🤯','🤠','🥳','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲',
+        '😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫',
+        '🥱','😤','😡','😠','🤬','😈','👿','💀','💩','🤡','👹','👺','👻','👽','🤖','😺',
+        '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔',
+        '💖','💗','💓','💞','💕','💟','❣️','💔','❤️','🧡','💛','💚','💙','💜','🖤','🤍',
+        '✨','⭐','🌟','💫','⚡','🔥','💥','💦','🌈','☀️','🌙','⛅','🌸','🌺','🌻','🌷'];
+
+    grid.innerHTML = emojis.map(e =>
+        '<button type="button" data-emoji="' + e + '" style="font-size:1.3rem;padding:0.25rem;border:none;background:none;cursor:pointer;border-radius:0.25rem;">' + e + '</button>'
+    ).join('');
+
+    grid.addEventListener('click', function(e) {
+        const b = e.target.closest('[data-emoji]');
+        if (!b) return;
+        input.value = b.dataset.emoji;
+        btn.textContent = b.dataset.emoji;
+        panel.style.display = 'none';
+    });
+
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target) && e.target !== btn) {
+            panel.style.display = 'none';
+        }
+    });
 }
 
 // 渲染技能列表
 function renderSkills() {
     const container = document.getElementById('skillsList');
-    if (!container || !profileData.skills) return;
-    
+    if (!container) return;
+    if (!profileData.skills) profileData.skills = [];
+
     container.innerHTML = '';
-    
     profileData.skills.forEach((skill, index) => {
         const tag = document.createElement('span');
         tag.className = 'skill-tag';
-        tag.innerHTML = `
-            ${escapeHtml(skill)}
-            <button class="skill-remove" onclick="removeSkill(${index})">×</button>
-        `;
+        tag.textContent = skill;
+        const del = document.createElement('button');
+        del.className = 'skill-remove';
+        del.textContent = '×';
+        del.addEventListener('click', () => removeSkill(index));
+        tag.appendChild(del);
         container.appendChild(tag);
     });
 }
 
-// 添加技能
 function addSkill() {
     const input = document.getElementById('newSkillInput');
     const skill = input.value.trim();
-    
     if (!skill) return;
     if (!profileData.skills) profileData.skills = [];
     if (profileData.skills.includes(skill)) {
         alert('该技能已存在');
         return;
     }
-    
     profileData.skills.push(skill);
     input.value = '';
     renderSkills();
 }
 
-// 删除技能
 function removeSkill(index) {
     if (!profileData.skills) return;
     profileData.skills.splice(index, 1);
     renderSkills();
 }
 
-// 渲染项目列表
-function renderProjects() {
-    const container = document.getElementById('projectsList');
-    if (!container || !profileData.projects) return;
-    
+// 渲染小计划
+function renderTodos() {
+    const container = document.getElementById('todosList');
+    if (!container) return;
+    if (!profileData.todos) profileData.todos = [];
+
     container.innerHTML = '';
-    
-    profileData.projects.forEach((project, index) => {
+    profileData.todos.forEach((todo, index) => {
         const item = document.createElement('div');
-        item.className = 'project-edit-item';
-        item.innerHTML = `
-            <div class="project-edit-info">
-                <input type="text" class="project-name-input" value="${escapeHtml(project.name || '')}" placeholder="项目名称" onchange="updateProject(${index}, 'name', this.value)">
-                <textarea class="project-desc-input" rows="2" placeholder="项目描述" onchange="updateProject(${index}, 'desc', this.value)">${escapeHtml(project.desc || '')}</textarea>
-                <input type="text" class="project-url-input" value="${escapeHtml(project.url || '')}" placeholder="项目链接" onchange="updateProject(${index}, 'url', this.value)">
-            </div>
-            <div class="project-edit-actions">
-                <button class="btn-danger btn-small" onclick="removeProject(${index})">删除</button>
-            </div>
-        `;
+        item.style.cssText = 'display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid var(--border-color);';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = !!todo.done;
+        cb.style.cssText = 'width:18px;height:18px;cursor:pointer;';
+        cb.addEventListener('change', () => { profileData.todos[index].done = cb.checked; });
+
+        const text = document.createElement('input');
+        text.type = 'text';
+        text.value = todo.text || '';
+        text.placeholder = '计划内容';
+        text.style.cssText = 'flex:1;padding:0.3rem 0.5rem;border:1px solid var(--border-color);border-radius:0.3rem;background:var(--card-bg);color:var(--text-color);';
+        text.addEventListener('change', () => { profileData.todos[index].text = text.value; });
+
+        const del = document.createElement('button');
+        del.textContent = '×';
+        del.style.cssText = 'background:none;border:none;color:#ef4444;cursor:pointer;font-size:1.1rem;padding:0.25rem;';
+        del.addEventListener('click', () => removeTodo(index));
+
+        item.appendChild(cb);
+        item.appendChild(text);
+        item.appendChild(del);
         container.appendChild(item);
     });
 }
 
-// 添加项目
-function addProject() {
-    if (!profileData.projects) profileData.projects = [];
-    
-    profileData.projects.push({
-        name: '新项目',
-        desc: '项目描述',
-        url: '#'
-    });
-    
-    renderProjects();
+function addTodo() {
+    const input = document.getElementById('newTodoInput');
+    const text = input.value.trim();
+    if (!text) return;
+    if (!profileData.todos) profileData.todos = [];
+    profileData.todos.push({ text, done: false });
+    input.value = '';
+    renderTodos();
 }
 
-// 更新项目
-function updateProject(index, field, value) {
-    if (!profileData.projects || !profileData.projects[index]) return;
-    profileData.projects[index][field] = value;
-}
-
-// 删除项目
-function removeProject(index) {
-    if (!confirm('确定要删除这个项目吗？')) return;
-    if (!profileData.projects) return;
-    
-    profileData.projects.splice(index, 1);
-    renderProjects();
+function removeTodo(index) {
+    if (!profileData.todos) return;
+    profileData.todos.splice(index, 1);
+    renderTodos();
 }
 
 // 保存个人主页数据
 async function saveProfile() {
+    if (!profileData || typeof profileData !== 'object') {
+        profileData = getDefaultProfileData();
+    }
     const btn = document.getElementById('saveProfileBtn');
+    if (!btn) return;
     btn.disabled = true;
     btn.textContent = '保存中...';
-    
-    // 收集表单数据
+
+    profileData.avatar = document.getElementById('profileAvatar').value.trim();
     profileData.name = document.getElementById('profileName').value.trim();
     profileData.bio = document.getElementById('profileBio').value.trim();
+    profileData.avatarEmoji = document.getElementById('profileAvatarEmoji').value.trim() || '😊';
+    profileData.quote = document.getElementById('profileQuote').value.trim();
+    if (!profileData.contact) profileData.contact = {};
     profileData.contact = {
+        ...profileData.contact,
+        qq: document.getElementById('contactQQ').value.trim(),
         email: document.getElementById('contactEmail').value.trim(),
         github: document.getElementById('contactGithub').value.trim(),
-        twitter: document.getElementById('contactTwitter').value.trim()
+        telegram: document.getElementById('contactTelegram').value.trim(),
+        bilibili: document.getElementById('contactBilibili').value.trim(),
+        blog: document.getElementById('contactBlog').value.trim(),
+        location: document.getElementById('profileLocation').value.trim()
     };
-    
+
     try {
         const response = await fetch('/api/profile', {
             method: 'POST',
             credentials: 'include',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ data: profileData })
         });
-        
         const data = await response.json();
-        
         if (data.success) {
-            showProfileMsg('保存成功！', 'success');
+            showProfileMsg('保存成功', 'success');
         } else {
             showProfileMsg('保存失败: ' + (data.message || '未知错误'), 'error');
         }
@@ -545,6 +576,8 @@ async function saveProfile() {
         btn.textContent = '保存个人主页设置';
     }
 }
+
+
 
 // 显示保存消息
 function showProfileMsg(msg, type) {
